@@ -1,0 +1,33 @@
+# GPIBUtils-NG — GitHub Linguist / line-ending rules
+# Primary language: C#. Other languages (Python, VB.NET, etc.) may appear in
+# subprojects and are still counted; only bulk data/generated/docs assets below
+# are excluded so they don't skew the language bar away from C#.
+
+# --- Normalize line endings ---
+* text=auto eol=lf
+*.cs   text eol=crlf diff=csharp
+*.csproj text eol=crlf
+*.sln  text eol=crlf
+*.xaml text eol=crlf
+*.ps1  text eol=crlf
+*.sh   text eol=lf
+
+# --- Keep C# as the detected primary language ---
+# Bulk instrument-model data (the ~200 JSON recipes from GPIB-MCP): data, not code.
+**/data/instruments/**  linguist-vendored
+*.instruments.json      linguist-vendored
+
+# Captured plotter / HPGL vector assets are data samples, not source.
+*.plt   linguist-vendored
+*.PLT   linguist-vendored
+*.hpgl  linguist-vendored
+
+# Instrument command-reference dumps bundled from service manuals.
+docs/**            linguist-documentation
+**/reference/**    linguist-documentation
+*.md               linguist-documentation
+
+# Third-party / generated — don't count toward language stats.
+**/bin/**          linguist-generated
+**/obj/**          linguist-generated
+*.Designer.cs      linguist-generated
