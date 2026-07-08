@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <!-- Referenced so the NI providers are deployed and auto-registered (needs NI-VISA installed). -->
+    <ProjectReference Include="..\..\src\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
   </ItemGroup>
 
 </Project>

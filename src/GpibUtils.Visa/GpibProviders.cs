@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GpibUtils.Visa.Providers;
 using GpibUtils.Visa.Simulation;
+// NI providers (GpibUtils.Visa.Ni) are loaded by reflection — no compile-time reference here.
 
 namespace GpibUtils.Visa
 {
@@ -32,12 +33,33 @@ namespace GpibUtils.Visa
 
         private static void RegisterBuiltIns()
         {
-            Register(new NiVisaGpibProvider());
-            Register(new Ni4882GpibProvider());
+            // Vendor-neutral built-ins that live in this dependency-free core assembly.
             Register(new KeysightVisaGpibProvider());
             Register(new PrologixGpibProvider());
             Register(new Ar488GpibProvider());
             Register(new SimulatedGpibProvider());
+
+            // The NI providers live in the sibling GpibUtils.Visa.Ni assembly (which references the
+            // official NI/IVI VISA.NET assemblies). Register them by reflection when that assembly is
+            // deployed, so referencing GpibUtils.Visa.Ni is all it takes to get NI-VISA as the default —
+            // while this core keeps no NI dependency and still builds/tests without it.
+            TryAutoLoadExternal("GpibUtils.Visa.Ni.NiVisaGpibProvider, GpibUtils.Visa.Ni");
+            TryAutoLoadExternal("GpibUtils.Visa.Ni.Ni4882GpibProvider, GpibUtils.Visa.Ni");
+        }
+
+        private static void TryAutoLoadExternal(string assemblyQualifiedTypeName)
+        {
+            try
+            {
+                var type = Type.GetType(assemblyQualifiedTypeName, throwOnError: false);
+                if (type != null && typeof(IGpibProvider).IsAssignableFrom(type))
+                    Register((IGpibProvider)Activator.CreateInstance(type));
+            }
+            catch
+            {
+                // The external provider assembly (or its VISA dependencies) isn't present/loadable;
+                // that provider simply stays unavailable. Not an error for a non-NI consumer.
+            }
         }
 
         /// <summary>Registers (or replaces, by name) a provider.</summary>
@@ -98,7 +120,18 @@ namespace GpibUtils.Visa
         }
 
         /// <summary>The resolved default provider.</summary>
-        public static IGpibProvider Default => Get(DefaultProviderName);
+        public static IGpibProvider Default
+        {
+            get
+            {
+                var name = DefaultProviderName;
+                if (TryGet(name, out var provider)) return provider;
+                throw new InvalidOperationException(
+                    $"Default provider '{name}' is not registered. Reference the GpibUtils.Visa.Ni " +
+                    $"project to load the NI providers, or set GpibProviders.DefaultProviderName to one " +
+                    $"of: {string.Join(", ", Names)}.");
+            }
+        }
 
         /// <summary>Opens a session on the default provider.</summary>
         public static IInstrumentSession Open(string resourceName, SessionSettings settings = null) =>

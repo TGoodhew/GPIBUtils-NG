@@ -58,7 +58,7 @@ Sessions need not be thread-safe; a driver serializes access to its own session.
    out of `GpibUtils.Visa`'s core so the default build stays dependency-light.
 2. **Implement `IGpibProvider`** and a matching `IInstrumentSession`. Use the
    [`SimulatedGpibProvider`](../src/GpibUtils.Visa/Simulation/SimulatedGpibProvider.cs) as a minimal,
-   dependency-free reference and the [`NiVisaGpibProvider`](../src/GpibUtils.Visa/Providers/NiVisaGpibProvider.cs)
+   dependency-free reference and the [`NiVisaGpibProvider`](../src/GpibUtils.Visa.Ni/NiVisaGpibProvider.cs)
    as the real-hardware reference.
 3. **Advertise honest `Capabilities`.** If you can't do SRQ or discovery, say so.
 4. **Register it.** Either call `GpibProviders.Register(new MyProvider())` at startup, or — for a
@@ -99,13 +99,31 @@ on `::`, opens the port, and talks to primary address `9`.
 - **Availability over exceptions:** a stub or a provider whose driver is absent should return
   `IsAvailable == false` with a clear `UnavailableReason`, not throw from the constructor.
 
+## Vendor assemblies and the NI project
+
+The core `GpibUtils.Visa` assembly has **no VISA/vendor dependency** — it's the abstraction, the
+stubs, and the simulator, and it builds anywhere. Vendor-specific providers live in their own projects
+so they can be referenced (or dropped) independently:
+
+- **`GpibUtils.Visa.Ni`** holds the NI providers and references the **official NI/IVI VISA.NET
+  assemblies** — `Ivi.Visa.dll` and `NationalInstruments.Visa.dll` — installed by **NI-VISA**. On .NET
+  Framework these are *not* distributed via NuGet, so the project references them by `HintPath` into the
+  local IVI Foundation install; the build fails with clear guidance if they're missing, and a machine
+  without NI simply removes the project reference. The DLLs are never committed.
+- The core registry **reflection-loads** the NI providers when `GpibUtils.Visa.Ni` is deployed, so
+  referencing that project is all it takes to get `NI-VISA` as the default — with no NI dependency
+  leaking into the core.
+
+Put your own vendor project (e.g. `GpibUtils.Visa.Keysight`) alongside `GpibUtils.Visa.Ni` and either
+register from your app or add it to the reflection-load list in `GpibProviders`.
+
 ## The built-in providers
 
-| Name | Status | Notes |
-|---|---|---|
-| `NI-VISA` | **Implemented (default)** | VISA.NET via `Ivi.Visa.GlobalResourceManager`; vendor-neutral, so it also drives Keysight VISA if that's your system VISA. |
-| `NI-488.2` | **Implemented (opt-in build)** | Native board/primary/secondary addressing; compiled only with `-p:DefineConstants=NI4882` + the NI-488.2 driver. |
-| `Keysight-VISA` | Stub | Usually unnecessary — see the note in the class. Placeholder for pinning to Keysight's IVI.NET. |
-| `Prologix` | Stub | `++` serial/TCP command set; skeleton documented in the class. |
-| `AR488` | Stub | Arduino controller emulating the Prologix command set over USB serial. |
-| `Simulated` | **Implemented** | In-memory fake instruments for hardware-free build/test/CI. |
+| Name | Lives in | Status | Notes |
+|---|---|---|---|
+| `NI-VISA` | `GpibUtils.Visa.Ni` | **Implemented (default)** | Official NI VISA.NET (`NationalInstruments.Visa` + `Ivi.Visa`); GPIB/USB-TMC/LXI/serial by resource string. |
+| `NI-488.2` | `GpibUtils.Visa.Ni` | **Implemented (opt-in build)** | Native board/primary/secondary addressing; compiled only with `-p:DefineConstants=NI4882` + the NI-488.2 driver. |
+| `Keysight-VISA` | `GpibUtils.Visa` | Stub | Placeholder for pinning to Keysight's IVI.NET. |
+| `Prologix` | `GpibUtils.Visa` | Stub | `++` serial/TCP command set; skeleton documented in the class. |
+| `AR488` | `GpibUtils.Visa` | Stub | Arduino controller emulating the Prologix command set over USB serial. |
+| `Simulated` | `GpibUtils.Visa` | **Implemented** | In-memory fake instruments for hardware-free build/test/CI. |

@@ -24,7 +24,8 @@ duplication and standardizes on one clean, testable, vendor-neutral core.
 
 | Layer | Project | Responsibility |
 |---|---|---|
-| Transport | `GpibUtils.Visa` | Vendor-neutral VISA via `Ivi.Visa` `GlobalResourceManager` (NI-VISA at runtime), `IInstrumentLink`, SRQ/serial-poll completion, simulation link |
+| Transport (core) | `GpibUtils.Visa` | Vendor-neutral pluggable transport: `IGpibProvider` / `IInstrumentSession`, capability reporting, SRQ/serial-poll, the provider registry, extension stubs (Keysight/Prologix/AR488), and an in-memory simulator. **No vendor dependency — builds anywhere.** |
+| Transport (NI) | `GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers, built against the **official NI/IVI VISA.NET assemblies** from the local NI-VISA install (referenced by path, never vendored; auto-registered by reflection). Drop this project if you don't use NI. |
 | Shared | `GpibUtils.Common` | Cross-cutting helpers (`ToEngineeringFormat`, etc.) |
 | Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category (SignalSources, Meters, Counters, Analyzers, PowerSupplies, Switches, Plotters, Calibrators, Oscilloscopes) |
 | Rendering | `GpibUtils.Hpgl` | Shared HP-GL / PCL parser + renderer (plotters and screen-capture) |

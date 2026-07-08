@@ -2,23 +2,24 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using Ivi.Visa;
+using NationalInstruments.Visa;
 
-namespace GpibUtils.Visa.Providers
+namespace GpibUtils.Visa.Ni
 {
     /// <summary>
-    /// An <see cref="IInstrumentSession"/> backed by a VISA.NET message-based session opened through
-    /// the vendor-neutral <see cref="GlobalResourceManager"/>. The concrete VISA implementation
-    /// (NI-VISA, Keysight VISA, ...) is chosen by the installed system VISA at runtime.
+    /// An <see cref="IInstrumentSession"/> backed by NI-VISA.NET (<see cref="MessageBasedSession"/>),
+    /// using the official National Instruments VISA.NET assemblies.
     /// </summary>
-    internal sealed class VisaInstrumentSession : IInstrumentSession
+    internal sealed class NiVisaInstrumentSession : IInstrumentSession
     {
         /// <summary>1:1 byte-to-char encoding (Latin-1) for lossless string/byte conversion.</summary>
         private static readonly Encoding Latin1 = Encoding.GetEncoding("ISO-8859-1");
 
-        private readonly IMessageBasedSession _session;
+        private readonly MessageBasedSession _session;
         private char? _readTermination;
 
-        public VisaInstrumentSession(IGpibProvider provider, string resourceName, SessionSettings settings)
+        public NiVisaInstrumentSession(IGpibProvider provider, ResourceManager resourceManager,
+                                       string resourceName, SessionSettings settings)
         {
             Provider = provider;
             ResourceName = resourceName;
@@ -26,7 +27,7 @@ namespace GpibUtils.Visa.Providers
 
             try
             {
-                _session = (IMessageBasedSession)GlobalResourceManager.Open(resourceName);
+                _session = (MessageBasedSession)resourceManager.Open(resourceName);
             }
             catch (Exception ex)
             {
@@ -149,14 +150,14 @@ namespace GpibUtils.Visa.Providers
         {
             try
             {
-                if (_session is IGpibSession gpib)
-                    gpib.SendRemoteLocalCommand(RemoteLocalMode.Local);
+                if (_session is GpibSession gpib)
+                    gpib.SendRemoteLocalCommand(GpibInstrumentRemoteLocalMode.GoToLocal);
             }
             catch { /* not fatal — some links/instruments do not support REN control */ }
         }
 
         private GpibException Wrap(string op, Exception ex) =>
-            new GpibException($"VISA {op} failed on '{ResourceName}'.", Provider.DescribeError(ex), ex);
+            new GpibException($"NI-VISA {op} failed on '{ResourceName}'.", Provider.DescribeError(ex), ex);
 
         public void Dispose()
         {
