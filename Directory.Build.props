@@ -1,0 +1,20 @@
+<Project>
+  <!-- Shared build settings for every project in GPIBUtils-NG. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Company>TGoodhew</Company>
+    <Product>GPIBUtils-NG</Product>
+    <Authors>Tony Goodhew</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Missing-XML-comment noise off; we document public API but not every member yet. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Building net472 with only the .NET SDK installed (no full targeting pack). -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

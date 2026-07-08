@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Visa</RootNamespace>
+    <AssemblyName>GpibUtils.Visa</AssemblyName>
+    <Description>Vendor-neutral GPIB/VISA transport for GPIBUtils-NG: a pluggable IGpibProvider model with a default NI-VISA implementation and Prologix/AR488/Keysight extension points.</Description>
+    <!--
+      Define the NI4882 constant (dotnet build -p:DefineConstants=NI4882) on a machine with the
+      NI-488.2 driver installed to compile the native board-addressing path in Ni4882GpibProvider.
+      Left undefined by default so the library restores and builds from NuGet alone.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Vendor-neutral VISA.NET API (IVI Foundation shared components, community repackage).
+         At runtime GlobalResourceManager dispatches to whatever VISA is installed:
+         NI-VISA by default, or Keysight VISA if that is the system VISA implementation. -->
+    <PackageReference Include="Kelary.Ivi.Visa" Version="7.2.0" />
+  </ItemGroup>
+
+  <!-- Native NI-488.2 board addressing is only compiled when explicitly requested and available. -->
+  <ItemGroup Condition="'$(DefineConstants.Contains(NI4882))' == 'true'">
+    <Reference Include="NationalInstruments.NI4882">
+      <HintPath>$(ProgramFiles)\National Instruments\Measurement Studio VS2010\DotNET\Assemblies\Current\NationalInstruments.NI4882.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
