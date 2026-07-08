@@ -25,18 +25,23 @@ duplication and standardizes on one clean, testable, vendor-neutral core.
 | Layer | Project | Responsibility |
 |---|---|---|
 | Transport | `GpibUtils.Visa` | Vendor-neutral VISA via `Ivi.Visa` `GlobalResourceManager` (NI-VISA at runtime), `IInstrumentLink`, SRQ/serial-poll completion, simulation link |
+| Shared | `GpibUtils.Common` | Cross-cutting helpers (`ToEngineeringFormat`, etc.) |
 | Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category (SignalSources, Meters, Counters, Analyzers, PowerSupplies, Switches, Plotters, Calibrators, Oscilloscopes) |
 | Rendering | `GpibUtils.Hpgl` | Shared HP-GL / PCL parser + renderer (plotters and screen-capture) |
 | Automation | `GpibUtils.Verification` | Plan-driven, non-interactive verification runner (from 5440Verify) |
 | Integration | `GpibUtils.Mcp` | MCP server exposing the suite to LLM clients + ~200-model instrument DB |
-| Front-ends | apps / CLI | Unified Spectre.Console CLI + optional WPF/WinForms tools on the shared core |
+| Front-end (console) | `GpibUtils.Console` | **Spectre.Console** UI (`Spectre.Console.Cli` command surface) on the shared core |
+| Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop UI (assumed initially) on the shared core |
+
+The **core/driver libraries carry no UI dependencies** — the console (Spectre.Console) and Windows (WPF) front-ends are the only UI projects, and both call the same drivers/services. WinForms sources (ESG-SignalCreator, SALink) migrate to WPF.
 
 **Reference implementation:** the [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator) repo
 already follows the intended pattern (vendor-neutral `Ivi.Visa`, a `Core` library, a hardware
 simulator, and CI) and is the model the rest should converge on.
 
-**Proposed target framework:** .NET 8 (`net8.0` libraries, `net8.0-windows` for GUI front-ends).
-Current sources are .NET Framework 4.7.2/4.8.1. This is an open decision — see #1.
+**Language & target framework (decided):** C# on **.NET Framework 4.7.2** (`net472`) for all
+projects, including the WPF front-end — matching the bulk of the existing source and the
+HP-Attenuator reference for zero VISA.NET churn. See #1.
 
 ## Migration issue format
 
