@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Console</RootNamespace>
+    <AssemblyName>gpibutils</AssemblyName>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Description>Spectre.Console front-end for GPIBUtils-NG: discover instruments and run SCPI over any GPIB provider.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Common\GpibUtils.Common.csproj" />
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <!-- NI providers (needs NI-VISA installed). Remove this reference on a non-NI machine. -->
+    <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
+  </ItemGroup>
+
+</Project>

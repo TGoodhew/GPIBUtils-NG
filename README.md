@@ -20,6 +20,26 @@ serial-poll completion, engineering-notation formatting, and — in four separat
 for the **HP 8673B**, and in four places a driver for the **HP 8902A**. Consolidation removes that
 duplication and standardizes on one clean, testable, vendor-neutral core.
 
+## Quick start
+
+Build the solution and run the Spectre.Console front-end (`gpibutils`). The **Simulated** provider
+needs no hardware, so this works anywhere:
+
+```
+dotnet build GPIBUtils-NG.sln
+
+# List providers and their capabilities
+gpibutils providers
+
+# Talk to a simulated instrument (no hardware)
+gpibutils idn   GPIB0::5::INSTR --provider Simulated
+gpibutils query GPIB0::14::INSTR "MEAS:VOLT?" --provider Simulated --engineering V
+
+# Against real hardware (NI-VISA is the default provider)
+gpibutils discover
+gpibutils idn GPIB0::14::INSTR
+```
+
 ## Target architecture
 
 | Layer | Project | Responsibility |

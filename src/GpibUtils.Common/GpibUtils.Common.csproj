@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Common</RootNamespace>
+    <AssemblyName>GpibUtils.Common</AssemblyName>
+    <Description>Cross-cutting helpers shared across GPIBUtils-NG (engineering-notation formatting, etc.). No instrument or VISA dependency.</Description>
+  </PropertyGroup>
+
+</Project>
