@@ -38,6 +38,7 @@ bench confirmation.
 |---|---|---|---|---|---|---|---|
 | [#6](https://github.com/TGoodhew/GPIBUtils-NG/issues/6) | HP 11713A Attenuator/Switch Driver | `verify/6-hp11713a` | 11713A + step attenuators (8494/8496), GPIB | 🟡 Verification Needed | — | — | Merged simulator-green; 25 unit tests. Confirm relay data strings against real hardware. |
 | [#7](https://github.com/TGoodhew/GPIBUtils-NG/issues/7) | HP 8340B Synthesized Sweeper | `verify/7-hp8340b` | 8340B, GPIB; power meter / counter to confirm output | 🟡 Verification Needed | — | — | Merged simulator-green; 14 unit tests. Confirm CW frequency / power / RF gating on real output. |
+| [#8](https://github.com/TGoodhew/GPIBUtils-NG/issues/8) | HP 8673B Synthesized Signal Generator | `verify/8-hp8673b` | 8673B, GPIB; counter / power meter (2-26.5 GHz) | 🟡 Verification Needed | — | — | Merged simulator-green; 13 unit tests. Confirm FR/LE mnemonics + RF gating across the band on real output. |
 
 ## Per-instrument bench checklist (template)
 

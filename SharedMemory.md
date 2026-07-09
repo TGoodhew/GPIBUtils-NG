@@ -28,10 +28,10 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `hp11713a` + `hp8340b` branches). | ✅ done (base + 2 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources) | xUnit. | ✅ 60 tests green |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `hp11713a` + `hp8340b` + `hp8673b` branches). | ✅ done (base + 3 devices) |
+| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources) | xUnit. | ✅ 73 tests green |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`). **HP 8340B** (#7) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
 | `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | ⬜ not started |
 | `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | ⬜ not started |
@@ -94,12 +94,13 @@ from the install into `bin/`).
 
 ## Current status / resume point
 
-- **HP 11713A (#6) and HP 8340B (#7) landed** on `main` — drivers + `hp11713a`/`hp8340b` CLI branches,
-  60 tests green, tagged `verify/6-hp11713a` / `verify/7-hp8340b`. Both issues open in **🟡 Verification
-  Needed** state (board / issue #46); run the bench checklists when hardware is available.
-- **Next step:** migrate the next driver reusing the same pattern (candidates: HP 8673B #8 and HP 8902A
-  #9 both have ready reference code in the HP-Attenuator repo; or HP 3499A switch #4). After more
-  drivers: `GpibUtils.Hpgl`, `GpibUtils.Mcp`, `GpibUtils.Wpf`, and CI.
+- **HP 11713A (#6), HP 8340B (#7), HP 8673B (#8) landed** on `main` — drivers + `hp11713a`/`hp8340b`/`hp8673b`
+  CLI branches, 73 tests green, tagged `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`. All
+  three issues open in **🟡 Verification Needed** state (board / issue #46); run the bench checklists when
+  hardware is available.
+- **Next step:** migrate the next driver reusing the same pattern (candidate: **HP 8902A #9** — measuring
+  receiver, has ready reference code in the HP-Attenuator repo; would seed a new `GpibUtils.Instruments.Meters`;
+  or HP 3499A switch #4). After more drivers: `GpibUtils.Hpgl`, `GpibUtils.Mcp`, `GpibUtils.Wpf`, and CI.
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot
