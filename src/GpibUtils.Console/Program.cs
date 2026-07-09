@@ -65,6 +65,24 @@ namespace GpibUtils.Console
                     dev.AddCommand<Hp8340BInitCommand>("init")
                         .WithDescription("Device clear + preset + RF off (clean known state).");
                 });
+
+                config.AddBranch<CommandSettings>("hp8673b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");
+                    dev.AddCommand<Hp8673BCwCommand>("cw")
+                        .WithDescription("Preset, set frequency + level, and turn the RF on.")
+                        .WithExample(new[] { "hp8673b", "cw", "10000", "8", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8673BFreqCommand>("freq")
+                        .WithDescription("Set the output frequency (MHz).");
+                    dev.AddCommand<Hp8673BPowerCommand>("power")
+                        .WithDescription("Set the output level (dBm).");
+                    dev.AddCommand<Hp8673BRfCommand>("rf")
+                        .WithDescription("Turn the RF output on or off.");
+                    dev.AddCommand<Hp8673BPresetCommand>("preset")
+                        .WithDescription("Instrument preset (IP).");
+                    dev.AddCommand<Hp8673BInitCommand>("init")
+                        .WithDescription("Device clear + preset + RF off (clean known state).");
+                });
             });
             return app.Run(args);
         }

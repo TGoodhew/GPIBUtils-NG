@@ -15,6 +15,13 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8673B Synthesized Signal Generator** (issue [#8](https://github.com/TGoodhew/GPIBUtils-NG/issues/8),
+  ported from [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)) — second `GpibUtils.Instruments.SignalSources`
+  driver, an `ILocalOscillator` (2–26.5 GHz) used as the LO for the 11793A converter path: preset (`IP`),
+  frequency (`FR … MZ`), level (`LE … DM`), RF on/off. Configurable address (default `GPIB0::19::INSTR`);
+  `Hp8673BSimulatedDevice` for hardware-free testing; `gpibutils hp8673b cw|freq|power|rf|preset|init`
+  CLI branch (#45). The **canonical** 8673B driver, consolidating the implementations in HP8902Measurements,
+  HP8273BLLMTest and GPIBUtils. 🟡 **Verification Needed.**
 - **`GpibUtils.Instruments.SignalSources`** — signal-source driver category with a shared `ISignalSource`
   contract. **HP 8340B Synthesized Sweeper** (issue [#7](https://github.com/TGoodhew/GPIBUtils-NG/issues/7),
   ported from [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)) driven as a CW source: preset
