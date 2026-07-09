@@ -36,6 +36,18 @@ the target architecture.
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell. | ⬜ not started |
 | CI | Build in simulation, no hardware. | ⬜ not started |
 
+## Development workflow (no-hardware build policy)
+
+Development happens **without the physical instruments**, so building and hardware verification are
+decoupled. Full board: [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md) (mirrored by pinned
+HW-verification tracking issue **#46**); changes logged in [`CHANGE_LOG.md`](CHANGE_LOG.md).
+
+- **`main`** = always-green integration line (builds + passes **Simulated**-provider tests). Everything stacks on it.
+- Per issue: branch **`feat/<issue#>-<slug>`** → port driver + simulator + tests + CLI branch (#45).
+- **Merge to `main` on simulator/unit-test green — HW verification is _not_ a merge gate** (lets the next driver build immediately).
+- **Do not close the issue on merge.** Label it **`verification-needed`**, add the bench checklist, register it on the board, and tag the merge commit **`verify/<issue#>-<instrument>`**.
+- At the bench: run the checklist against real HW, record pass/fail + FW/serial/date, **then** close (or open a follow-up on a discrepancy).
+
 ## Build & test
 
 ```

@@ -9,8 +9,10 @@ instrument is tracked here as its own **migration issue** (one issue per instrum
 The goal is a single solution with reusable drivers, a shared VISA transport, a common app/CLI
 shell, and an MCP server surface — replacing ~18 one-off repos.
 
-> Status: **planning**. Code has not been ported yet — the issues below define the work.
-> See **#1** for the foundational scaffolding that everything else depends on.
+> **Status:** foundation in progress (#1). The shared VISA transport, common helpers and the
+> Spectre.Console CLI have landed and build hardware-free; instrument drivers are next. See
+> [`CHANGE_LOG.md`](CHANGE_LOG.md) for what's landed and [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md)
+> for the real-hardware verification board.
 
 ## Why consolidate
 
@@ -63,6 +65,26 @@ simulator, and CI) and is the model the rest should converge on.
 **Language & target framework (decided):** C# on **.NET Framework 4.7.2** (`net472`) for all
 projects, including the WPF front-end — matching the bulk of the existing source and the
 HP-Attenuator reference for zero VISA.NET churn. See #1.
+
+## Development workflow (build-forward, verify-on-hardware)
+
+Much of this work is done **without access to the physical instruments**, so building and
+hardware verification are deliberately decoupled:
+
+- **`main`** is the always-green integration line — it must build and pass the **Simulated**-provider
+  unit tests. Everything stacks on it.
+- Work each issue on a **`feat/<issue#>-<slug>`** branch (e.g. `feat/6-hp11713a`): port the driver onto
+  the shared transport, add a simulator/mock and tests, and wire its CLI branch (#45).
+- A PR **merges to `main` on simulator/unit-test green — hardware verification is _not_ a merge gate.**
+  This lets the next driver build on it immediately while away from the bench.
+- On merge the issue is **not closed**. It gets the **`verification-needed`** label and a bench
+  checklist, and the merge commit is tagged **`verify/<issue#>-<instrument>`** so its exact state can be
+  checked out at the bench later. The full board is [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md)
+  (mirrored by the pinned tracking issue [#46](https://github.com/TGoodhew/GPIBUtils-NG/issues/46)).
+- Back at the bench, run the checklist against real hardware, record the result, and **only then close
+  the issue** (or open a follow-up on a discrepancy).
+
+Changes are logged in [`CHANGE_LOG.md`](CHANGE_LOG.md).
 
 ## Migration issue format
 
@@ -212,6 +234,10 @@ These were reviewed at the code level and deliberately left out of the backlog �
 | `ToEngineeringFormat` rework | GPIBUtils-Old | Pure number-formatting helper (folded into #1 as shared code) |
 
 Forked repos (`Multimeter_Controller`, `gpib_playground`, `FreeCal`) were out of scope by request.
+
+## License
+
+Released under the [MIT License](LICENSE). Copyright (c) 2026 Tony Goodhew.
 
 ---
 
