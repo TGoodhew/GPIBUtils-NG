@@ -15,6 +15,24 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`GpibUtils.Wpf`** — the Windows front-end: a WPF **MVVM** shell (issue
+  [#1](https://github.com/TGoodhew/GPIBUtils-NG/issues/1)) sitting on the same shared core as the console.
+  Lists the registered providers and their capabilities, discovers instruments, and runs a command against
+  any provider — works with no hardware via the Simulated provider. `ViewModelBase` / `RelayCommand` MVVM
+  primitives; view-model logic is unit-tested headlessly.
+- **Continuous integration** — GitHub Actions workflow (`.github/workflows/ci.yml`) building and testing the
+  whole solution on `windows-latest` with **no NI-VISA installed**, on every push/PR to `main`.
+- **`GpibUtils.Hpgl` / `GpibUtils.Mcp`** — scaffold projects completing the foundation solution layout;
+  filled in by their migrations (#42/#43 and #41).
+
+### Changed
+
+- **`GpibUtils.Visa.Ni` now degrades gracefully without NI-VISA.** When the official NI/IVI VISA.NET
+  assemblies aren't present at build time, the project compiles an "NI-VISA unavailable" provider stub
+  (reported via the registry) instead of failing the build. The whole solution — including `Console` and
+  `Wpf` — now builds and tests on a machine with **zero NI setup** (and on CI). Pass `-p:RequireNi=true`
+  to hard-fail when NI is expected. No more "remove this project reference on a non-NI machine".
+
 - **HP 8673B Synthesized Signal Generator** (issue [#8](https://github.com/TGoodhew/GPIBUtils-NG/issues/8),
   ported from [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)) — second `GpibUtils.Instruments.SignalSources`
   driver, an `ILocalOscillator` (2–26.5 GHz) used as the LO for the 11793A converter path: preset (`IP`),

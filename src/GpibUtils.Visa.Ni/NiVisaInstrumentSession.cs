@@ -1,3 +1,4 @@
+#if NI_VISA
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -166,3 +167,4 @@ namespace GpibUtils.Visa.Ni
         }
     }
 }
+#endif

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>GpibUtils.Wpf</RootNamespace>
+    <AssemblyName>GpibUtils.Wpf</AssemblyName>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Description>WPF (MVVM) desktop shell for GPIBUtils-NG: browse GPIB providers, discover instruments, and run commands over the shared core. No instrument logic lives here.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Common\GpibUtils.Common.csproj" />
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <!-- NI providers (builds an 'unavailable' stub where NI-VISA isn't installed). -->
+    <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
+  </ItemGroup>
+
+</Project>

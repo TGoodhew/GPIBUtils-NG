@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Hpgl</RootNamespace>
+    <AssemblyName>GpibUtils.Hpgl</AssemblyName>
+    <Description>Shared HP-GL / PCL parser + renderer for GPIBUtils-NG (plotters and screen-capture). Scaffold — implemented by issues #42 / #43.</Description>
+  </PropertyGroup>
+
+</Project>

@@ -29,14 +29,14 @@ the target architecture.
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
 | `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `hp11713a` + `hp8340b` + `hp8673b` branches). | ✅ done (base + 3 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources) | xUnit. | ✅ 73 tests green |
+| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Wpf) | xUnit. | ✅ 77 tests green |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
-| `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | ⬜ not started |
-| `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | ⬜ not started |
-| `src/GpibUtils.Wpf` | WPF/MVVM desktop shell. | ⬜ not started |
-| CI | Build in simulation, no hardware. | ⬜ not started |
+| `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
+| `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | 🏗 scaffold (filled by #42/#43) |
+| `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | 🏗 scaffold (filled by #41) |
+| CI | GitHub Actions: build + test whole solution, no NI. | ✅ done |
 
 ## Development workflow (no-hardware build policy)
 
@@ -63,9 +63,10 @@ gpibutils idn   GPIB0::5::INSTR  --provider Simulated
 gpibutils query GPIB0::14::INSTR "MEAS:VOLT?" --provider Simulated --engineering V
 ```
 
-`GpibUtils.Visa.Ni` builds only where NI-VISA is installed (it errors with guidance otherwise); a
-non-NI contributor removes that one project reference. NI DLLs are **never committed** (they resolve
-from the install into `bin/`).
+`GpibUtils.Visa.Ni` uses the real NI providers where NI-VISA is installed, and **builds an "NI-VISA
+unavailable" stub otherwise** — so the whole solution (and CI) builds with zero NI setup; no need to
+remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is expected. NI DLLs are
+**never committed** (they resolve from the install into `bin/`).
 
 ## Key conventions (apply to all future work)
 
@@ -94,13 +95,15 @@ from the install into `bin/`).
 
 ## Current status / resume point
 
-- **HP 11713A (#6), HP 8340B (#7), HP 8673B (#8) landed** on `main` — drivers + `hp11713a`/`hp8340b`/`hp8673b`
-  CLI branches, 73 tests green, tagged `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`. All
-  three issues open in **🟡 Verification Needed** state (board / issue #46); run the bench checklists when
-  hardware is available.
-- **Next step:** migrate the next driver reusing the same pattern (candidate: **HP 8902A #9** — measuring
-  receiver, has ready reference code in the HP-Attenuator repo; would seed a new `GpibUtils.Instruments.Meters`;
-  or HP 3499A switch #4). After more drivers: `GpibUtils.Hpgl`, `GpibUtils.Mcp`, `GpibUtils.Wpf`, and CI.
+- **Foundation (#1) essentially complete:** core transport + Common + Console + **WPF shell** + **CI** all
+  landed; `Hpgl`/`Mcp` scaffolded (filled by #42/#43, #41); `Visa.Ni` degrades gracefully without NI so the
+  whole solution builds with zero NI setup. 77 tests green. Only outstanding #1 item: a **visual smoke test
+  of the WPF shell** (launch `GpibUtils.Wpf`), plus the higher-level SRQ `CompletionWaiter` deferred to #43.
+- **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
+  tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`.
+- **Next step:** migrate the next driver reusing the pattern (candidate: **HP 8902A #9** — measuring
+  receiver, ready reference code in HP-Attenuator; would seed `GpibUtils.Instruments.Meters`; or HP 3499A
+  switch #4). Then flesh out `Hpgl` (#42/#43), `Mcp` (#41), and add instrument panels to the WPF shell.
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot

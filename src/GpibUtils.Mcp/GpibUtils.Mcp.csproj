@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Mcp</RootNamespace>
+    <AssemblyName>GpibUtils.Mcp</AssemblyName>
+    <Description>MCP server surface exposing the GPIBUtils-NG suite to LLM clients, plus the instrument-model DB. Scaffold — implemented by issue #41.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+</Project>
