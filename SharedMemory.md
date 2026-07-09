@@ -28,9 +28,10 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn`). | ✅ done (base commands) |
-| `tests/GpibUtils.Visa.Tests`, `tests/GpibUtils.Common.Tests` | xUnit. | ✅ 21 tests green |
-| `src/GpibUtils.Instruments.*` | Instrument drivers by category. | ⬜ not started |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `hp11713a` branch). | ✅ done (base + first device) |
+| `tests/*` (Visa, Common, Instruments.Switches) | xUnit. | ✅ 46 tests green |
+| `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
 | `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | ⬜ not started |
 | `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | ⬜ not started |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell. | ⬜ not started |
@@ -92,11 +93,12 @@ from the install into `bin/`).
 
 ## Current status / resume point
 
-- **All work pushed** — everything is on `main` (latest foundation commits). Working tree clean.
-- **Next step (open choice):** build `GpibUtils.Instruments` and migrate the **first real driver —
-  HP 11713A (issue #6)** with its typed CLI branch (establishes the #45 pattern), **or** stand up the
-  `GpibUtils.Wpf` shell first. After that: more drivers, `GpibUtils.Hpgl`, `GpibUtils.Mcp`,
-  `GpibUtils.Wpf`, and CI.
+- **HP 11713A (#6) landed** on `main` — first driver + `gpibutils hp11713a` CLI branch, 46 tests green,
+  tagged `verify/6-hp11713a`. Issue #6 is open in **🟡 Verification Needed** state (see the board /
+  issue #46); run the bench checklist when hardware is available.
+- **Next step:** migrate the next driver (e.g. HP 3499A switch #4, or an HP-Attenuator source driver),
+  reusing the #6 pattern (branch `feat/<issue#>-<slug>`, simulator + tests, CLI branch, then
+  verification-needed). After more drivers: `GpibUtils.Hpgl`, `GpibUtils.Mcp`, `GpibUtils.Wpf`, and CI.
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot

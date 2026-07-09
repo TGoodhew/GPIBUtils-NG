@@ -13,10 +13,28 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ## [Unreleased]
 
-Foundation (issue [#1](https://github.com/TGoodhew/GPIBUtils-NG/issues/1)) — scaffolding and the
-shared transport. No instrument drivers have landed yet, so nothing is pending HW verification.
-
 ### Added
+
+- **`GpibUtils.Instruments.Switches`** — first instrument driver category. **HP 11713A Attenuator/Switch
+  Driver** (issue [#6](https://github.com/TGoodhew/GPIBUtils-NG/issues/6), ported from
+  [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)): dB→A/B relay-string solver
+  (`Hp11713ACommandBuilder`), configurable attenuator wiring (`AttenuatorConfig`, default 8494+8496 =
+  0–121 dB in 1 dB steps), independent S9/S0 switches, and a software state shadow (the 11713A is
+  listen-only). Runs on the shared vendor-neutral `IInstrumentSession`; GPIB address is configurable
+  (default `GPIB0::28::INSTR`). Includes `Hp11713ASimulatedDevice`, an in-memory model that decodes the
+  A/B data strings back into relay state for hardware-free testing. 🟡 **Verification Needed.**
+- **`gpibutils hp11713a …` CLI branch** (issue [#45](https://github.com/TGoodhew/GPIBUtils-NG/issues/45))
+  — hierarchical, self-documenting commands `set` / `engage` / `zero` / `switch9` / `switch0` / `raw`,
+  with shared `--provider` / `--address` / `--timeout` options (plus `--config` / `--invert-sense`) at
+  the leaf. Establishes the per-instrument CLI pattern for future drivers.
+- **`SimulatedInstrument.WriteObserver`** (foundation) — a hook that reports every write, so a simulated
+  **listen-only** instrument can track the state it is driven into. Enables end-to-end,
+  no-hardware verification of write-only drivers.
+
+Foundation (issue [#1](https://github.com/TGoodhew/GPIBUtils-NG/issues/1)) — scaffolding and the
+shared transport:
+
+### Added (foundation)
 
 - **`GpibUtils.Visa`** — vendor-neutral, pluggable GPIB transport (`net472`): `IGpibProvider` /
   `IInstrumentSession` abstractions, capability reporting, the `GpibProviders` registry, extension
