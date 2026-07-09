@@ -15,6 +15,16 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`GpibUtils.Instruments.SignalSources`** — signal-source driver category with a shared `ISignalSource`
+  contract. **HP 8340B Synthesized Sweeper** (issue [#7](https://github.com/TGoodhew/GPIBUtils-NG/issues/7),
+  ported from [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)) driven as a CW source: preset
+  (`IP`), frequency (`CW … MZ`), power (`PL … DB`), and RF on/off (`RF1`/`RF0`), with culture-invariant
+  formatting. Runs on the shared `IInstrumentSession`; address configurable (default `GPIB0::20::INSTR`).
+  Includes `Hp8340BSimulatedDevice` for hardware-free testing. This is the **canonical** 8340B driver for
+  the related app issues [#16](https://github.com/TGoodhew/GPIBUtils-NG/issues/16) /
+  [#34](https://github.com/TGoodhew/GPIBUtils-NG/issues/34) to build on. 🟡 **Verification Needed.**
+- **`gpibutils hp8340b …` CLI branch** (issue [#45](https://github.com/TGoodhew/GPIBUtils-NG/issues/45))
+  — `cw` (one-shot preset+freq+power+RF-on) / `freq` / `power` / `rf` / `preset` / `init`.
 - **`GpibUtils.Instruments.Switches`** — first instrument driver category. **HP 11713A Attenuator/Switch
   Driver** (issue [#6](https://github.com/TGoodhew/GPIBUtils-NG/issues/6), ported from
   [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)): dB→A/B relay-string solver

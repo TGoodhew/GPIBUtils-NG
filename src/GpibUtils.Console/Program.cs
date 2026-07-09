@@ -47,6 +47,24 @@ namespace GpibUtils.Console
                     dev.AddCommand<Hp11713ARawCommand>("raw")
                         .WithDescription("Send a raw 11713A data string.");
                 });
+
+                config.AddBranch<CommandSettings>("hp8340b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8340B synthesized sweeper as a CW signal source.");
+                    dev.AddCommand<Hp8340BCwCommand>("cw")
+                        .WithDescription("Preset, set frequency + power, and turn the RF on.")
+                        .WithExample(new[] { "hp8340b", "cw", "3000", "-10", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8340BFreqCommand>("freq")
+                        .WithDescription("Set the CW output frequency (MHz).");
+                    dev.AddCommand<Hp8340BPowerCommand>("power")
+                        .WithDescription("Set the output power (dBm).");
+                    dev.AddCommand<Hp8340BRfCommand>("rf")
+                        .WithDescription("Turn the RF output on or off.");
+                    dev.AddCommand<Hp8340BPresetCommand>("preset")
+                        .WithDescription("Instrument preset (IP).");
+                    dev.AddCommand<Hp8340BInitCommand>("init")
+                        .WithDescription("Device clear + preset + RF off (clean known state).");
+                });
             });
             return app.Run(args);
         }
