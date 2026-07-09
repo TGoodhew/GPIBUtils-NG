@@ -18,6 +18,7 @@
     <ProjectReference Include="..\GpibUtils.Common\GpibUtils.Common.csproj" />
     <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Switches\GpibUtils.Instruments.Switches.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.SignalSources\GpibUtils.Instruments.SignalSources.csproj" />
     <!-- NI providers (needs NI-VISA installed). Remove this reference on a non-NI machine. -->
     <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
   </ItemGroup>

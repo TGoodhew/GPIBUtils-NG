@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.SignalSources</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.SignalSources</AssemblyName>
+    <Description>Signal-source / sweep-generator instruments for GPIBUtils-NG (HP 8340B, ...). Drives the shared vendor-neutral transport; no UI or vendor dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+</Project>
