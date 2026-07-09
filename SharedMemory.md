@@ -83,6 +83,15 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   reconcile duplicate implementations into one canonical driver (see the "Related implementations" note
   in each issue).
 - **Don't re-copy** `ToEngineeringFormat` — use `GpibUtils.Common`.
+- **Bench uses HP-IB bus extenders (HP 37204A or similar)** — this has two hard consequences:
+  1. **Bus-scan discovery is untrustworthy.** An extender ACKs the address handshake for its whole remote
+     segment, so a VISA scan (`Rm.Find`) reports *every* GPIB address 0–30 as present — all phantom. Never
+     use `discover` / the WPF Discover button to enumerate real instruments; drive by explicit resource
+     string (`--address` / per-driver `DefaultResource`). Diagnostic: **seeing (nearly) every address in use
+     means an extender is in the path** — both front-ends warn when `Discover` returns ≥15 resources.
+  2. **SRQ / serial-poll must tolerate extender latency.** Keep timeouts generous and make the #43
+     `Srq.Completion` engine forgiving of the longer, variable turnaround across the link. Directly affects
+     the HP 8902A (SRQ-based measurement-complete handshake).
 
 ## Migration backlog map
 
@@ -97,8 +106,11 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 
 - **Foundation (#1) essentially complete:** core transport + Common + Console + **WPF shell** + **CI** all
   landed; `Hpgl`/`Mcp` scaffolded (filled by #42/#43, #41); `Visa.Ni` degrades gracefully without NI so the
-  whole solution builds with zero NI setup. 77 tests green. Only outstanding #1 item: a **visual smoke test
-  of the WPF shell** (launch `GpibUtils.Wpf`), plus the higher-level SRQ `CompletionWaiter` deferred to #43.
+  whole solution builds with zero NI setup. 77 tests green. **WPF visual smoke test passed** (2026-07-09) —
+  #1 ready to close bar the higher-level SRQ `CompletionWaiter` deferred to #43.
+- **Extender-aware discovery caveat landed** (2026-07-09): `gpibutils discover` and WPF Discover now warn
+  when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
+  (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
   tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`.
 - **Next step:** migrate the next driver reusing the pattern (candidate: **HP 8902A #9** — measuring

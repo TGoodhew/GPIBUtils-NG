@@ -99,9 +99,15 @@ namespace GpibUtils.Wpf.ViewModels
                 var provider = GpibProviders.Get(SelectedProvider);
                 var found = provider.Discover();
                 foreach (var r in found) Discovered.Add(r);
-                Status = found.Count == 0
-                    ? $"No instruments found via {provider.Name}."
-                    : $"{found.Count} instrument(s) via {provider.Name}.";
+                if (found.Count == 0)
+                    Status = $"No instruments found via {provider.Name}.";
+                else if (found.Count >= 15)
+                    Status = $"{found.Count} present via {provider.Name} — nearly the whole bus, so an " +
+                             "HP-IB extender (HP 37204A or similar) is in the path. This list is phantom; " +
+                             "drive instruments by explicit address.";
+                else
+                    Status = $"{found.Count} instrument(s) via {provider.Name}. " +
+                             "Note: bus extenders can make addresses appear present — prefer explicit addresses.";
             });
         }
 

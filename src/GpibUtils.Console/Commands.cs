@@ -79,6 +79,20 @@ namespace GpibUtils.Console
                 }
                 AnsiConsole.MarkupLineInterpolated($"[green]{found.Count}[/] instrument(s) via {provider.Name}:");
                 foreach (var r in found) AnsiConsole.WriteLine("  " + r);
+                if (found.Count >= 15)
+                {
+                    AnsiConsole.MarkupLine(
+                        "[yellow]![/] Nearly every GPIB address reported present — that signature means an " +
+                        "HP-IB bus extender (HP 37204A or similar) is in the path. Extenders ACK the address " +
+                        "scan for their whole remote segment, so this list is phantom. Ignore it and drive " +
+                        "instruments by explicit address.");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine(
+                        "[grey]Note: bus extenders (e.g. HP 37204A) can make addresses appear present; " +
+                        "prefer explicit addresses over discovery.[/]");
+                }
                 return 0;
             });
         }
