@@ -55,6 +55,7 @@ namespace GpibUtils.Visa.Simulation
         {
             var command = raw.TrimEnd('\r', '\n');
             _lastCommand = command;
+            _instrument.ObserveWrite(command);
 
             // Side effects for the common commands that carry them.
             switch (command.Trim().ToUpperInvariant())

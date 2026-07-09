@@ -34,12 +34,9 @@ bench confirmation.
 
 ## Board
 
-_No instrument drivers have merged yet — the foundation (#1) is transport-only and needs no hardware.
-The first driver to land will appear here as 🟡 Verification Needed._
-
 | Issue | Instrument | Verify tag | HW required | Status | FW / serial | Date | Notes |
 |---|---|---|---|---|---|---|---|
-| — | _(none yet)_ | — | — | — | — | — | — |
+| [#6](https://github.com/TGoodhew/GPIBUtils-NG/issues/6) | HP 11713A Attenuator/Switch Driver | `verify/6-hp11713a` | 11713A + step attenuators (8494/8496), GPIB | 🟡 Verification Needed | — | — | Merged simulator-green; 25 unit tests. Confirm relay data strings against real hardware. |
 
 ## Per-instrument bench checklist (template)
 

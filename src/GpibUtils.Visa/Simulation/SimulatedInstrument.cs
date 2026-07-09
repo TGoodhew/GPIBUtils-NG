@@ -18,6 +18,16 @@ namespace GpibUtils.Visa.Simulation
         /// </summary>
         public Func<string, string> Responder { get; set; }
 
+        /// <summary>
+        /// Optional observer invoked for every write (command or query, terminators stripped). Lets a
+        /// simulated <b>listen-only</b> instrument (e.g. the HP 11713A, which cannot be queried) track the
+        /// state it is being driven into, so drivers for such devices verify without hardware.
+        /// </summary>
+        public Action<string> WriteObserver { get; set; }
+
+        /// <summary>Notifies <see cref="WriteObserver"/> of a write. Called by the simulated session.</summary>
+        internal void ObserveWrite(string command) => WriteObserver?.Invoke(command);
+
         /// <summary>The status byte returned by a serial poll (RQS/bit-6 is OR-ed in when
         /// <see cref="ServiceRequestPending"/> is set).</summary>
         public byte StatusByte { get; set; }
