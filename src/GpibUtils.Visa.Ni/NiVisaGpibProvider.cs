@@ -1,3 +1,4 @@
+#if NI_VISA
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,3 +68,40 @@ namespace GpibUtils.Visa.Ni
         }
     }
 }
+#else
+using System;
+using System.Collections.Generic;
+
+namespace GpibUtils.Visa.Ni
+{
+    /// <summary>
+    /// Stub NI-VISA provider compiled when the official NI/IVI VISA.NET assemblies were not present at
+    /// build time (e.g. on CI or a contributor machine without NI-VISA). It keeps the same identity so
+    /// the registry still lists "NI-VISA", but reports <see cref="IsAvailable"/> = false and every
+    /// operation fails with guidance instead of the whole build breaking. Install NI-VISA and rebuild
+    /// <c>GpibUtils.Visa.Ni</c> to get the real provider.
+    /// </summary>
+    public sealed class NiVisaGpibProvider : IGpibProvider
+    {
+        public string Name => "NI-VISA";
+
+        public ProviderCapabilities Capabilities { get; } = new ProviderCapabilities(
+            name: "NI-VISA", discovery: true, serialPoll: true, serviceRequest: true,
+            deviceClear: true, returnToLocal: true, nativeAddressing: false);
+
+        public bool IsAvailable => false;
+
+        public string UnavailableReason =>
+            "NI-VISA / IVI VISA.NET assemblies were not present when GpibUtils.Visa.Ni was built. " +
+            "Install NI-VISA and rebuild (see docs/implementing-a-gpib-provider.md) to enable it, or " +
+            "use another provider (e.g. Simulated).";
+
+        public IReadOnlyList<string> Discover(string filter = "?*::INSTR") => Array.Empty<string>();
+
+        public IInstrumentSession Open(string resourceName, SessionSettings settings = null) =>
+            throw new GpibException(UnavailableReason);
+
+        public GpibStatus DescribeError(Exception ex) => GpibStatus.Empty;
+    }
+}
+#endif

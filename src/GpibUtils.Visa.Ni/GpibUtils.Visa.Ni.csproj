@@ -9,11 +9,20 @@
     <!--
       Official NI/IVI VISA.NET assemblies are installed by NI-VISA (they are NOT on NuGet for .NET
       Framework). These paths point at the local install; adjust them for your machine or NI-VISA
-      version. The CheckNiAssemblies target below fails the build with guidance if they are missing.
+      version. When they are present the real NI-VISA provider is built (NI_VISA defined); when absent
+      (e.g. CI, or a machine without NI-VISA) the project still builds an "NI-VISA unavailable" stub so
+      the whole solution compiles with no NI setup. Pass -p:RequireNi=true to hard-fail instead.
     -->
     <IviVisaNetDir>$(ProgramW6432)\IVI Foundation\VISA\Microsoft.NET\Framework64\v4.0.30319\VISA.NET Shared Components 8.0.2</IviVisaNetDir>
     <NiVisaNetDir>$(ProgramW6432)\IVI Foundation\VISA\Microsoft.NET\Framework64\v4.0.30319\NI VISA.NET 26.3</NiVisaNetDir>
     <NiGpibDir>$(MSBuildProgramFiles32)\National Instruments\MeasurementStudioVS2010\DotNET\Assemblies\Current</NiGpibDir>
+
+    <!-- Real NI provider is compiled only when both VISA.NET assemblies are found on disk. -->
+    <NiVisaPresent Condition="Exists('$(IviVisaNetDir)\Ivi.Visa.dll') And Exists('$(NiVisaNetDir)\NationalInstruments.Visa.dll')">true</NiVisaPresent>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(NiVisaPresent)' == 'true'">
+    <DefineConstants>$(DefineConstants);NI_VISA</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +30,7 @@
   </ItemGroup>
 
   <!-- Official IVI VISA.NET shared components + NI VISA.NET (resolved from the local install). -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(NiVisaPresent)' == 'true'">
     <Reference Include="Ivi.Visa">
       <HintPath>$(IviVisaNetDir)\Ivi.Visa.dll</HintPath>
       <Private>true</Private>
@@ -40,11 +49,11 @@
     </Reference>
   </ItemGroup>
 
-  <Target Name="CheckNiAssemblies" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('$(IviVisaNetDir)\Ivi.Visa.dll')"
-           Text="Official IVI VISA.NET shared components (Ivi.Visa.dll) not found at '$(IviVisaNetDir)'. Install NI-VISA, edit IviVisaNetDir in GpibUtils.Visa.Ni.csproj, or remove the GpibUtils.Visa.Ni project reference. See docs/implementing-a-gpib-provider.md." />
-    <Error Condition="!Exists('$(NiVisaNetDir)\NationalInstruments.Visa.dll')"
-           Text="Official NI VISA.NET (NationalInstruments.Visa.dll) not found at '$(NiVisaNetDir)'. Install NI-VISA, edit NiVisaNetDir in GpibUtils.Visa.Ni.csproj, or remove the GpibUtils.Visa.Ni project reference. See docs/implementing-a-gpib-provider.md." />
+  <Target Name="ReportNiVisa" BeforeTargets="CoreCompile">
+    <Message Condition="'$(NiVisaPresent)' != 'true'" Importance="high"
+             Text="GpibUtils.Visa.Ni: NI/IVI VISA.NET assemblies not found — building the 'NI-VISA unavailable' stub. Install NI-VISA (or fix IviVisaNetDir/NiVisaNetDir) and rebuild to enable the real provider." />
+    <Error Condition="'$(RequireNi)' == 'true' And '$(NiVisaPresent)' != 'true'"
+           Text="RequireNi=true but the official NI/IVI VISA.NET assemblies were not found (IviVisaNetDir='$(IviVisaNetDir)', NiVisaNetDir='$(NiVisaNetDir)'). Install NI-VISA or fix those paths. See docs/implementing-a-gpib-provider.md." />
   </Target>
 
 </Project>

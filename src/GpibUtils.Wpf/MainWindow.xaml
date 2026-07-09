@@ -1,0 +1,100 @@
+<Window x:Class="GpibUtils.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:GpibUtils.Wpf.ViewModels"
+        Title="GPIBUtils-NG" Height="560" Width="880" MinHeight="420" MinWidth="720">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <DockPanel Margin="10">
+
+        <!-- Status bar -->
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding Status}" />
+            </StatusBarItem>
+        </StatusBar>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Providers -->
+            <DockPanel Grid.Column="0">
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                    <TextBlock Text="Providers" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
+                    <Button Content="Refresh" Command="{Binding RefreshProvidersCommand}"
+                            DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="10,2" />
+                </DockPanel>
+                <ListView ItemsSource="{Binding Providers}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" Width="110" DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Header="Avail" Width="45" DisplayMemberBinding="{Binding Available}" />
+                            <GridViewColumn Header="Def" Width="34" DisplayMemberBinding="{Binding Default}" />
+                            <GridViewColumn Header="Capabilities" Width="180" DisplayMemberBinding="{Binding Capabilities}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch" Background="#DDD" />
+
+            <!-- Provider selection + discover + query -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Provider selector -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <TextBlock Text="Provider:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ComboBox ItemsSource="{Binding ProviderNames}" SelectedItem="{Binding SelectedProvider}" />
+                </DockPanel>
+
+                <!-- Discover -->
+                <Button Grid.Row="1" Content="Discover instruments" Command="{Binding DiscoverCommand}"
+                        HorizontalAlignment="Left" Padding="12,4" Margin="0,0,0,6" />
+                <ListBox Grid.Row="2" ItemsSource="{Binding Discovered}" MinHeight="120" />
+
+                <!-- Query -->
+                <Grid Grid.Row="3" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Resource:" VerticalAlignment="Center"
+                               Margin="0,0,8,4" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Resource, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Command:" VerticalAlignment="Center"
+                               Margin="0,0,8,0" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Command, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Button Grid.Row="4" Content="Send" Command="{Binding QueryCommand}"
+                        HorizontalAlignment="Left" Padding="16,4" Margin="0,8,0,6" />
+
+                <Border Grid.Row="5" BorderBrush="#CCC" BorderThickness="1" Padding="8" MinHeight="48">
+                    <TextBlock Text="{Binding Reply}" FontFamily="Consolas" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

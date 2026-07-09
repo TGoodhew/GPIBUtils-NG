@@ -47,14 +47,14 @@ gpibutils idn GPIB0::14::INSTR
 | Layer | Project | Responsibility |
 |---|---|---|
 | Transport (core) | `GpibUtils.Visa` | Vendor-neutral pluggable transport: `IGpibProvider` / `IInstrumentSession`, capability reporting, SRQ/serial-poll, the provider registry, extension stubs (Keysight/Prologix/AR488), and an in-memory simulator. **No vendor dependency — builds anywhere.** |
-| Transport (NI) | `GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers, built against the **official NI/IVI VISA.NET assemblies** from the local NI-VISA install (referenced by path, never vendored; auto-registered by reflection). Drop this project if you don't use NI. |
+| Transport (NI) | `GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers, built against the **official NI/IVI VISA.NET assemblies** from the local NI-VISA install (referenced by path, never vendored; auto-registered by reflection). Where NI-VISA isn't installed it builds an *"NI-VISA unavailable"* stub, so the whole solution still compiles with zero NI setup (and on CI). |
 | Shared | `GpibUtils.Common` | Cross-cutting helpers (`ToEngineeringFormat`, etc.) |
 | Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category (SignalSources, Meters, Counters, Analyzers, PowerSupplies, Switches, Plotters, Calibrators, Oscilloscopes) |
 | Rendering | `GpibUtils.Hpgl` | Shared HP-GL / PCL parser + renderer (plotters and screen-capture) |
 | Automation | `GpibUtils.Verification` | Plan-driven, non-interactive verification runner (from 5440Verify) |
 | Integration | `GpibUtils.Mcp` | MCP server exposing the suite to LLM clients + ~200-model instrument DB |
 | Front-end (console) | `GpibUtils.Console` | **Spectre.Console** UI (`Spectre.Console.Cli` command surface) on the shared core |
-| Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop UI (assumed initially) on the shared core |
+| Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop shell on the shared core — browse providers, discover instruments, run a command (works hardware-free via the Simulated provider) |
 
 The **core/driver libraries carry no UI dependencies** — the console (Spectre.Console) and Windows (WPF) front-ends are the only UI projects, and both call the same drivers/services. WinForms sources (ESG-SignalCreator, SALink) migrate to WPF.
 
