@@ -23,7 +23,19 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 - **Continuous integration** — GitHub Actions workflow (`.github/workflows/ci.yml`) building and testing the
   whole solution on `windows-latest` with **no NI-VISA installed**, on every push/PR to `main`.
 - **`GpibUtils.Hpgl` / `GpibUtils.Mcp`** — scaffold projects completing the foundation solution layout;
-  filled in by their migrations (#42/#43 and #41).
+  filled in by their migrations (#42 and #41).
+- **SRQ / serial-poll completion engine** (`GpibUtils.Visa.Srq`, issue
+  [#43](https://github.com/TGoodhew/GPIBUtils-NG/issues/43), ported from
+  [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP)) — the shared, data-driven IEEE-488.2 completion state
+  machine every SRQ-based driver now builds on, so no driver hand-rolls its own serial-poll/SemaphoreSlim
+  handshake. A `StatusModel` (loadable from the instrument DB) declares the status-byte bits, enable-mask
+  commands and named operations; `CompletionWaiter` runs the ARM→(busy)→confirm→restore flow, choosing the
+  robust **SRQ-edge** strategy when the model names a request-service bit (hardware-confirmed on the 8563E)
+  or the legacy **direct-bit** poll otherwise. Decoupled from the wire via `IStatusChannel`;
+  `SessionStatusChannel` bridges it onto a live `IInstrumentSession`, and an injected clock/sleep makes it
+  fully headless — driven end-to-end against a virtual-clock 8560-series simulator (11 new tests, 88 total).
+  Timeouts and per-model `BusyConfirmMs` are kept generous to tolerate HP-IB bus-extender latency. First
+  consumer will be the HP 8902A (#9).
 
 ### Changed
 
