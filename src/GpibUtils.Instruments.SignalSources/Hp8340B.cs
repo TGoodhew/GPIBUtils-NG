@@ -13,7 +13,10 @@ namespace GpibUtils.Instruments.SignalSources
     /// </summary>
     public sealed class Hp8340B : ISignalSource
     {
-        /// <summary>GPIB address of the 8340B on the reference bench (the migrated harness default).</summary>
+        /// <summary>GPIB address of the 8340B. <b>This is 20, NOT the manual factory default of 19</b>
+        /// (8340B/41B Operating manual: "The factory-set address is 19"). The bench deliberately remaps the
+        /// 8340B to 20 — via its rear-panel DIP switches — because the HP 8673B already occupies the shared
+        /// factory-default 19 (<see cref="Hp8673B.DefaultResource"/>). Override with <c>--address</c>.</summary>
         public const string DefaultResource = "GPIB0::20::INSTR";
 
         private readonly IInstrumentSession _session;
