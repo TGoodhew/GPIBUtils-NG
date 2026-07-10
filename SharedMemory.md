@@ -28,8 +28,8 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `hp11713a` + `hp8340b` + `hp8673b` branches). | ✅ done (base + 3 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Wpf) | xUnit. | ✅ 77 tests green |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a` branches). | ✅ done (base + config + 4 devices) |
+| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Wpf) | xUnit. | ✅ 120 tests green |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters (`IMeasuringReceiver`). **HP 8902A** (#9, canonical) ported. | 🟡 done, awaiting HW verification |
@@ -121,12 +121,18 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   (hardware-verified inline — deliberately NOT rewired onto #43's engine before bench re-verification).
   `Hp8902ASimulatedDevice` + 21 tests; `gpibutils hp8902a init|preset|status|frequency|power|level`.
   Default address `GPIB0::14::INSTR` (8902A factory-default HP-IB address, confirmed). 🟡 awaiting HW.
+- **Per-instrument address config landed** (#54, 2026-07-10): `InstrumentAddressStore` in `GpibUtils.Common`
+  (JSON at `%APPDATA%\GpibUtils\addresses.json` or `$GPIBUTILS_CONFIG`) persists the bench's real addresses;
+  resolution precedence is **`--address` > configured > `DefaultResource`**. Console `gpibutils config address
+  list|get|set|clear` + `config path`. Every driver's `DefaultResource` verified against its manual (2026-07,
+  see [manuals folder]) — 11713A=28, 8673B=19, 8902A=14 match; **8340B=20 documented as a bench remap** off
+  the manual default 19 (shares 8673B's factory 19). WPF surfacing deferred until it has per-instrument panels.
 - **Extender-aware discovery caveat landed** (2026-07-09): `gpibutils discover` and WPF Discover now warn
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
   HP 8902A (#9); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a`.
-  **109 tests green.**
+  **120 tests green.**
 - **Next step:** next driver candidate — **HP 3499A switch #4** or an SCPI DMM (HP 34401A #17/#36); or
   flesh out `Hpgl` (#42) / `Mcp` (#41), or add instrument panels to the WPF shell. The measuring-receiver
   category (`Meters`) is now seeded for the power meters (#25, #33).

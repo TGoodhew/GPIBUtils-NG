@@ -12,7 +12,7 @@ namespace GpibUtils.Console.Instruments
         /// <summary>Opens a session (default GPIB0::20::INSTR) and builds the driver.</summary>
         internal Hp8340B OpenDriver(out Visa.IInstrumentSession session)
         {
-            session = OpenSession(Hp8340B.DefaultResource);
+            session = OpenSession("hp8340b", Hp8340B.DefaultResource);
             return new Hp8340B(session);
         }
     }

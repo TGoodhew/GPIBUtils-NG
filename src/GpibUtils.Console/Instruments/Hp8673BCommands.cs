@@ -12,7 +12,7 @@ namespace GpibUtils.Console.Instruments
         /// <summary>Opens a session (default GPIB0::19::INSTR) and builds the driver.</summary>
         internal Hp8673B OpenDriver(out Visa.IInstrumentSession session)
         {
-            session = OpenSession(Hp8673B.DefaultResource);
+            session = OpenSession("hp8673b", Hp8673B.DefaultResource);
             return new Hp8673B(session);
         }
     }

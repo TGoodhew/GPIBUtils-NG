@@ -12,7 +12,7 @@ namespace GpibUtils.Console.Instruments
         /// <summary>Opens a session (default GPIB0::14::INSTR) and builds the driver.</summary>
         internal Hp8902A OpenDriver(out Visa.IInstrumentSession session)
         {
-            session = OpenSession(Hp8902A.DefaultResource);
+            session = OpenSession("hp8902a", Hp8902A.DefaultResource);
             return new Hp8902A(session);
         }
     }
