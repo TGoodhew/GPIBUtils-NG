@@ -15,6 +15,16 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Per-instrument GPIB address configuration** (issue
+  [#54](https://github.com/TGoodhew/GPIBUtils-NG/issues/54)) — the bench's *actual* addresses can now be
+  set and persisted, instead of being hardcoded constants or passed on every command line. A shared
+  `InstrumentAddressStore` (in `GpibUtils.Common`, JSON at `%APPDATA%\GpibUtils\addresses.json` or
+  `$GPIBUTILS_CONFIG`, framework-native serialization — no NuGet dependency) maps device → resource, and
+  address resolution now follows the precedence **`--address` &gt; configured &gt; `DefaultResource`** (each
+  driver's `DefaultResource` stays the documented manual factory default fallback). New Console commands:
+  `gpibutils config address list | get <dev> | set <dev> <resource> | clear <dev>` and `config path`.
+  Shared by design so the WPF shell can surface the same store once it grows per-instrument panels (11 tests).
+
 - **`GpibUtils.Wpf`** — the Windows front-end: a WPF **MVVM** shell (issue
   [#1](https://github.com/TGoodhew/GPIBUtils-NG/issues/1)) sitting on the same shared core as the console.
   Lists the registered providers and their capabilities, discovers instruments, and runs a command against

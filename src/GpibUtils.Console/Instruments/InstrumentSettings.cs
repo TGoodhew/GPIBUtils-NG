@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using GpibUtils.Common;
 using GpibUtils.Visa;
 using Spectre.Console.Cli;
 
@@ -19,12 +20,17 @@ namespace GpibUtils.Console.Instruments
         [Description("I/O timeout in milliseconds (default 5000).")]
         public int TimeoutMs { get; set; } = 5000;
 
-        /// <summary>Opens a session to <see cref="Address"/> (or <paramref name="defaultAddress"/>) on the
-        /// resolved provider, applying <see cref="TimeoutMs"/>.</summary>
-        internal IInstrumentSession OpenSession(string defaultAddress)
+        /// <summary>
+        /// Opens a session on the resolved provider, applying <see cref="TimeoutMs"/>. The address is
+        /// resolved with the precedence <b>--address &gt; configured &gt; default</b>: an explicit
+        /// <see cref="Address"/> wins; otherwise a stored override for <paramref name="deviceKey"/> in the
+        /// <see cref="InstrumentAddressStore"/> (issue #54); otherwise the driver's
+        /// <paramref name="defaultAddress"/> (its manual factory default).
+        /// </summary>
+        internal IInstrumentSession OpenSession(string deviceKey, string defaultAddress)
         {
             var provider = Resolve();
-            var resource = string.IsNullOrWhiteSpace(Address) ? defaultAddress : Address;
+            var resource = InstrumentAddressStore.Load().Resolve(Address, deviceKey, defaultAddress);
             return provider.Open(resource, new SessionSettings { TimeoutMilliseconds = TimeoutMs });
         }
     }

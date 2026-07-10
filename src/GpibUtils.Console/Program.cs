@@ -26,6 +26,29 @@ namespace GpibUtils.Console
                       .WithDescription("Query *IDN? from an instrument.")
                       .WithExample(new[] { "idn", "GPIB0::5::INSTR", "-p", "Simulated" });
 
+                // Per-instrument GPIB address configuration (issue #54): persist the bench's actual
+                // addresses so they override each driver's manual-default DefaultResource without editing
+                // code or passing --address every time. Precedence: --address > configured > default.
+                config.AddBranch<CommandSettings>("config", cfg =>
+                {
+                    cfg.SetDescription("View and persist per-instrument GPIB addresses.");
+                    cfg.AddBranch<CommandSettings>("address", addr =>
+                    {
+                        addr.SetDescription("Configure the GPIB address used for each instrument (overrides the manual default).");
+                        addr.AddCommand<ConfigAddressListCommand>("list")
+                            .WithDescription("List every instrument's effective address and its source.");
+                        addr.AddCommand<ConfigAddressGetCommand>("get")
+                            .WithDescription("Show the effective address for one device.");
+                        addr.AddCommand<ConfigAddressSetCommand>("set")
+                            .WithDescription("Set (persist) a device's GPIB address.")
+                            .WithExample(new[] { "config", "address", "set", "hp8340b", "GPIB0::20::INSTR" });
+                        addr.AddCommand<ConfigAddressClearCommand>("clear")
+                            .WithDescription("Remove a device's override (revert to the manual default).");
+                    });
+                    cfg.AddCommand<ConfigPathCommand>("path")
+                        .WithDescription("Print the config-file path.");
+                });
+
                 // Instrument command branches (issue #45): every device is fully driveable from the CLI.
                 // The branch itself carries no options; each leaf owns the shared instrument options
                 // (provider/address/timeout/…) so they parse in the natural trailing position,

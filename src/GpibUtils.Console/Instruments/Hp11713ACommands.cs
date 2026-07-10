@@ -35,7 +35,7 @@ namespace GpibUtils.Console.Instruments
         internal Hp11713A OpenDriver(out Visa.IInstrumentSession session)
         {
             var config = ResolveConfig();
-            session = OpenSession(Hp11713A.DefaultResource);
+            session = OpenSession("hp11713a", Hp11713A.DefaultResource);
             return new Hp11713A(session, config) { InvertSense = InvertSense };
         }
     }
