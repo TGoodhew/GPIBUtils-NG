@@ -13,7 +13,9 @@ namespace GpibUtils.Instruments.SignalSources
     /// </summary>
     public sealed class Hp8673B : ILocalOscillator
     {
-        /// <summary>GPIB address of the 8673B on the reference bench (the migrated harness LO default).</summary>
+        /// <summary>GPIB address of the 8673B — 19, the manual factory default (8673B Operating manual:
+        /// factory-set Talk 'S' / Listen '3' = decimal 19; verified 2026-07). Note the HP 8340B shares this
+        /// factory default and is remapped to 20 on the bench to avoid the clash. Override with <c>--address</c>.</summary>
         public const string DefaultResource = "GPIB0::19::INSTR";
 
         private readonly IInstrumentSession _session;

@@ -13,7 +13,8 @@ namespace GpibUtils.Instruments.Switches
     /// </summary>
     public sealed class Hp11713A
     {
-        /// <summary>Factory GPIB address of an 11713A (the migrated app's default).</summary>
+        /// <summary>GPIB address of the 11713A — 28, the manual factory default (11713A manual: "factory
+        /// preset address of decimal 28"; verified 2026-07). Override with <c>--address</c>.</summary>
         public const string DefaultResource = "GPIB0::28::INSTR";
 
         private readonly IInstrumentSession _session;
