@@ -32,6 +32,7 @@ the target architecture.
 | `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Wpf) | xUnit. | ✅ 77 tests green |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters (`IMeasuringReceiver`). **HP 8902A** (#9, canonical) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
 | `src/GpibUtils.Visa/Srq` | Shared SRQ/serial-poll completion engine (`CompletionWaiter` + data-driven `StatusModel`, `IStatusChannel`, `SessionStatusChannel`). **#43 ported.** | ✅ done |
@@ -111,17 +112,24 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **SRQ completion engine landed** (#43, 2026-07-10): `GpibUtils.Visa.Srq` — the shared, data-driven
   `CompletionWaiter` (SRQ-edge + direct-bit flows) driven by a `StatusModel`, decoupled via `IStatusChannel`
   with `SessionStatusChannel` bridging a live session. Headless-tested against a virtual-clock 8560 simulator.
-  **88 tests green.** This is the reusable completion helper for all SRQ-based drivers (first consumer: HP 8902A).
-  Defaults kept generous for HP-IB extender latency. CLI/MCP exposure deferred until the first driver consumes it.
+  Defaults kept generous for HP-IB extender latency. It targets **SRQ-enable-mask-driven** completions
+  (8560-style sweeps); instruments with their own settled-read handshake (the 8902A) keep theirs. CLI/MCP
+  exposure deferred until the first mask-driven consumer.
+- **HP 8902A Measuring Receiver landed** (#9, 2026-07-10): seeds `GpibUtils.Instruments.Meters`
+  (`IMeasuringReceiver`) — the canonical 8902A. Tuned RF Level (dB) / RF power (dBm) / frequency, cal-factor
+  tables, zero+sensor-cal, Track Mode, Avg/Sync detectors; settled-read Data-Ready serial-poll completion
+  (hardware-verified inline — deliberately NOT rewired onto #43's engine before bench re-verification).
+  `Hp8902ASimulatedDevice` + 21 tests; `gpibutils hp8902a init|preset|status|frequency|power|level`.
+  **Default address `GPIB0::14::INSTR` is a guess — confirm on the bench.** 🟡 awaiting HW.
 - **Extender-aware discovery caveat landed** (2026-07-09): `gpibutils discover` and WPF Discover now warn
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
-  tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`.
-- **Next step:** migrate **HP 8902A #9** (measuring receiver) — now unblocked by #43; its SRQ-based
-  measurement-complete handshake drives `CompletionWaiter` via `SessionStatusChannel`. Would seed
-  `GpibUtils.Instruments.Meters` and be the first real consumer of the completion engine (validating it on
-  hardware). Then flesh out `Hpgl` (#42), `Mcp` (#41), and add instrument panels to the WPF shell.
+  HP 8902A (#9); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a`.
+  **109 tests green.**
+- **Next step:** next driver candidate — **HP 3499A switch #4** or an SCPI DMM (HP 34401A #17/#36); or
+  flesh out `Hpgl` (#42) / `Mcp` (#41), or add instrument panels to the WPF shell. The measuring-receiver
+  category (`Meters`) is now seeded for the power meters (#25, #33).
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot
