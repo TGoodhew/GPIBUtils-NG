@@ -133,9 +133,31 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
   HP 8902A (#9); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a`.
   **120 tests green.**
-- **Next step:** next driver candidate — **HP 3499A switch #4** or an SCPI DMM (HP 34401A #17/#36); or
-  flesh out `Hpgl` (#42) / `Mcp` (#41), or add instrument panels to the WPF shell. The measuring-receiver
-  category (`Meters`) is now seeded for the power meters (#25, #33).
+- **All PRs merged as of 2026-07-10** — no open PRs. `main` is green (120 tests). Merged this session:
+  #52 (SRQ #43), #53 (8902A #9), #55 (address docs), #56 (address config #54); plus the `.gitignore`
+  entry for `.claude/settings.local.json`.
+
+- **Next step — pick a track (recommendation = ①):**
+  1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
+     instruments (11713A/8340B/8673B/8902A) are now migrated, so the deferred `MeasurementEngine`
+     (orchestrates source→LO→attenuator→receiver) is unblocked. Port it from
+     `C:\Users\Tony\Source\Repos\HP-Attenuator\src\HP-Attenuator.Core\Measurement\MeasurementEngine.cs`.
+     Maps to issue #34 / the app side of #6. Biggest milestone; first real bench demo.
+  2. **Next driver (breadth):** lowest-risk = **HP 34401A DMM (#17/#36)** (plain SCPI); or HP 3499A
+     switch (#4), HP 53131A counter (#5/#21). `Meters` category also awaits power meters #25/#33.
+  3. **Fill a scaffold:** **#41 GPIB-MCP server** (brings the instrument DB → also the `StatusModel`
+     source for the #43 SRQ engine + a control surface) or **#42 HP-GL rendering** (unblocks plotters
+     #38/#39/#40).
+  4. **WPF instrument panels** + finish #54's WPF address-config surfacing.
+  - **Quick backlog cleanup (any time):** close the consolidated duplicate issues as superseded by the
+    canonical migrations — 8673B → #3/#18/#23, 8902A → #2/#24, 8340B → #16. Not yet done.
+  - **Blocked:** bench verification of #6–#9 until back in Renton (board #46).
+
+> Cross-machine note: this file (in-repo) is the durable handoff and travels via git. The assistant's
+> local file-memory (`~/.claude/projects/.../memory/`) is machine-local and does NOT follow you — but it
+> only mirrors what's here plus the reference: **manuals at `C:\Users\Tony\OneDrive\Documents\Manuals`**
+> are the authority for default GPIB addresses; **whenever a `DefaultResource` is added, verify it against
+> the manual and document any divergence in code** (the rule that produced the 8340B=20-vs-19 note).
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot
