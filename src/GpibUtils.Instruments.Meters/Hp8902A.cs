@@ -22,8 +22,9 @@ namespace GpibUtils.Instruments.Meters
     /// </summary>
     public sealed class Hp8902A : IMeasuringReceiver
     {
-        /// <summary>GPIB address of the 8902A on the reference bench. <b>Best-effort default — confirm on
-        /// the bench</b> (the migrated sources did not hardcode it); override with <c>--address</c>.</summary>
+        /// <summary>GPIB address of the 8902A — its documented factory-default HP-IB address is 14 (8902A
+        /// Operation manual). Override with <c>--address</c>. Note: never rely on bus-scan discovery to find
+        /// it — the bench's HP-IB extenders make every address look present; drive by this explicit resource.</summary>
         public const string DefaultResource = "GPIB0::14::INSTR";
 
         /// <summary>

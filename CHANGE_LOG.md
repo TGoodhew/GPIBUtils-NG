@@ -44,8 +44,8 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   (dBm) and signal frequency, with Normal + Frequency-Offset cal-factor tables, zero/sensor-cal, Track Mode
   (32.9SP), Average/Synchronous IF detectors, and a settled-read Data-Ready serial-poll completion handshake
   that surfaces UNCAL/RECAL and error-sentinel readings as typed `Hp8902AException`s. Configurable address
-  (best-effort default `GPIB0::14::INSTR` — confirm on bench); `Hp8902ASimulatedDevice` for hardware-free
-  testing (21 tests); `gpibutils hp8902a init|preset|status|frequency|power|level` CLI branch (#45).
+  (factory-default HP-IB address `GPIB0::14::INSTR`); `Hp8902ASimulatedDevice` for hardware-free testing
+  (21 tests); `gpibutils hp8902a init|preset|status|frequency|power|level` CLI branch (#45).
   🟡 **Verification Needed.**
 
 ### Changed

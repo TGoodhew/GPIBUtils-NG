@@ -120,7 +120,7 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   tables, zero+sensor-cal, Track Mode, Avg/Sync detectors; settled-read Data-Ready serial-poll completion
   (hardware-verified inline — deliberately NOT rewired onto #43's engine before bench re-verification).
   `Hp8902ASimulatedDevice` + 21 tests; `gpibutils hp8902a init|preset|status|frequency|power|level`.
-  **Default address `GPIB0::14::INSTR` is a guess — confirm on the bench.** 🟡 awaiting HW.
+  Default address `GPIB0::14::INSTR` (8902A factory-default HP-IB address, confirmed). 🟡 awaiting HW.
 - **Extender-aware discovery caveat landed** (2026-07-09): `gpibutils discover` and WPF Discover now warn
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
