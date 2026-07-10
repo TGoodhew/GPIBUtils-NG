@@ -66,6 +66,26 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + preset + RF off (clean known state).");
                 });
 
+                config.AddBranch<CommandSettings>("hp8902a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");
+                    dev.AddCommand<Hp8902AInitCommand>("init")
+                        .WithDescription("Device clear + preset (clean known state).");
+                    dev.AddCommand<Hp8902APresetCommand>("preset")
+                        .WithDescription("Instrument preset (IP).");
+                    dev.AddCommand<Hp8902AStatusCommand>("status")
+                        .WithDescription("Serial-poll and print the status byte.");
+                    dev.AddCommand<Hp8902AFrequencyCommand>("frequency")
+                        .WithDescription("Measure the input signal frequency (MHz).")
+                        .WithExample(new[] { "hp8902a", "frequency", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8902APowerCommand>("power")
+                        .WithDescription("Measure absolute RF power (dBm) at a frequency.")
+                        .WithExample(new[] { "hp8902a", "power", "3000", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8902ALevelCommand>("level")
+                        .WithDescription("Measure the absolute Tuned RF Level (dBm) at a frequency.")
+                        .WithExample(new[] { "hp8902a", "level", "12000", "--converted", "--lo", "17120.53", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
                 {
                     dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");

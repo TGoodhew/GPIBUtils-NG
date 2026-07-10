@@ -33,9 +33,20 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   robust **SRQ-edge** strategy when the model names a request-service bit (hardware-confirmed on the 8563E)
   or the legacy **direct-bit** poll otherwise. Decoupled from the wire via `IStatusChannel`;
   `SessionStatusChannel` bridges it onto a live `IInstrumentSession`, and an injected clock/sleep makes it
-  fully headless — driven end-to-end against a virtual-clock 8560-series simulator (11 new tests, 88 total).
-  Timeouts and per-model `BusyConfirmMs` are kept generous to tolerate HP-IB bus-extender latency. First
-  consumer will be the HP 8902A (#9).
+  fully headless — driven end-to-end against a virtual-clock 8560-series simulator (11 new tests). Timeouts
+  and per-model `BusyConfirmMs` are kept generous to tolerate HP-IB bus-extender latency. Targets
+  SRQ-enable-mask-driven completions (e.g. 8560-series sweeps); instruments with their own settled-read
+  handshake (e.g. the HP 8902A) keep it.
+- **HP 8902A Measuring Receiver** (issue [#9](https://github.com/TGoodhew/GPIBUtils-NG/issues/9), ported
+  from [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator)) — first `GpibUtils.Instruments.Meters`
+  driver (`IMeasuringReceiver`). The **canonical** 8902A, consolidating the HP8902Measurements / GPIBUtils /
+  GPIBUtils-Old implementations. Measures attenuation as relative Tuned RF Level (dB), absolute RF power
+  (dBm) and signal frequency, with Normal + Frequency-Offset cal-factor tables, zero/sensor-cal, Track Mode
+  (32.9SP), Average/Synchronous IF detectors, and a settled-read Data-Ready serial-poll completion handshake
+  that surfaces UNCAL/RECAL and error-sentinel readings as typed `Hp8902AException`s. Configurable address
+  (factory-default HP-IB address `GPIB0::14::INSTR`); `Hp8902ASimulatedDevice` for hardware-free testing
+  (21 tests); `gpibutils hp8902a init|preset|status|frequency|power|level` CLI branch (#45).
+  🟡 **Verification Needed.**
 
 ### Changed
 
