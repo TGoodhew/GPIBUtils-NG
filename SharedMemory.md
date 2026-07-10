@@ -34,7 +34,8 @@ the target architecture.
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
-| `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | 🏗 scaffold (filled by #42/#43) |
+| `src/GpibUtils.Visa/Srq` | Shared SRQ/serial-poll completion engine (`CompletionWaiter` + data-driven `StatusModel`, `IStatusChannel`, `SessionStatusChannel`). **#43 ported.** | ✅ done |
+| `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | 🏗 scaffold (filled by #42) |
 | `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | 🏗 scaffold (filled by #41) |
 | CI | GitHub Actions: build + test whole solution, no NI. | ✅ done |
 
@@ -105,17 +106,22 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 ## Current status / resume point
 
 - **Foundation (#1) essentially complete:** core transport + Common + Console + **WPF shell** + **CI** all
-  landed; `Hpgl`/`Mcp` scaffolded (filled by #42/#43, #41); `Visa.Ni` degrades gracefully without NI so the
-  whole solution builds with zero NI setup. 77 tests green. **WPF visual smoke test passed** (2026-07-09) —
-  #1 ready to close bar the higher-level SRQ `CompletionWaiter` deferred to #43.
+  landed; `Hpgl`/`Mcp` scaffolded (filled by #42, #41); `Visa.Ni` degrades gracefully without NI so the
+  whole solution builds with zero NI setup. **WPF visual smoke test passed** (2026-07-09) — #1 ready to close.
+- **SRQ completion engine landed** (#43, 2026-07-10): `GpibUtils.Visa.Srq` — the shared, data-driven
+  `CompletionWaiter` (SRQ-edge + direct-bit flows) driven by a `StatusModel`, decoupled via `IStatusChannel`
+  with `SessionStatusChannel` bridging a live session. Headless-tested against a virtual-clock 8560 simulator.
+  **88 tests green.** This is the reusable completion helper for all SRQ-based drivers (first consumer: HP 8902A).
+  Defaults kept generous for HP-IB extender latency. CLI/MCP exposure deferred until the first driver consumes it.
 - **Extender-aware discovery caveat landed** (2026-07-09): `gpibutils discover` and WPF Discover now warn
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
   tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b`.
-- **Next step:** migrate the next driver reusing the pattern (candidate: **HP 8902A #9** — measuring
-  receiver, ready reference code in HP-Attenuator; would seed `GpibUtils.Instruments.Meters`; or HP 3499A
-  switch #4). Then flesh out `Hpgl` (#42/#43), `Mcp` (#41), and add instrument panels to the WPF shell.
+- **Next step:** migrate **HP 8902A #9** (measuring receiver) — now unblocked by #43; its SRQ-based
+  measurement-complete handshake drives `CompletionWaiter` via `SessionStatusChannel`. Would seed
+  `GpibUtils.Instruments.Meters` and be the first real consumer of the completion engine (validating it on
+  hardware). Then flesh out `Hpgl` (#42), `Mcp` (#41), and add instrument panels to the WPF shell.
 
 ---
 _This file is the human/tool-readable mirror of the assistant's working notes. If you use GitHub Copilot
