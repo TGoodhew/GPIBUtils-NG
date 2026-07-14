@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP/Agilent 3458A 8½-digit DMM** (issue [#31](https://github.com/TGoodhew/GPIBUtils-NG/issues/31), ported
+  from [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old)) — a driver in
+  `GpibUtils.Instruments.Meters` speaking the 3458A's native (non-SCPI) command language: `RESET`/`END ALWAYS`,
+  `FUNC` (DCV/ACV/OHM/OHMF/DCI/ACI/FREQ/PER) with `SETACV SYNC` for AC volts, `NPLC`/`RES`, and single or
+  burst triggered reads (`TARM SGL`). Identity via `ID?` (no `*IDN?`). Factory address `GPIB0::22::INSTR`
+  (confirmed against the 3458A User's Guide). `Hp3458ASimulatedDevice` (11 tests);
+  `gpibutils hp3458a idn|init|measure` CLI branch. 🟡 **Verification Needed.**
+
 - **Rigol DM3058 Digital Multimeter** (issue [#26](https://github.com/TGoodhew/GPIBUtils-NG/issues/26),
   ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a SCPI DMM in
   `GpibUtils.Instruments.Meters` (implements `IDigitalMultimeter`) driven with one-shot `MEASure:…?` queries
