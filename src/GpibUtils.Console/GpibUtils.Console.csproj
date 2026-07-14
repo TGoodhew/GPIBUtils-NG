@@ -22,6 +22,7 @@
     <ProjectReference Include="..\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
     <!-- NI providers (needs NI-VISA installed). Remove this reference on a non-NI machine. -->
     <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Counters\GpibUtils.Instruments.Counters.csproj" />
   </ItemGroup>
 
 </Project>

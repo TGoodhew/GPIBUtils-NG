@@ -28,9 +28,10 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a`/`hp34401a` branches). | ✅ done (base + config + 5 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Wpf) | xUnit. | ✅ 152 tests green |
-| `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a`/`hp34401a`/`hp53131a`/`hp3499a` branches). | ✅ done (base + config + 7 devices) |
+| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Counters, Wpf) | xUnit. | ✅ 187 tests green |
+| `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** switch/control mainframe (#4) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Counters` | Universal counters (`IFrequencyCounter`). **HP 53131A** (#21/#5, canonical) ported — completion via the #43 SRQ engine. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters / DMMs. **HP 8902A** (#9, `IMeasuringReceiver`) + **HP 34401A DMM** (#36/#17, `IDigitalMultimeter`, canonical) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
@@ -100,8 +101,9 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **#1** foundation · **#2–#43** one issue per instrument/driver found (42 items) · **#44** pinned epic ·
   **#45** the CLI hierarchical-help requirement.
 - **Consolidate duplicates** (same instrument, multiple source repos): HP 8673B → #3/#8/#18/#23 (canonical
-  = #8); HP 8902A → #2/#9/#24/#34 (canonical = #9, richest); HP 53131A → #5/#21; HP 34401A → #17/#36
-  (canonical = #36, ✅ done — driver only; the 5440-verify harness & HP435B PDF app are deferred follow-ups);
+  = #8); HP 8902A → #2/#9/#24/#34 (canonical = #9, richest); HP 53131A → #5/#21 (canonical = #21, ✅ done);
+  HP 34401A → #17/#36 (canonical = #36, ✅ done — driver only; the 5440-verify harness & HP435B PDF app are
+  deferred follow-ups);
   Rigol DM3058 → #26 supersedes #30; HP 3325B → #28/#29; HP 8340A/B → #7/#16/#34; HP-GL plotters →
   #38/#39/#40 share #42's renderer; 85620A → #10/#14; SRQ handling → #43 replaces ad-hoc code. Details in #44.
 
@@ -114,8 +116,23 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   `CompletionWaiter` (SRQ-edge + direct-bit flows) driven by a `StatusModel`, decoupled via `IStatusChannel`
   with `SessionStatusChannel` bridging a live session. Headless-tested against a virtual-clock 8560 simulator.
   Defaults kept generous for HP-IB extender latency. It targets **SRQ-enable-mask-driven** completions
-  (8560-style sweeps); instruments with their own settled-read handshake (the 8902A) keep theirs. CLI/MCP
-  exposure deferred until the first mask-driven consumer.
+  (8560-style sweeps); instruments with their own settled-read handshake (the 8902A) keep theirs.
+  **First real consumer = HP 53131A (#21, 2026-07-15):** its `*ESE 1`/`*SRE 32`/`INIT;*OPC` completion runs
+  through `CompletionWaiter` (direct-bit flow) via `SessionStatusChannel`, with the `StatusModel` built in
+  `Hp53131A.StatusModel()` — proof the engine drives a driver end to end, headlessly.
+- **HP 53131A Universal Counter landed** (#21/#5, 2026-07-15): new `GpibUtils.Instruments.Counters` project
+  (`IFrequencyCounter`); the **canonical** 53131A, deduping the two identical `GPIBUtils/HPDevices` copies
+  (#21) and the SCPI reader in `HP3499Demo` (#5). Frequency on ch 1–3 (`CONF:FREQ (@n)`), 50 Ω/1 MΩ input
+  impedance. **First driver to consume the #43 SRQ engine** — completion via `CompletionWaiter` +
+  `SessionStatusChannel`, `StatusModel` in `Hp53131A.StatusModel()`; timeout → typed `Hp53131AException`.
+  `Hp53131ASimulatedDevice` + 18 tests; `gpibutils hp53131a idn|init|reset|freq`. Default `GPIB0::3::INSTR`
+  (factory default per Programming Guide; **demo used bench ::23::** — confirm the real bench address).
+- **HP 3499A Switch/Control System landed** (#4, 2026-07-15): plain-SCPI mainframe driver in
+  `GpibUtils.Instruments.Switches`. Relay open/close/state on the `snn` (slot+2-digit channel) scheme
+  (`ROUT:CLOS`/`OPEN`/`CLOS? (@snn)`) + card inventory (`SYST:CTYPE?`). 44472A/44476B are plug-ins on the
+  mainframe scheme, not separate instruments; N2236A digital-IO not driven (source didn't either).
+  `Hp3499ASimulatedDevice` + 17 tests; `gpibutils hp3499a idn|init|cards|close|open|state`. Default
+  `GPIB0::9::INSTR` (factory default per User's & Programming Guide, matches source).
 - **HP 34401A Digital Multimeter landed** (#36/#17, 2026-07-15): the **canonical** 34401A DMM in
   `GpibUtils.Instruments.Meters` — a plain SCPI `IDigitalMultimeter` (new interface). Consolidates the two
   source apps: the rich SCPI menu from `5440Controller/34401AController` (canonical) + the buffered
@@ -144,11 +161,12 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
-  HP 8902A (#9), HP 34401A (#36/#17); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` /
-  `verify/9-hp8902a` / `verify/36-hp34401a`. **152 tests green.**
-- **As of 2026-07-15:** `main` green (152 tests), **no open PRs**. Merged this session: **#57 (HP 34401A DMM
-  #36/#17)**. Prior (2026-07-10): #52 SRQ #43, #53 8902A #9, #55 address docs, #56 address config #54.
-  #36 + #17 labelled `verification-needed` with bench checklists (not closed, per policy).
+  HP 8902A (#9), HP 34401A (#36/#17), HP 53131A (#21/#5), HP 3499A (#4); tags `verify/6-hp11713a` /
+  `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a` / `verify/36-hp34401a` / `verify/21-hp53131a` /
+  `verify/4-hp3499a`. **187 tests green.**
+- **As of 2026-07-15:** merged **#57 (HP 34401A #36/#17)**; then the HP 53131A (#21/#5) + HP 3499A (#4)
+  drivers (this session). Prior (2026-07-10): #52 SRQ #43, #53 8902A #9, #55 address docs, #56 address
+  config #54. Merged issues get `verification-needed` + bench checklists (not closed, per policy).
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
@@ -156,8 +174,10 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
      (orchestrates source→LO→attenuator→receiver) is unblocked. Port it from
      `C:\Users\Tony\Source\Repos\HP-Attenuator\src\HP-Attenuator.Core\Measurement\MeasurementEngine.cs`.
      Maps to issue #34 / the app side of #6. Biggest milestone; first real bench demo.
-  2. **Next driver (breadth):** ~~HP 34401A DMM~~ ✅ done (#57). Next lowest-risk = HP 53131A counter
-     (#5/#21) or HP 3499A switch (#4); `Meters` also awaits power meters #25/#33.
+  2. **Next driver (breadth):** ~~HP 34401A DMM (#57)~~, ~~HP 53131A counter (#21/#5)~~, ~~HP 3499A switch
+     (#4)~~ ✅ all done. Next candidates: HP 34401A power meters #25/#33 (`Meters`), or the E4418B power
+     meter / HP 5351A counter seen in `GPIBUtils/HPDevices` (own issues). SCPI DMM/counter/switch pattern is
+     now well-trodden.
   3. **Fill a scaffold:** **#41 GPIB-MCP server** (brings the instrument DB → also the `StatusModel`
      source for the #43 SRQ engine + a control surface) or **#42 HP-GL rendering** (unblocks plotters
      #38/#39/#40).
