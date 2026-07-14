@@ -164,9 +164,11 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   HP 8902A (#9), HP 34401A (#36/#17), HP 53131A (#21/#5), HP 3499A (#4); tags `verify/6-hp11713a` /
   `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a` / `verify/36-hp34401a` / `verify/21-hp53131a` /
   `verify/4-hp3499a`. **187 tests green.**
-- **As of 2026-07-15:** merged **#57 (HP 34401A #36/#17)**; then the HP 53131A (#21/#5) + HP 3499A (#4)
-  drivers (this session). Prior (2026-07-10): #52 SRQ #43, #53 8902A #9, #55 address docs, #56 address
-  config #54. Merged issues get `verification-needed` + bench checklists (not closed, per policy).
+- **As of 2026-07-15:** `main` green (187 tests), **no open PRs**. Merged this session: **#57 (HP 34401A
+  #36/#17)** and **#58 (HP 53131A #21/#5 + HP 3499A #4)**. Prior (2026-07-10): #52 SRQ #43, #53 8902A #9,
+  #55 address docs, #56 address config #54. All merged issues carry `verification-needed` + bench checklists
+  (not closed, per policy). Legacy source repos now cloned locally: `GPIBUtils`, `HP3499Demo` (+ scratchpad
+  `5440Controller`, `HP435B-Test`).
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
