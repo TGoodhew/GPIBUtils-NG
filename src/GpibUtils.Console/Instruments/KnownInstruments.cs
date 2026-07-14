@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GpibUtils.Instruments.Counters;
 using GpibUtils.Instruments.Meters;
+using GpibUtils.Instruments.PowerSupplies;
 using GpibUtils.Instruments.SignalSources;
 using GpibUtils.Instruments.Switches;
 
@@ -41,6 +42,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp34401a", Hp34401A.DefaultResource, "HP 34401A digital multimeter"),
             new KnownInstrument("hp53131a", Hp53131A.DefaultResource, "HP 53131A universal frequency counter"),
             new KnownInstrument("hp3499a",  Hp3499A.DefaultResource,  "HP 3499A switch/control system"),
+            new KnownInstrument("hpe3633a", HpE3633A.DefaultResource, "HP E3633A DC power supply"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

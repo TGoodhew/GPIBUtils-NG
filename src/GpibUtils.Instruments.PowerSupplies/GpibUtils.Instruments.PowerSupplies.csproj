@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.PowerSupplies</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.PowerSupplies</AssemblyName>
+    <Description>DC power-supply instruments for GPIBUtils-NG (HP E3633A, Rigol DP832, ...). Drives the shared vendor-neutral transport; no UI or vendor dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets the test project exercise internal helpers directly. -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.PowerSupplies.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
