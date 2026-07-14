@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP/Agilent E4418B RF Power Meter** (issue [#25](https://github.com/TGoodhew/GPIBUtils-NG/issues/25),
+  ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — an `IPowerMeter` in
+  `GpibUtils.Instruments.Meters`. Zeroes+calibrates the sensor (`:CAL1:ALL`), applies the cal factor for a
+  carrier frequency (`:FREQ …MHZ`), and measures power in dBm (`:CONF1;:INIT;FETCh?`). Both the cal and the
+  measurement complete through the shared **#43 `CompletionWaiter`** OPC→SRQ handshake (`*ESE 1`/`*SRE 32`/
+  `*OPC`) — the second driver on the engine after the 53131A. New shared `IPowerMeter` contract (also used by
+  the HP 438A). `HpE4418BSimulatedDevice` (8 tests); `gpibutils e4418b idn|init|cal|measure` CLI branch.
+  Bench address `GPIB0::13::INSTR`. 🟡 **Verification Needed.**
+
 - **Rigol DP832 triple-output DC Power Supply** (issue [#15](https://github.com/TGoodhew/GPIBUtils-NG/issues/15),
   ported from [DP832](https://github.com/TGoodhew/DP832)) — a SCPI `IDcPowerSupply` in
   `GpibUtils.Instruments.PowerSupplies` with per-channel control of all three outputs (CH1/CH2 30 V, CH3 5 V):

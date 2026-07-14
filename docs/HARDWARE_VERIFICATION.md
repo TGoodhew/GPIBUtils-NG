@@ -45,6 +45,7 @@ bench confirmation.
 | [#4](https://github.com/TGoodhew/GPIBUtils-NG/issues/4) | HP 3499A Switch/Control System | `verify/4-hp3499a` | 3499A + plug-ins (44472A VHF, 44476B microwave), GPIB (addr 9) | 🟡 Verification Needed | — | — | Merged simulator-green; 17 unit tests. Confirm `ROUT:CLOS`/`OPEN`/`CLOS?` relay control on the `snn` channel scheme and `SYST:CTYPE?` card inventory against real plug-ins. |
 | [#19](https://github.com/TGoodhew/GPIBUtils-NG/issues/19) | HP E3633A DC Power Supply | `verify/19-hpe3633a` | E3633A, GPIB (factory addr 5; demo used 27) | 🟡 Verification Needed | — | — | Merged simulator-green; 11 unit tests. Confirm `VOLT`/`CURR`/`OUTP` set + `MEAS:VOLT?`/`MEAS:CURR?` readback. **Confirm the bench address (demo used 27).** |
 | [#15](https://github.com/TGoodhew/GPIBUtils-NG/issues/15) | Rigol DP832 DC Power Supply | `verify/15-dp832` | DP832, GPIB (default addr 2; app used 1) or LXI/USB | 🟡 Verification Needed | — | — | Merged simulator-green; 10 unit tests. Confirm per-channel `:SOUR{n}:VOLT/CURR`, `:OUTP CH{n}`, `:MEAS:...? CH{n}`, OVP/OCP on all 3 channels. |
+| [#25](https://github.com/TGoodhew/GPIBUtils-NG/issues/25) | HP/Agilent E4418B Power Meter | `verify/25-e4418b` | E4418B + sensor, GPIB (bench addr 13) | 🟡 Verification Needed | — | — | Merged simulator-green; 8 unit tests. Confirm the `:CAL1:ALL` zero/cal and `:CONF1;:INIT;FETCh?` measure both complete via the #43 OPC→SRQ handshake; `:FREQ …MHZ` cal factor; dBm reading. Confirm bench address. |
 
 ## Per-instrument bench checklist (template)
 

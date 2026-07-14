@@ -44,6 +44,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp3499a",  Hp3499A.DefaultResource,  "HP 3499A switch/control system"),
             new KnownInstrument("hpe3633a", HpE3633A.DefaultResource, "HP E3633A DC power supply"),
             new KnownInstrument("dp832",    RigolDp832.DefaultResource, "Rigol DP832 triple DC power supply"),
+            new KnownInstrument("e4418b",   HpE4418B.DefaultResource,  "HP E4418B RF power meter"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
