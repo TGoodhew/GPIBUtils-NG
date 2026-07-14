@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 5342A Microwave Frequency Counter** (issue [#32](https://github.com/TGoodhew/GPIBUtils-NG/issues/32),
+  reconstructed from the 5342A manual — the [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old) source
+  `.cs` was a mis-labelled DMM stub) — a driver in `GpibUtils.Instruments.Counters` for the microwave counter
+  (Option 011 HP-IB): AUTO/MANUAL acquisition (`AU`/`MA`), manual center frequency (`SM…E`, integer MHz),
+  resolution (`SR3`…`SR9`), and a talked frequency read guarding the over/under-level dashes sentinel.
+  Bench address `GPIB0::2::INSTR` (manual programming examples; no fixed factory default — rear-panel switch).
+  `Hp5342ASimulatedDevice` (10 tests); `gpibutils hp5342a idn|init|freq` CLI branch. Mnemonics reconstructed
+  from the manual — flagged for bench confirmation. 🟡 **Verification Needed.**
+
 - **HP 5351A Microwave Frequency Counter** (issue [#20](https://github.com/TGoodhew/GPIBUtils-NG/issues/20),
   ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a driver in
   `GpibUtils.Instruments.Counters` for the single-input microwave counter: preset + clear SRQ mask

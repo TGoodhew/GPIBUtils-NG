@@ -49,6 +49,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("dm3058",   RigolDm3058.DefaultResource, "Rigol DM3058 digital multimeter"),
             new KnownInstrument("hp3458a",  Hp3458A.DefaultResource,   "HP 3458A 8.5-digit DMM"),
             new KnownInstrument("hp5351a",  Hp5351A.DefaultResource,   "HP 5351A microwave frequency counter"),
+            new KnownInstrument("hp5342a",  Hp5342A.DefaultResource,   "HP 5342A microwave frequency counter"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
