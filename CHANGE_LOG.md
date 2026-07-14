@@ -15,6 +15,21 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP/Agilent/Keysight 34401A Digital Multimeter** (issues
+  [#36](https://github.com/TGoodhew/GPIBUtils-NG/issues/36) + [#17](https://github.com/TGoodhew/GPIBUtils-NG/issues/17),
+  ported from [5440Controller](https://github.com/TGoodhew/5440Controller) and
+  [HP435B-Test](https://github.com/TGoodhew/HP435B-Test)) — the **canonical** 34401A DMM in
+  `GpibUtils.Instruments.Meters`, a plain SCPI `IDigitalMultimeter`. Exposes the full measurement surface:
+  configure any function (DCV/ACV/DCI/ACI/2W+4W resistance/frequency/period/continuity/diode) with
+  range+resolution, tune SENSe (NPLC / autorange / input impedance / autozero), TRIGger + SAMPle
+  (source/count/delay), CALCulate math (null / dB / dBm / limits / average-statistics) and DISPlay text;
+  read one value or a burst (`READ?`/`FETCh?`) with `DmmStatistics` (min/max/avg/sample-σ) summarizing the
+  burst — consolidating the buffered recorder-output acquisition from HP435B-Test with the rich SCPI menu
+  from 5440Controller. Configurable address (factory-default GPIB address `GPIB0::22::INSTR`, confirmed
+  against the 34401A User's Guide); `Hp34401ASimulatedDevice` for hardware-free testing (32 tests);
+  `gpibutils hp34401a idn|init|reset|read|measure|stats|selftest|errors|display` CLI branch (#45).
+  🟡 **Verification Needed.**
+
 - **Per-instrument GPIB address configuration** (issue
   [#54](https://github.com/TGoodhew/GPIBUtils-NG/issues/54)) — the bench's *actual* addresses can now be
   set and persisted, instead of being hardcoded constants or passed on every command line. A shared

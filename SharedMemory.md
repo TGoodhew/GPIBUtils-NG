@@ -28,11 +28,11 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a` branches). | ✅ done (base + config + 4 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Wpf) | xUnit. | ✅ 120 tests green |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a`/`hp34401a` branches). | ✅ done (base + config + 5 devices) |
+| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Wpf) | xUnit. | ✅ 152 tests green |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters (`IMeasuringReceiver`). **HP 8902A** (#9, canonical) ported. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters / DMMs. **HP 8902A** (#9, `IMeasuringReceiver`) + **HP 34401A DMM** (#36/#17, `IDigitalMultimeter`, canonical) ported. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
 | `src/GpibUtils.Visa/Srq` | Shared SRQ/serial-poll completion engine (`CompletionWaiter` + data-driven `StatusModel`, `IStatusChannel`, `SessionStatusChannel`). **#43 ported.** | ✅ done |
@@ -100,7 +100,8 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **#1** foundation · **#2–#43** one issue per instrument/driver found (42 items) · **#44** pinned epic ·
   **#45** the CLI hierarchical-help requirement.
 - **Consolidate duplicates** (same instrument, multiple source repos): HP 8673B → #3/#8/#18/#23 (canonical
-  = #8); HP 8902A → #2/#9/#24/#34 (canonical = #9, richest); HP 53131A → #5/#21; HP 34401A → #17/#36;
+  = #8); HP 8902A → #2/#9/#24/#34 (canonical = #9, richest); HP 53131A → #5/#21; HP 34401A → #17/#36
+  (canonical = #36, ✅ done — driver only; the 5440-verify harness & HP435B PDF app are deferred follow-ups);
   Rigol DM3058 → #26 supersedes #30; HP 3325B → #28/#29; HP 8340A/B → #7/#16/#34; HP-GL plotters →
   #38/#39/#40 share #42's renderer; 85620A → #10/#14; SRQ handling → #43 replaces ad-hoc code. Details in #44.
 
@@ -115,6 +116,18 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   Defaults kept generous for HP-IB extender latency. It targets **SRQ-enable-mask-driven** completions
   (8560-style sweeps); instruments with their own settled-read handshake (the 8902A) keep theirs. CLI/MCP
   exposure deferred until the first mask-driven consumer.
+- **HP 34401A Digital Multimeter landed** (#36/#17, 2026-07-15): the **canonical** 34401A DMM in
+  `GpibUtils.Instruments.Meters` — a plain SCPI `IDigitalMultimeter` (new interface). Consolidates the two
+  source apps: the rich SCPI menu from `5440Controller/34401AController` (canonical) + the buffered
+  recorder-output acquisition from `HP435B-Test`. Full surface: CONFigure (all functions + range/res),
+  SENSe (NPLC / autorange / input-Z / autozero), TRIGger + SAMPle, CALCulate math (null/dB/dBm/limits/avg
+  stats), DISPlay; single + burst `READ?`/`FETCh?` with `DmmStatistics` (min/max/avg/sample-σ, Welford).
+  `Hp34401ASimulatedDevice` + 32 tests; `gpibutils hp34401a idn|init|reset|read|measure|stats|selftest|
+  errors|display`. Default address `GPIB0::22::INSTR` (34401A factory default, confirmed against the User's
+  Guide p.91). Reads use plain blocking `READ?` (the 34401A returns the whole burst in one response) rather
+  than the source's *OPC/SRQ handshake — no #43 engine needed for a bounded burst. 🟡 awaiting HW.
+  **Deferred follow-ups (own issues, not this driver):** the 5440A-calibrator ppm-verification harness
+  (needs a 5440 driver + dual-session orchestration) and the HP 435B power-meter PDF test app (Syncfusion).
 - **HP 8902A Measuring Receiver landed** (#9, 2026-07-10): seeds `GpibUtils.Instruments.Meters`
   (`IMeasuringReceiver`) — the canonical 8902A. Tuned RF Level (dB) / RF power (dBm) / frequency, cal-factor
   tables, zero+sensor-cal, Track Mode, Avg/Sync detectors; settled-read Data-Ready serial-poll completion
@@ -131,11 +144,10 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   when a scan returns ≥15 resources that an HP-IB bus extender is in the path and the list is phantom
   (see Key conventions).
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
-  HP 8902A (#9); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a`.
-  **120 tests green.**
-- **All PRs merged as of 2026-07-10** — no open PRs. `main` is green (120 tests). Merged this session:
-  #52 (SRQ #43), #53 (8902A #9), #55 (address docs), #56 (address config #54); plus the `.gitignore`
-  entry for `.claude/settings.local.json`.
+  HP 8902A (#9), HP 34401A (#36/#17); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` /
+  `verify/9-hp8902a` / `verify/36-hp34401a`. **152 tests green.**
+- **As of 2026-07-15:** `main` green through #56 (2026-07-10: #52 SRQ #43, #53 8902A #9, #55 address docs,
+  #56 address config #54). **Open PR:** feat/36-hp34401a (HP 34401A DMM, this session) — awaiting merge.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
