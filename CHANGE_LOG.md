@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP/Agilent E3633A DC Power Supply** (issue [#19](https://github.com/TGoodhew/GPIBUtils-NG/issues/19),
+  ported from [E3633A-Demo](https://github.com/TGoodhew/E3633A-Demo)) — first driver in a new
+  `GpibUtils.Instruments.PowerSupplies` project (`IDcPowerSupply`). Sets output voltage / current limit
+  (`VOLT`/`CURR`), gates the output (`OUTP`), reads back measured voltage/current (`MEAS:VOLT?`/`MEAS:CURR?`),
+  and configures over-voltage protection. Configurable address (factory-default GPIB address `GPIB0::5::INSTR`,
+  confirmed against the E3633A User's Guide — the demo used a bench `::27::`); `HpE3633ASimulatedDevice` for
+  hardware-free testing (11 tests); `gpibutils hpe3633a idn|init|set|output|measure` CLI branch (#45).
+  🟡 **Verification Needed.**
+
 - **HP 53131A Universal Counter** (issues [#21](https://github.com/TGoodhew/GPIBUtils-NG/issues/21) +
   [#5](https://github.com/TGoodhew/GPIBUtils-NG/issues/5), ported from
   [GPIBUtils](https://github.com/TGoodhew/GPIBUtils) and [HP3499Demo](https://github.com/TGoodhew/HP3499Demo))

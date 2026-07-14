@@ -135,6 +135,23 @@ namespace GpibUtils.Console
                         .WithDescription("Set or clear the front-panel display text.");
                 });
 
+                config.AddBranch<CommandSettings>("hpe3633a", dev =>
+                {
+                    dev.SetDescription("Drive an HP/Agilent E3633A DC power supply (SCPI).");
+                    dev.AddCommand<HpE3633AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hpe3633a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<HpE3633AInitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS (clean known state).");
+                    dev.AddCommand<HpE3633ASetCommand>("set")
+                        .WithDescription("Set output voltage (and optionally current limit / enable output).")
+                        .WithExample(new[] { "hpe3633a", "set", "5", "--current", "1", "--on", "--provider", "Simulated" });
+                    dev.AddCommand<HpE3633AOutputCommand>("output")
+                        .WithDescription("Enable or disable the output (on/off).");
+                    dev.AddCommand<HpE3633AMeasureCommand>("measure")
+                        .WithDescription("Measure the actual output voltage and current.");
+                });
+
                 config.AddBranch<CommandSettings>("hp53131a", dev =>
                 {
                     dev.SetDescription("Drive an HP 53131A universal frequency counter (SCPI, SRQ completion).");
