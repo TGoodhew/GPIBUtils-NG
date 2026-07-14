@@ -152,6 +152,23 @@ namespace GpibUtils.Console
                         .WithDescription("Measure the actual output voltage and current.");
                 });
 
+                config.AddBranch<CommandSettings>("dp832", dev =>
+                {
+                    dev.SetDescription("Drive a Rigol DP832 triple-output DC power supply (SCPI).");
+                    dev.AddCommand<RigolDp832IdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "dp832", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<RigolDp832InitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS (clean known state).");
+                    dev.AddCommand<RigolDp832SetCommand>("set")
+                        .WithDescription("Set a channel's voltage (and optionally current / enable output).")
+                        .WithExample(new[] { "dp832", "set", "5", "-c", "1", "-i", "1", "--on", "--provider", "Simulated" });
+                    dev.AddCommand<RigolDp832OutputCommand>("output")
+                        .WithDescription("Enable or disable a channel's output (on/off).");
+                    dev.AddCommand<RigolDp832MeasureCommand>("measure")
+                        .WithDescription("Measure a channel's voltage, current, and power.");
+                });
+
                 config.AddBranch<CommandSettings>("hp53131a", dev =>
                 {
                     dev.SetDescription("Drive an HP 53131A universal frequency counter (SCPI, SRQ completion).");
