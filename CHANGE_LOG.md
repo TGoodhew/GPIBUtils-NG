@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8350B Sweep Oscillator** (issue [#22](https://github.com/TGoodhew/GPIBUtils-NG/issues/22), ported from
+  [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a write-only CW-source driver in
+  `GpibUtils.Instruments.SignalSources`: preset (`IP`), CW frequency (`CW … MZ`), power level (`PL … DM`).
+  The 8350B has no discrete RF on/off (RF is gated by the plug-in's leveling/blanking), so it is a faithful
+  concrete driver rather than an `ISignalSource`. Configurable address (factory HP-IB address `GPIB0::19::INSTR`
+  per the 8350B manual — note this shares the 8673B's factory 19, so remap one on a shared bench, as the 8340B
+  is remapped to 20). `Hp8350BSimulatedDevice` (5 tests); `gpibutils hp8350b cw|freq|power|preset|init` CLI
+  branch. 🟡 **Verification Needed.**
+
 - **HP 5342A Microwave Frequency Counter** (issue [#32](https://github.com/TGoodhew/GPIBUtils-NG/issues/32),
   reconstructed from the 5342A manual — the [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old) source
   `.cs` was a mis-labelled DMM stub) — a driver in `GpibUtils.Instruments.Counters` for the microwave counter
