@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 438A RF Power Meter** (issue [#33](https://github.com/TGoodhew/GPIBUtils-NG/issues/33), ported from
+  [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old)) — a pre-SCPI, mnemonic-driven `IPowerMeter` in
+  `GpibUtils.Instruments.Meters` for the dual-channel (A/B) 438A: preset + Log-mode (`PR`/`LG`), sensor zero
+  (`ZE`), cal-factor percent (`KB…PCT`), and per-channel power read (`{A|B}P TR2`) in dBm with the meter's
+  over-range error sentinel surfaced as an exception. Factory address `GPIB0::13::INSTR` (confirmed against
+  the 438A manual). `Hp438ASimulatedDevice` (10 tests); `gpibutils hp438a idn|init|zero|measure` CLI branch.
+  The mnemonic set is reconstructed from a partial GUI app — flagged for bench confirmation. 🟡 **Verification Needed.**
+
 - **HP/Agilent E4418B RF Power Meter** (issue [#25](https://github.com/TGoodhew/GPIBUtils-NG/issues/25),
   ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — an `IPowerMeter` in
   `GpibUtils.Instruments.Meters`. Zeroes+calibrates the sensor (`:CAL1:ALL`), applies the cal factor for a
