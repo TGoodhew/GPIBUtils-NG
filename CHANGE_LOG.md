@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 3325B Synthesizer / Function Generator** (issues [#28](https://github.com/TGoodhew/GPIBUtils-NG/issues/28) +
+  [#29](https://github.com/TGoodhew/GPIBUtils-NG/issues/29), consolidated from two
+  [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old) test apps — the 100 Hz harmonic/THD test and the
+  DC-offset test) — a driver in `GpibUtils.Instruments.SignalSources`: waveform (`FU{n}` — DC/sine/square/
+  triangle/positive-ramp), frequency (`FR` with HZ/KH/MH unit suffix), amplitude (`AM … VO`), DC offset
+  (`OF … VO`), and amplitude calibration (`AC`). Configurable address (factory-default HP-IB address
+  `GPIB0::17::INSTR` per the 3325B manual; both apps used a bench `::10::`). `Hp3325BSimulatedDevice`
+  (8 tests); `gpibutils hp3325b idn|init|set` CLI branch. 🟡 **Verification Needed.**
+
 - **HP 8350B Sweep Oscillator** (issue [#22](https://github.com/TGoodhew/GPIBUtils-NG/issues/22), ported from
   [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a write-only CW-source driver in
   `GpibUtils.Instruments.SignalSources`: preset (`IP`), CW frequency (`CW … MZ`), power level (`PL … DM`).
