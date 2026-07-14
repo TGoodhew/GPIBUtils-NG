@@ -15,6 +15,31 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 53131A Universal Counter** (issues [#21](https://github.com/TGoodhew/GPIBUtils-NG/issues/21) +
+  [#5](https://github.com/TGoodhew/GPIBUtils-NG/issues/5), ported from
+  [GPIBUtils](https://github.com/TGoodhew/GPIBUtils) and [HP3499Demo](https://github.com/TGoodhew/HP3499Demo))
+  — the **canonical** 53131A in a new `GpibUtils.Instruments.Counters` project (`IFrequencyCounter`),
+  deduping the two identical `HPDevices` copies and the SCPI reader in HP3499Demo. Measures frequency on
+  channels 1–3 (`CONF:FREQ (@n)`) and sets the channel-1 input impedance (50 Ω / 1 MΩ). Its measurement
+  completion — the IEEE-488.2 `*ESE 1` / `*SRE 32` / `INIT;*OPC` → SRQ handshake — is driven through the
+  shared **#43 `CompletionWaiter`** (direct-bit flow, `*SRE {mask}`) via `SessionStatusChannel` rather than
+  a hand-rolled serial-poll loop; the data-driven `StatusModel` is the only device-specific completion
+  knowledge and can move to the #41 instrument DB unchanged. A completion timeout surfaces as a typed
+  `Hp53131AException`. Configurable address (factory-default GPIB address `GPIB0::3::INSTR`, confirmed
+  against the 53131A Programming Guide — the legacy demo used a bench `::23::`); `Hp53131ASimulatedDevice`
+  for hardware-free testing (18 tests); `gpibutils hp53131a idn|init|reset|freq` CLI branch (#45).
+  🟡 **Verification Needed.**
+
+- **HP 3499A Switch/Control System** (issue [#4](https://github.com/TGoodhew/GPIBUtils-NG/issues/4), ported
+  from [HP3499Demo](https://github.com/TGoodhew/HP3499Demo)) — a plain-SCPI switch mainframe driver in
+  `GpibUtils.Instruments.Switches`. Opens/closes relay channels on the `snn` (slot + two-digit channel)
+  addressing scheme (`ROUT:CLOS`/`ROUT:OPEN`/`ROUT:CLOS? (@snn)`) and enumerates installed plug-in cards
+  (`SYST:CTYPE?`) — the 44472A VHF and 44476B microwave switches are plug-ins addressed via this mainframe
+  scheme, not separate instruments. Configurable address (factory-default GPIB address `GPIB0::9::INSTR`,
+  confirmed against the 3499A User's & Programming Guide, matching the source); `Hp3499ASimulatedDevice`
+  for hardware-free testing (17 tests); `gpibutils hp3499a idn|init|cards|close|open|state` CLI branch (#45).
+  🟡 **Verification Needed.**
+
 - **HP/Agilent/Keysight 34401A Digital Multimeter** (issues
   [#36](https://github.com/TGoodhew/GPIBUtils-NG/issues/36) + [#17](https://github.com/TGoodhew/GPIBUtils-NG/issues/17),
   ported from [5440Controller](https://github.com/TGoodhew/5440Controller) and

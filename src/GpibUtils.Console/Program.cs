@@ -135,6 +135,40 @@ namespace GpibUtils.Console
                         .WithDescription("Set or clear the front-panel display text.");
                 });
 
+                config.AddBranch<CommandSettings>("hp53131a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 53131A universal frequency counter (SCPI, SRQ completion).");
+                    dev.AddCommand<Hp53131AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hp53131a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp53131AInitCommand>("init")
+                        .WithDescription("Device clear + reset + status preset (clean known state).");
+                    dev.AddCommand<Hp53131AResetCommand>("reset")
+                        .WithDescription("Instrument reset (*RST).");
+                    dev.AddCommand<Hp53131AFreqCommand>("freq")
+                        .WithDescription("Measure the frequency (Hz) on an input channel.")
+                        .WithExample(new[] { "hp53131a", "freq", "1", "--impedance", "50", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("hp3499a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3499A switch/control system (relay channels + card inventory).");
+                    dev.AddCommand<Hp3499AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hp3499a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp3499AInitCommand>("init")
+                        .WithDescription("Device clear + reset + status preset (clean known state).");
+                    dev.AddCommand<Hp3499ACardsCommand>("cards")
+                        .WithDescription("List the plug-in cards installed in each slot (SYSTem:CTYPE?).");
+                    dev.AddCommand<Hp3499ACloseCommand>("close")
+                        .WithDescription("Close a relay channel (snn: slot + channel).")
+                        .WithExample(new[] { "hp3499a", "close", "100", "--provider", "Simulated" });
+                    dev.AddCommand<Hp3499AOpenCommand>("open")
+                        .WithDescription("Open a relay channel (snn: slot + channel).");
+                    dev.AddCommand<Hp3499AStateCommand>("state")
+                        .WithDescription("Query whether a relay channel is closed (ROUTe:CLOSe?).");
+                });
+
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
                 {
                     dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");
