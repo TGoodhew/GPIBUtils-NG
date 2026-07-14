@@ -138,6 +138,22 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp8902a", "level", "12000", "--converted", "--lo", "17120.53", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("ds1054z", dev =>
+                {
+                    dev.SetDescription("Drive a Rigol DS1054Z oscilloscope (SCPI).");
+                    dev.AddCommand<RigolDs1054ZIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "ds1054z", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<RigolDs1054ZAcqCommand>("acq")
+                        .WithDescription("Acquisition control: run, stop, single, or auto.")
+                        .WithExample(new[] { "ds1054z", "acq", "single", "--provider", "Simulated" });
+                    dev.AddCommand<RigolDs1054ZChannelCommand>("channel")
+                        .WithDescription("Turn a channel's display on or off.");
+                    dev.AddCommand<RigolDs1054ZMeasureCommand>("measure")
+                        .WithDescription("Measure vpp / vmax / freq on a channel.")
+                        .WithExample(new[] { "ds1054z", "measure", "1", "--item", "vpp", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("dm3058", dev =>
                 {
                     dev.SetDescription("Drive a Rigol DM3058 digital multimeter (SCPI one-shot MEAS?).");

@@ -24,6 +24,7 @@
     <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Counters\GpibUtils.Instruments.Counters.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.PowerSupplies\GpibUtils.Instruments.PowerSupplies.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Scopes\GpibUtils.Instruments.Scopes.csproj" />
   </ItemGroup>
 
 </Project>
