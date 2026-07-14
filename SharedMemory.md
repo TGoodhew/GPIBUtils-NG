@@ -146,8 +146,9 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **Drivers landed** (all 🟡 awaiting HW, board / issue #46): HP 11713A (#6), HP 8340B (#7), HP 8673B (#8),
   HP 8902A (#9), HP 34401A (#36/#17); tags `verify/6-hp11713a` / `verify/7-hp8340b` / `verify/8-hp8673b` /
   `verify/9-hp8902a` / `verify/36-hp34401a`. **152 tests green.**
-- **As of 2026-07-15:** `main` green through #56 (2026-07-10: #52 SRQ #43, #53 8902A #9, #55 address docs,
-  #56 address config #54). **Open PR:** feat/36-hp34401a (HP 34401A DMM, this session) — awaiting merge.
+- **As of 2026-07-15:** `main` green (152 tests), **no open PRs**. Merged this session: **#57 (HP 34401A DMM
+  #36/#17)**. Prior (2026-07-10): #52 SRQ #43, #53 8902A #9, #55 address docs, #56 address config #54.
+  #36 + #17 labelled `verification-needed` with bench checklists (not closed, per policy).
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
@@ -155,8 +156,8 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
      (orchestrates source→LO→attenuator→receiver) is unblocked. Port it from
      `C:\Users\Tony\Source\Repos\HP-Attenuator\src\HP-Attenuator.Core\Measurement\MeasurementEngine.cs`.
      Maps to issue #34 / the app side of #6. Biggest milestone; first real bench demo.
-  2. **Next driver (breadth):** lowest-risk = **HP 34401A DMM (#17/#36)** (plain SCPI); or HP 3499A
-     switch (#4), HP 53131A counter (#5/#21). `Meters` category also awaits power meters #25/#33.
+  2. **Next driver (breadth):** ~~HP 34401A DMM~~ ✅ done (#57). Next lowest-risk = HP 53131A counter
+     (#5/#21) or HP 3499A switch (#4); `Meters` also awaits power meters #25/#33.
   3. **Fill a scaffold:** **#41 GPIB-MCP server** (brings the instrument DB → also the `StatusModel`
      source for the #43 SRQ engine + a control surface) or **#42 HP-GL rendering** (unblocks plotters
      #38/#39/#40).
