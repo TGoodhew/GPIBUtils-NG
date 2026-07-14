@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 5351A Microwave Frequency Counter** (issue [#20](https://github.com/TGoodhew/GPIBUtils-NG/issues/20),
+  ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a driver in
+  `GpibUtils.Instruments.Counters` for the single-input microwave counter: preset + clear SRQ mask
+  (`SRQMASK,0`/`INIT`), sample-mode select (`SAMPLE,HOLD`/`FAST`), talked frequency read (Hz), and oven /
+  reference status (`OVEN?`/`REF?`). Ported from the working `GPIBUtils/HPDevices` driver (its unwired
+  frequency read is now implemented). Bench address `GPIB0::14::INSTR` (no fixed factory default — rear-panel
+  switch). `Hp5351ASimulatedDevice` (7 tests); `gpibutils hp5351a idn|init|freq|status` CLI branch.
+  🟡 **Verification Needed.**
+
 - **HP/Agilent 3458A 8½-digit DMM** (issue [#31](https://github.com/TGoodhew/GPIBUtils-NG/issues/31), ported
   from [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old)) — a driver in
   `GpibUtils.Instruments.Meters` speaking the 3458A's native (non-SCPI) command language: `RESET`/`END ALWAYS`,
