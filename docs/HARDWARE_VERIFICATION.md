@@ -50,6 +50,7 @@ bench confirmation.
 | [#26](https://github.com/TGoodhew/GPIBUtils-NG/issues/26) | Rigol DM3058 DMM | `verify/26-dm3058` | DM3058, GPIB (factory addr 7) or LXI | 🟡 Verification Needed | — | — | Merged simulator-green; 11 unit tests. Confirm one-shot `MEAS:VOLT/CURR/RES?` on real hardware. Consolidates #26 (supersedes #30 + its AC-current bug). Legacy app used LXI. |
 | [#31](https://github.com/TGoodhew/GPIBUtils-NG/issues/31) | HP 3458A 8.5-digit DMM | `verify/31-hp3458a` | 3458A, GPIB (factory addr 22) | 🟡 Verification Needed | — | — | Merged simulator-green; 11 unit tests. Confirm the native `RESET`/`FUNC`/`NPLC`/`RES`/`SETACV SYNC`/`TARM SGL` flow and single/burst reads. |
 | [#20](https://github.com/TGoodhew/GPIBUtils-NG/issues/20) | HP 5351A Microwave Counter | `verify/20-hp5351a` | 5351A + microwave source, GPIB (app used 14) | 🟡 Verification Needed | — | — | Merged simulator-green; 7 unit tests. Confirm `SRQMASK,0`/`INIT`/`SAMPLE,HOLD\|FAST`, the talked frequency read, and `OVEN?`/`REF?`. Confirm bench address. |
+| [#32](https://github.com/TGoodhew/GPIBUtils-NG/issues/32) | HP 5342A Microwave Counter | `verify/32-hp5342a` | 5342A (Opt 011 HP-IB) + microwave source, GPIB (manual examples use 2) | 🟡 Verification Needed | — | — | Merged simulator-green; 10 unit tests. **Reconstructed entirely from the manual (the source was a DMM stub) — confirm `RE`/`AU`/`MA`/`SR{n}`/`SM…E`, the talked read + dashes sentinel, and the SRQ bit-7 completion.** |
 
 ## Per-instrument bench checklist (template)
 

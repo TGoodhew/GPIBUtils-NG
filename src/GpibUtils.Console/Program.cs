@@ -253,6 +253,18 @@ namespace GpibUtils.Console
                         .WithDescription("Show oven and reference status.");
                 });
 
+                config.AddBranch<CommandSettings>("hp5342a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 5342A microwave frequency counter (mnemonic HP-IB).");
+                    dev.AddCommand<Hp5342AIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (5342A has no *IDN?).");
+                    dev.AddCommand<Hp5342AInitCommand>("init")
+                        .WithDescription("Device clear + RESET + AUTO mode.");
+                    dev.AddCommand<Hp5342AFreqCommand>("freq")
+                        .WithDescription("Measure the input frequency (Hz); --center for manual mode.")
+                        .WithExample(new[] { "hp5342a", "freq", "--center", "10000", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp3499a", dev =>
                 {
                     dev.SetDescription("Drive an HP 3499A switch/control system (relay channels + card inventory).");
