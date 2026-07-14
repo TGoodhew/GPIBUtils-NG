@@ -138,6 +138,19 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp8902a", "level", "12000", "--converted", "--lo", "17120.53", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("dm3058", dev =>
+                {
+                    dev.SetDescription("Drive a Rigol DM3058 digital multimeter (SCPI one-shot MEAS?).");
+                    dev.AddCommand<RigolDm3058IdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "dm3058", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<RigolDm3058InitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS (clean known state).");
+                    dev.AddCommand<RigolDm3058MeasureCommand>("measure")
+                        .WithDescription("Take a one-shot measurement of a function.")
+                        .WithExample(new[] { "dm3058", "measure", "dcv", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp34401a", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent/Keysight 34401A digital multimeter (SCPI).");

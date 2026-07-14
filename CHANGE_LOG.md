@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Rigol DM3058 Digital Multimeter** (issue [#26](https://github.com/TGoodhew/GPIBUtils-NG/issues/26),
+  ported from [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — a SCPI DMM in
+  `GpibUtils.Instruments.Meters` (implements `IDigitalMultimeter`) driven with one-shot `MEASure:…?` queries
+  across the function set (reusing `MeasurementFunction`). The **canonical** DM3058, superseding the older
+  #30 implementation — and fixing its bug where AC current was mapped to the DC-current command. Configurable
+  address (factory-default GPIB address `GPIB0::7::INSTR` per the DM3058 User's Guide; the app used LXI);
+  `RigolDm3058SimulatedDevice` (11 tests); `gpibutils dm3058 idn|init|measure` CLI branch. 🟡 **Verification Needed.**
+
 - **HP 438A RF Power Meter** (issue [#33](https://github.com/TGoodhew/GPIBUtils-NG/issues/33), ported from
   [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old)) — a pre-SCPI, mnemonic-driven `IPowerMeter` in
   `GpibUtils.Instruments.Meters` for the dual-channel (A/B) 438A: preset + Log-mode (`PR`/`LG`), sensor zero
