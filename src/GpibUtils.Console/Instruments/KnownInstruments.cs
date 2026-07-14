@@ -50,6 +50,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp3458a",  Hp3458A.DefaultResource,   "HP 3458A 8.5-digit DMM"),
             new KnownInstrument("hp5351a",  Hp5351A.DefaultResource,   "HP 5351A microwave frequency counter"),
             new KnownInstrument("hp5342a",  Hp5342A.DefaultResource,   "HP 5342A microwave frequency counter"),
+            new KnownInstrument("hp8350b",  Hp8350B.DefaultResource,   "HP 8350B sweep oscillator (CW source)"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

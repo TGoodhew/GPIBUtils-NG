@@ -284,6 +284,22 @@ namespace GpibUtils.Console
                         .WithDescription("Query whether a relay channel is closed (ROUTe:CLOSe?).");
                 });
 
+                config.AddBranch<CommandSettings>("hp8350b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8350B sweep oscillator as a CW source (write-only).");
+                    dev.AddCommand<Hp8350BCwCommand>("cw")
+                        .WithDescription("Preset, set CW frequency + power.")
+                        .WithExample(new[] { "hp8350b", "cw", "7555", "-5", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8350BFreqCommand>("freq")
+                        .WithDescription("Set the CW output frequency (MHz).");
+                    dev.AddCommand<Hp8350BPowerCommand>("power")
+                        .WithDescription("Set the output power (dBm).");
+                    dev.AddCommand<Hp8350BPresetCommand>("preset")
+                        .WithDescription("Instrument preset (IP).");
+                    dev.AddCommand<Hp8350BInitCommand>("init")
+                        .WithDescription("Device clear + preset (clean known state).");
+                });
+
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
                 {
                     dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");
