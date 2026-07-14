@@ -53,6 +53,7 @@ bench confirmation.
 | [#32](https://github.com/TGoodhew/GPIBUtils-NG/issues/32) | HP 5342A Microwave Counter | `verify/32-hp5342a` | 5342A (Opt 011 HP-IB) + microwave source, GPIB (manual examples use 2) | 🟡 Verification Needed | — | — | Merged simulator-green; 10 unit tests. **Reconstructed entirely from the manual (the source was a DMM stub) — confirm `RE`/`AU`/`MA`/`SR{n}`/`SM…E`, the talked read + dashes sentinel, and the SRQ bit-7 completion.** |
 | [#22](https://github.com/TGoodhew/GPIBUtils-NG/issues/22) | HP 8350B Sweep Oscillator | `verify/22-hp8350b` | 8350B + RF plug-in, GPIB (factory addr 19; shares 8673B's 19 — remap one) | 🟡 Verification Needed | — | — | Merged simulator-green; 5 unit tests. Confirm `IP`/`CW … MZ`/`PL … DM` for CW frequency + power. Write-only (no RF on/off). |
 | [#28](https://github.com/TGoodhew/GPIBUtils-NG/issues/28) | HP 3325B Synthesizer | `verify/28-hp3325b` | 3325B, GPIB (factory addr 17; apps used 10) | 🟡 Verification Needed | — | — | Merged simulator-green; 8 unit tests. Confirm `FU{n}` waveform, `FR`/`AM`/`OF` + unit suffixes, and `AC` amplitude cal. Consolidates #28 (harmonic/THD) + #29 (DC offset). |
+| [#27](https://github.com/TGoodhew/GPIBUtils-NG/issues/27) | Rigol DS1054Z Oscilloscope | `verify/27-ds1054z` | DS1054Z, USB/LXI (no GPIB) | 🟡 Verification Needed | — | — | Merged simulator-green; 8 unit tests. Confirm `:RUN`/`:STOP`/`:SINGle`/`:AUToscale`, channel display, and `:MEASure:ITEM?` on real hardware over USB/LAN. |
 
 ## Per-instrument bench checklist (template)
 

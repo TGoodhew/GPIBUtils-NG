@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Rigol DS1054Z Oscilloscope** (issue [#27](https://github.com/TGoodhew/GPIBUtils-NG/issues/27), ported from
+  [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — the first driver in a new `GpibUtils.Instruments.Scopes`
+  project (`IOscilloscope`). Acquisition control (`:RUN`/`:STOP`/`:SINGle`/`:AUToscale`), per-channel display
+  (`:CHANnel{n}:DISPlay`), timebase readback, and automatic measurements (`:MEASure:ITEM? VPP|VMAX|FREQ,CHANnel{n}`).
+  The DS1054Z is a USB/LXI instrument (no GPIB), so the default resource is the legacy app's LXI address — the
+  transport-neutral provider model runs the same driver over any session. `RigolDs1054ZSimulatedDevice`
+  (8 tests); `gpibutils ds1054z idn|acq|channel|measure` CLI branch. 🟡 **Verification Needed.**
+
 - **HP 3325B Synthesizer / Function Generator** (issues [#28](https://github.com/TGoodhew/GPIBUtils-NG/issues/28) +
   [#29](https://github.com/TGoodhew/GPIBUtils-NG/issues/29), consolidated from two
   [GPIBUtils-Old](https://github.com/TGoodhew/GPIBUtils-Old) test apps — the 100 Hz harmonic/THD test and the
