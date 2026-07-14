@@ -89,6 +89,21 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + preset + RF off (clean known state).");
                 });
 
+                config.AddBranch<CommandSettings>("e4418b", dev =>
+                {
+                    dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
+                    dev.AddCommand<HpE4418BIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "e4418b", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<HpE4418BInitCommand>("init")
+                        .WithDescription("Device clear + reset (clean known state).");
+                    dev.AddCommand<HpE4418BCalCommand>("cal")
+                        .WithDescription("Zero and calibrate the sensor.");
+                    dev.AddCommand<HpE4418BMeasureCommand>("measure")
+                        .WithDescription("Measure power (dBm) at a carrier frequency.")
+                        .WithExample(new[] { "e4418b", "measure", "1000", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8902a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");
