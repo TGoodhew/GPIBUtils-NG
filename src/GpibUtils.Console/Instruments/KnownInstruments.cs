@@ -51,6 +51,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp5351a",  Hp5351A.DefaultResource,   "HP 5351A microwave frequency counter"),
             new KnownInstrument("hp5342a",  Hp5342A.DefaultResource,   "HP 5342A microwave frequency counter"),
             new KnownInstrument("hp8350b",  Hp8350B.DefaultResource,   "HP 8350B sweep oscillator (CW source)"),
+            new KnownInstrument("hp3325b",  Hp3325B.DefaultResource,   "HP 3325B synthesizer/function generator"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

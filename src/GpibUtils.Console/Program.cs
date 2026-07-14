@@ -300,6 +300,18 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + preset (clean known state).");
                 });
 
+                config.AddBranch<CommandSettings>("hp3325b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3325B synthesizer / function generator (mnemonic HP-IB).");
+                    dev.AddCommand<Hp3325BIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).");
+                    dev.AddCommand<Hp3325BInitCommand>("init")
+                        .WithDescription("Device clear + *RST (clean known state).");
+                    dev.AddCommand<Hp3325BSetCommand>("set")
+                        .WithDescription("Set waveform / frequency (Hz) / amplitude (V) / DC offset (V).")
+                        .WithExample(new[] { "hp3325b", "set", "-w", "sine", "-f", "1000", "-a", "1", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
                 {
                     dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");
