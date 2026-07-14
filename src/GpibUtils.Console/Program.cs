@@ -151,6 +151,19 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "dm3058", "measure", "dcv", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp3458a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3458A 8.5-digit DMM (native FUNC/NPLC/TARM language).");
+                    dev.AddCommand<Hp3458AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (ID?).")
+                        .WithExample(new[] { "hp3458a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp3458AInitCommand>("init")
+                        .WithDescription("Device clear + RESET + END ALWAYS (clean known state).");
+                    dev.AddCommand<Hp3458AMeasureCommand>("measure")
+                        .WithDescription("Configure a function then read (or average a burst).")
+                        .WithExample(new[] { "hp3458a", "measure", "dcv", "--nplc", "100", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp34401a", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent/Keysight 34401A digital multimeter (SCPI).");

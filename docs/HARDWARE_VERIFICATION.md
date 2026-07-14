@@ -48,6 +48,7 @@ bench confirmation.
 | [#25](https://github.com/TGoodhew/GPIBUtils-NG/issues/25) | HP/Agilent E4418B Power Meter | `verify/25-e4418b` | E4418B + sensor, GPIB (bench addr 13) | 🟡 Verification Needed | — | — | Merged simulator-green; 8 unit tests. Confirm the `:CAL1:ALL` zero/cal and `:CONF1;:INIT;FETCh?` measure both complete via the #43 OPC→SRQ handshake; `:FREQ …MHZ` cal factor; dBm reading. Confirm bench address. |
 | [#33](https://github.com/TGoodhew/GPIBUtils-NG/issues/33) | HP 438A Power Meter | `verify/33-hp438a` | 438A + sensor(s), GPIB (factory addr 13) | 🟡 Verification Needed | — | — | Merged simulator-green; 10 unit tests. **Mnemonics reconstructed from a partial GUI app — confirm `CS`/`PR`/`LG`/`ZE`/`{A\|B}P TR2`/`KB…PCT` and the over-range sentinel against the real 438A.** |
 | [#26](https://github.com/TGoodhew/GPIBUtils-NG/issues/26) | Rigol DM3058 DMM | `verify/26-dm3058` | DM3058, GPIB (factory addr 7) or LXI | 🟡 Verification Needed | — | — | Merged simulator-green; 11 unit tests. Confirm one-shot `MEAS:VOLT/CURR/RES?` on real hardware. Consolidates #26 (supersedes #30 + its AC-current bug). Legacy app used LXI. |
+| [#31](https://github.com/TGoodhew/GPIBUtils-NG/issues/31) | HP 3458A 8.5-digit DMM | `verify/31-hp3458a` | 3458A, GPIB (factory addr 22) | 🟡 Verification Needed | — | — | Merged simulator-green; 11 unit tests. Confirm the native `RESET`/`FUNC`/`NPLC`/`RES`/`SETACV SYNC`/`TARM SGL` flow and single/burst reads. |
 
 ## Per-instrument bench checklist (template)
 

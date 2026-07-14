@@ -47,6 +47,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("e4418b",   HpE4418B.DefaultResource,  "HP E4418B RF power meter"),
             new KnownInstrument("hp438a",   Hp438A.DefaultResource,    "HP 438A RF power meter"),
             new KnownInstrument("dm3058",   RigolDm3058.DefaultResource, "Rigol DM3058 digital multimeter"),
+            new KnownInstrument("hp3458a",  Hp3458A.DefaultResource,   "HP 3458A 8.5-digit DMM"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
