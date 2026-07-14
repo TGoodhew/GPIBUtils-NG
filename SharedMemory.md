@@ -28,13 +28,14 @@ the target architecture.
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
-| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + `hp11713a`/`hp8340b`/`hp8673b`/`hp8902a`/`hp34401a`/`hp53131a`/`hp3499a` branches). | ✅ done (base + config + 7 devices) |
-| `tests/*` (Visa, Common, Instruments.Switches, Instruments.SignalSources, Meters, Counters, Wpf) | xUnit. | ✅ 187 tests green |
-| `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** switch/control mainframe (#4) ported. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.Counters` | Universal counters (`IFrequencyCounter`). **HP 53131A** (#21/#5, canonical) ported — completion via the #43 SRQ engine. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.SignalSources` | Signal sources (`ISignalSource`/`ILocalOscillator`). **HP 8340B** (#7), **HP 8673B** (#8) ported. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.Meters` | Measuring receivers / power meters / DMMs. **HP 8902A** (#9, `IMeasuringReceiver`) + **HP 34401A DMM** (#36/#17, `IDigitalMultimeter`, canonical) ported. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.*` (other categories) | Instrument drivers by category. | ⬜ not started |
+| `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + 17 device branches). | ✅ done (base + config + 17 devices) |
+| `tests/*` (Visa, Common, Switches, SignalSources, Meters, Counters, PowerSupplies, Wpf) | xUnit. | ✅ 278 tests green |
+| `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** (#4). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Counters` | Counters. **HP 53131A** (#21/#5, universal, #43 SRQ) + **HP 5351A** (#20) + **HP 5342A** (#32) microwave. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.SignalSources` | Signal sources. **HP 8340B** (#7), **8673B** (#8), **8350B** (#22), **3325B** synth (#28/#29). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Meters` | Receivers / power meters / DMMs. **8902A** (#9), **34401A** (#36/#17), **E4418B** (#25, `IPowerMeter`, #43 SRQ), **438A** (#33), **DM3058** (#26), **3458A** (#31). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.PowerSupplies` | DC power supplies (`IDcPowerSupply`). **HP E3633A** (#19) + **Rigol DP832** (#15, 3-ch). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.*` (Scopes, Analyzers, Calibrators, plotters) | Remaining categories. | ⬜ in progress (this session) |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
 | `src/GpibUtils.Visa/Srq` | Shared SRQ/serial-poll completion engine (`CompletionWaiter` + data-driven `StatusModel`, `IStatusChannel`, `SessionStatusChannel`). **#43 ported.** | ✅ done |
 | `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | 🏗 scaffold (filled by #42) |
@@ -164,11 +165,17 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   HP 8902A (#9), HP 34401A (#36/#17), HP 53131A (#21/#5), HP 3499A (#4); tags `verify/6-hp11713a` /
   `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a` / `verify/36-hp34401a` / `verify/21-hp53131a` /
   `verify/4-hp3499a`. **187 tests green.**
-- **As of 2026-07-15:** `main` green (187 tests), **no open PRs**. Merged this session: **#57 (HP 34401A
-  #36/#17)** and **#58 (HP 53131A #21/#5 + HP 3499A #4)**. Prior (2026-07-10): #52 SRQ #43, #53 8902A #9,
-  #55 address docs, #56 address config #54. All merged issues carry `verification-needed` + bench checklists
-  (not closed, per policy). Legacy source repos now cloned locally: `GPIBUtils`, `HP3499Demo` (+ scratchpad
-  `5440Controller`, `HP435B-Test`).
+- **As of 2026-07-15:** `main` green (278 tests), **no open PRs**. **Batch migration in progress** (this
+  session, PRs #57–#68): 34401A (#57), 53131A+3499A (#58), then E3633A (#59), DP832 (#60), E4418B (#61),
+  438A (#62), DM3058 (#63), 3458A (#64), 5351A (#65), 5342A (#66), 8350B (#67), 3325B (#68) — all merged,
+  each `verification-needed` + bench checklist (not closed). **Closed as consolidated/superseded:** #30
+  (→#26), #29 (→#28), #16 (→#7 8340B covers 8340A), #18/#23/#3 (→#8), #24/#2 (→#9). All legacy source repos
+  now cloned locally under `C:\Users\Tony\Source\Repos`.
+- **Remaining to port (this session's worklist):** #27 Rigol DS1054Z scope (new Scopes proj), #11 E4438C ESG,
+  #13 8560E + #10 8563E + #14 85620A + #12 E4406A (new Analyzers proj; 8560/8563 sweeps use the #43 engine),
+  #35 Fluke 5440A calibrator (new Calibrators proj), #42 HP-GL rendering + #38/#39/#40 plotters, #41 MCP
+  server. Apps deferred to their own follow-ups: #34 (8340B output test), #37 (5440Verify), the 8340A
+  cal-verify harness, the HP435B PDF report, the attenuation MeasurementEngine.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
