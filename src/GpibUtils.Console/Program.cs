@@ -104,6 +104,20 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "e4418b", "measure", "1000", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp438a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 438A dual-channel RF power meter (pre-SCPI mnemonics).");
+                    dev.AddCommand<Hp438AIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (438A has no *IDN?).");
+                    dev.AddCommand<Hp438AInitCommand>("init")
+                        .WithDescription("Device clear + preset + Log (dBm) mode.");
+                    dev.AddCommand<Hp438AZeroCommand>("zero")
+                        .WithDescription("Zero the sensor (ZE).");
+                    dev.AddCommand<Hp438AMeasureCommand>("measure")
+                        .WithDescription("Measure power (dBm) on channel A or B.")
+                        .WithExample(new[] { "hp438a", "measure", "A", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8902a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");
