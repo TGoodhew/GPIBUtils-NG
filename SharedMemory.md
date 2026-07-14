@@ -29,7 +29,8 @@ the target architecture.
 | `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
 | `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + 17 device branches). | ✅ done (base + config + 17 devices) |
-| `tests/*` (Visa, Common, Switches, SignalSources, Meters, Counters, PowerSupplies, Wpf) | xUnit. | ✅ 278 tests green |
+| `tests/*` (Visa, Common, Switches, SignalSources, Meters, Counters, PowerSupplies, Scopes, Wpf) | xUnit. | ✅ 286 tests green |
+| `src/GpibUtils.Instruments.Scopes` | Oscilloscopes (`IOscilloscope`). **Rigol DS1054Z** (#27). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** (#4). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Counters` | Counters. **HP 53131A** (#21/#5, universal, #43 SRQ) + **HP 5351A** (#20) + **HP 5342A** (#32) microwave. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources. **HP 8340B** (#7), **8673B** (#8), **8350B** (#22), **3325B** synth (#28/#29). | 🟡 done, awaiting HW verification |
@@ -171,11 +172,40 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   each `verification-needed` + bench checklist (not closed). **Closed as consolidated/superseded:** #30
   (→#26), #29 (→#28), #16 (→#7 8340B covers 8340A), #18/#23/#3 (→#8), #24/#2 (→#9). All legacy source repos
   now cloned locally under `C:\Users\Tony\Source\Repos`.
-- **Remaining to port (this session's worklist):** #27 Rigol DS1054Z scope (new Scopes proj), #11 E4438C ESG,
-  #13 8560E + #10 8563E + #14 85620A + #12 E4406A (new Analyzers proj; 8560/8563 sweeps use the #43 engine),
-  #35 Fluke 5440A calibrator (new Calibrators proj), #42 HP-GL rendering + #38/#39/#40 plotters, #41 MCP
-  server. Apps deferred to their own follow-ups: #34 (8340B output test), #37 (5440Verify), the 8340A
-  cal-verify harness, the HP435B PDF report, the attenuation MeasurementEngine.
+- **DS1054Z landed** (#27, PR #69): new `GpibUtils.Instruments.Scopes` (`IOscilloscope`) — Rigol DS1054Z
+  (run/stop/single/autoscale, channel display, `:MEASure:ITEM?`). USB/LXI (no GPIB).
+- **Remaining to port (specs already gathered — see per-instrument notes below):**
+  1. **#35 Fluke 5440A/5440B calibrator** (new `Calibrators` proj) — source `5440Controller/Program.cs`.
+     Mnemonic, predates *IDN? (use `GVRS` for firmware). Cmds: `SOUT <v>` (G7, <8 sig digits), `OPER`/`STBY`,
+     `ESNS`(ext 4-wire)/`ISNS`(int 2-wire), `GOUT`, `GERR` (no `?`), `RESET`, `SSRQ <n>`/`GSRQ`, `GSTS`,
+     `GONG`(0=idle). Factory addr **7** (confirmed, `5440B-AF User Manual.pdf`). No SRQ in code; settle ~1 s
+     after OPER. Note: the 34401AController already exposes a minimal 5440 subset — this is the full driver.
+  2. **#11 Keysight E4438C ESG** (SignalSources) — source `ESG-SignalCreator.Core/EsgController.cs`. SCPI:
+     `:FREQuency:FIXed <hz> Hz`, `:POWer:LEVel <dbm> dBm`, `:OUTPut:STATe ON|OFF`, `:OUTPut:MODulation:STATe`,
+     `:RADio:ARB:STATe`, ARB download `:MEMory:DATA "WFM1:<name>",<block>` + `*OPC?`. Addr 19 (lab; manual
+     doesn't print a factory value). Completion via `*OPC?` (not SRQ). ARB = interleaved I/Q 16-bit big-endian.
+  3. **#13 HP 8560E spectrum analyzer** (new `Analyzers` proj) — **THE ideal #43 SRQ consumer.** Manual (not
+     the DLPBits app, which only loads DLPs) mnemonics: `IP`, `CF <f>`, `SP <span>`, `RB`/`VB`, `ST`, `SNGLS`,
+     `TS` (take sweep), `MKPK HI`, `TRA?` (trace read), marker `MKF?`/`MKA?`. **RQS mask model** (Table 7-9):
+     status bits RQS=64, ERROR=32, COMMAND-COMPLETE=16, END-OF-SWEEP=4, MESSAGE=2, TRIGGER=1; `RQS <mask>` /
+     `RQS 0`. Sweep-complete: `RQS 16` + `…;TS;` → SRQ on command-complete (SRQ-edge flow, expect bit=RQS 64,
+     errorBit=32) — build the StatusModel like `Hp53131A.StatusModel()`. Factory addr **18**. `DONE?` handshake
+     is the non-SRQ alternative.
+  4. **#10/#14 HP 85620A mass memory + 8563E card** (Analyzers or a Storage helper) — sources `MemCardTest`
+     (8563E, addr 18) + `DLPBits` (85620A DLP loader). Storage cmds: `ID?`, `MSDEV MEM|CARD;`, `CATALOG?;`,
+     `CARDSTORE %name%;`, `CARDLOAD %name%;`, `DONE?;`, `ERR?;`, `DISPOSE ALL;`, `FUNCDEF <dlp>;`. Completion
+     via `DONE?`/`ERR?` (NOT SRQ). SRAM image decode (addr/data bit de-scramble + DLP extraction between
+     markers 0x10,0x80 … 0x3b,0xff) — see `DLPBits/Program.cs`. Card FORMAT can't be done over GPIB.
+  5. **#12 Agilent E4406A VSA** (Analyzers) — source `ESG-SignalCreator.Core/Measure/*`. `:INSTrument:SELect
+     BASIC`, `:INITiate:CONTinuous OFF`, `:SENSe:FREQuency:CENTer <hz> Hz`, per-measurement `:READ:<root>?`
+     (CHPower/ACP/PSTatistic/WAVeform/SPECtrum). No global span. Blocking read (no SRQ). Manual factory addr
+     **18** (app used 17).
+  6. **#42 HP-GL/PCL rendering** (fills `GpibUtils.Hpgl` scaffold) + **#38/#39/#40 plotters** (7090A/7550A/
+     HPGL streamer) — sources `7090ATest`, `7550ATest`, `HPGLTest`. Plotters depend on #42.
+  7. **#41 GPIB-MCP server** (fills `GpibUtils.Mcp` scaffold) — source `GPIB-MCP` (local).
+  - Apps deferred to their own follow-ups: #34 (8340B output test), #37 (5440Verify runner), the 8340A
+    cal-verify harness, the HP435B PDF report, the attenuation MeasurementEngine.
+  - **All source repos are cloned locally** under `C:\Users\Tony\Source\Repos`.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
