@@ -37,6 +37,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp8340b",  Hp8340B.DefaultResource,  "HP 8340B synthesized sweeper (CW source)"),
             new KnownInstrument("hp8673b",  Hp8673B.DefaultResource,  "HP 8673B synthesized signal generator / LO"),
             new KnownInstrument("hp8902a",  Hp8902A.DefaultResource,  "HP 8902A measuring receiver"),
+            new KnownInstrument("hp34401a", Hp34401A.DefaultResource, "HP 34401A digital multimeter"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

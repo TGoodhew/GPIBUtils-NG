@@ -109,6 +109,32 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp8902a", "level", "12000", "--converted", "--lo", "17120.53", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp34401a", dev =>
+                {
+                    dev.SetDescription("Drive an HP/Agilent/Keysight 34401A digital multimeter (SCPI).");
+                    dev.AddCommand<Hp34401AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hp34401a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp34401AInitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS (clean known state).");
+                    dev.AddCommand<Hp34401AResetCommand>("reset")
+                        .WithDescription("Instrument reset (*RST).");
+                    dev.AddCommand<Hp34401AReadCommand>("read")
+                        .WithDescription("Read a single value from the current configuration (READ?).");
+                    dev.AddCommand<Hp34401AMeasureCommand>("measure")
+                        .WithDescription("Configure a function then read one value.")
+                        .WithExample(new[] { "hp34401a", "measure", "dcv", "--range", "10", "--provider", "Simulated" });
+                    dev.AddCommand<Hp34401AStatsCommand>("stats")
+                        .WithDescription("Configure a function, take a burst, and report min/max/avg/sd.")
+                        .WithExample(new[] { "hp34401a", "stats", "dcv", "-n", "100", "--provider", "Simulated" });
+                    dev.AddCommand<Hp34401ASelfTestCommand>("selftest")
+                        .WithDescription("Run the internal self-test (*TST?).");
+                    dev.AddCommand<Hp34401AErrorsCommand>("errors")
+                        .WithDescription("Drain and print the error queue (SYST:ERR?).");
+                    dev.AddCommand<Hp34401ADisplayCommand>("display")
+                        .WithDescription("Set or clear the front-panel display text.");
+                });
+
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
                 {
                     dev.SetDescription("Drive an HP 8673B synthesized signal generator (2-26.5 GHz), e.g. as an LO.");
