@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Rigol DP832 triple-output DC Power Supply** (issue [#15](https://github.com/TGoodhew/GPIBUtils-NG/issues/15),
+  ported from [DP832](https://github.com/TGoodhew/DP832)) — a SCPI `IDcPowerSupply` in
+  `GpibUtils.Instruments.PowerSupplies` with per-channel control of all three outputs (CH1/CH2 30 V, CH3 5 V):
+  voltage / current limit (`:SOUR{n}:VOLT`/`:CURR`), output gating (`:OUTP CH{n}`), V/I/P measurement
+  (`:MEAS:...? CH{n}`), and OVP/OCP. The `IDcPowerSupply` members act on a selectable channel; explicit
+  per-channel overloads cover the rest. Configurable address (default GPIB address `GPIB0::2::INSTR` per the
+  DP832 User's Guide; the app used `::1::`); `RigolDp832SimulatedDevice` (10 tests);
+  `gpibutils dp832 idn|init|set|output|measure` CLI branch (#45). 🟡 **Verification Needed.**
+
 - **HP/Agilent E3633A DC Power Supply** (issue [#19](https://github.com/TGoodhew/GPIBUtils-NG/issues/19),
   ported from [E3633A-Demo](https://github.com/TGoodhew/E3633A-Demo)) — first driver in a new
   `GpibUtils.Instruments.PowerSupplies` project (`IDcPowerSupply`). Sets output voltage / current limit

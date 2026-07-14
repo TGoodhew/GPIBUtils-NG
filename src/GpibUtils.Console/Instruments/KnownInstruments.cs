@@ -43,6 +43,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp53131a", Hp53131A.DefaultResource, "HP 53131A universal frequency counter"),
             new KnownInstrument("hp3499a",  Hp3499A.DefaultResource,  "HP 3499A switch/control system"),
             new KnownInstrument("hpe3633a", HpE3633A.DefaultResource, "HP E3633A DC power supply"),
+            new KnownInstrument("dp832",    RigolDp832.DefaultResource, "Rigol DP832 triple DC power supply"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
