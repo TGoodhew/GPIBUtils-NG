@@ -15,6 +15,22 @@ namespace GpibUtils.Instruments.Analyzers
         public double[] Raw { get; set; }
     }
 
+    /// <summary>Power-statistics (CCDF) scalar result: average power, its probability, and the crest factor.</summary>
+    public struct CcdfResult
+    {
+        /// <summary>Average input power (dBm) — scalar [0].</summary>
+        public double AveragePowerDbm { get; set; }
+
+        /// <summary>Probability at the average input power (%) — scalar [1].</summary>
+        public double ProbabilityAtAveragePercent { get; set; }
+
+        /// <summary>Peak-to-average power ratio / crest factor (dB) — scalar [8].</summary>
+        public double PaprDb { get; set; }
+
+        /// <summary>The full raw <c>PSTatistic</c> scalar set (10 values).</summary>
+        public double[] Raw { get; set; }
+    }
+
     /// <summary>
     /// Driver for the Agilent E4406A VSA Transmitter Tester (Basic mode) — a SCPI measurement instrument.
     /// Selects Basic single-measurement mode at a center frequency and runs a named measurement via the
@@ -168,6 +184,30 @@ namespace GpibUtils.Instruments.Analyzers
             if (integrationBandwidthHz > 0)
                 Send(":SENSe:ACP:BANDwidth:INTegration " + integrationBandwidthHz.ToString("G17", CultureInfo.InvariantCulture) + " Hz");
             return Read(AcpRoot);
+        }
+
+        /// <summary>
+        /// Runs a Power-Statistics (CCDF) measurement: Basic single mode at <paramref name="centerHz"/>,
+        /// bounds the sample count so <c>:READ:PSTatistic?</c> returns promptly, then reads the scalar set and
+        /// maps the E4406A-documented layout — [0] average power dBm, [1] probability at the average (%),
+        /// [8] peak power = PAPR / crest factor (dB). A missing field yields <see cref="double.NaN"/>.
+        /// </summary>
+        public CcdfResult MeasureCcdf(double centerHz, long counts = 1_000_000)
+        {
+            SelectBasicMode();
+            SetSingleMeasurement();
+            SetCenterFrequencyHz(centerHz);
+            if (counts > 0)
+                Send(":SENSe:PSTatistic:COUNts " + counts.ToString(CultureInfo.InvariantCulture));
+
+            double[] s = Read(CcdfRoot);
+            return new CcdfResult
+            {
+                Raw = s,
+                AveragePowerDbm = s.Length > 0 ? s[0] : double.NaN,
+                ProbabilityAtAveragePercent = s.Length > 1 ? s[1] : double.NaN,
+                PaprDb = s.Length > 8 ? s[8] : double.NaN
+            };
         }
 
         /// <summary>Reads the head of the SCPI error queue (<c>:SYSTem:ERRor?</c>).</summary>
