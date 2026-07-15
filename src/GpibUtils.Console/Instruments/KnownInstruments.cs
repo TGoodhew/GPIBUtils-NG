@@ -60,6 +60,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("e4438c",   KeysightE4438C.DefaultResource, "Keysight E4438C ESG vector signal generator"),
             new KnownInstrument("hp8560e",  Hp8560E.DefaultResource,   "HP 8560E spectrum analyzer"),
             new KnownInstrument("e4406a",   AgilentE4406A.DefaultResource, "Agilent E4406A VSA transmitter tester"),
+            new KnownInstrument("hp85620a", Hp85620A.DefaultResource,  "HP 85620A mass memory module (via 8563E)"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
