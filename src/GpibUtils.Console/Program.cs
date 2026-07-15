@@ -49,6 +49,15 @@ namespace GpibUtils.Console
                         .WithDescription("Print the config-file path.");
                 });
 
+                // Attenuation-measurement app (issue #34): orchestrate source+LO+attenuator+receiver.
+                config.AddBranch<CommandSettings>("measure", m =>
+                {
+                    m.SetDescription("End-to-end attenuation-vs-frequency measurement (8340B + 8673B + 11713A + 8902A).");
+                    m.AddCommand<MeasureSweepCommand>("sweep")
+                        .WithDescription("Sweep frequency + attenuation and print per-frequency error/depth.")
+                        .WithExample(new[] { "measure", "sweep", "--start", "1000", "--stop", "2000", "--step", "500", "--provider", "Simulated" });
+                });
+
                 // HP-GL pen plotters (issues #38/#39/#40): stream a plot file to a 7090A/7475A/7550A.
                 config.AddBranch<CommandSettings>("plotter", dev =>
                 {
