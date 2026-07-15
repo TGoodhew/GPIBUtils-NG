@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.Plotters</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.Plotters</AssemblyName>
+    <Description>HP-GL pen-plotter drivers for GPIBUtils-NG (HP 7090A / 7475A / 7550A). Streams HP-GL over the shared vendor-neutral transport and can preview a plot via the GpibUtils.Hpgl renderer; no UI or vendor dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <ProjectReference Include="..\GpibUtils.Hpgl\GpibUtils.Hpgl.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.Plotters.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

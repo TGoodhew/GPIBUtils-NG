@@ -29,6 +29,7 @@
     <ProjectReference Include="..\GpibUtils.Instruments.Analyzers\GpibUtils.Instruments.Analyzers.csproj" />
     <ProjectReference Include="..\GpibUtils.Hpgl\GpibUtils.Hpgl.csproj" />
     <ProjectReference Include="..\GpibUtils.Mcp\GpibUtils.Mcp.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Plotters\GpibUtils.Instruments.Plotters.csproj" />
   </ItemGroup>
 
 </Project>
