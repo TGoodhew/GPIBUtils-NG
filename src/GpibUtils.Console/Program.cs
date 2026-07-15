@@ -49,6 +49,22 @@ namespace GpibUtils.Console
                         .WithDescription("Print the config-file path.");
                 });
 
+                // HP-GL pen plotters (issues #38/#39/#40): stream a plot file to a 7090A/7475A/7550A.
+                config.AddBranch<CommandSettings>("plotter", dev =>
+                {
+                    dev.SetDescription("Drive an HP 7090A/7475A/7550A HP-GL pen plotter (stream a plot; preview via #42).");
+                    dev.AddCommand<HpPlotterIdnCommand>("idn")
+                        .WithDescription("Show the plotter identity (OI?).")
+                        .WithExample(new[] { "plotter", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<HpPlotterInitCommand>("init")
+                        .WithDescription("Device clear + HP-GL initialize (IN).");
+                    dev.AddCommand<HpPlotterPlotCommand>("plot")
+                        .WithDescription("Stream an HP-GL plot file to the plotter; --preview writes a PNG too.")
+                        .WithExample(new[] { "plotter", "plot", "drawing.plt", "-m", "7550a", "--preview", "drawing.png" });
+                    dev.AddCommand<HpPlotterWindowCommand>("window")
+                        .WithDescription("Read the hard-clip output window (OW) and scaling points (OP).");
+                });
+
                 // MCP server (issue #41): expose the suite to an LLM client over JSON-RPC/stdio.
                 config.AddBranch<CommandSettings>("mcp", m =>
                 {
