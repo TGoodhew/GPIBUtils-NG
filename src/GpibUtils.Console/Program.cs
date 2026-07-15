@@ -413,6 +413,9 @@ namespace GpibUtils.Console
                         .WithDescription("Load a named entry from the card into module memory (CARDLOAD).");
                     dev.AddCommand<Hp85620AClearCommand>("clear")
                         .WithDescription("Dispose all entries in module memory (DISPOSE ALL).");
+                    dev.AddCommand<Hp85620ADecodeCommand>("decode")
+                        .WithDescription("Offline: decode a raw SRAM dump and list/export the stored DLPs (no GPIB).")
+                        .WithExample(new[] { "hp85620a", "decode", "SRAM_85620A.bin", "--out", "dlps" });
                 });
 
                 config.AddBranch<CommandSettings>("e4406a", dev =>

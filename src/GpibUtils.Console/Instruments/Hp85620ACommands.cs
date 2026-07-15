@@ -112,4 +112,48 @@ namespace GpibUtils.Console.Instruments
         public override int Execute(CommandContext context, Settings settings) =>
             Hp85620ARunner.Run(settings, d => { d.ClearModule(); return "module memory cleared (DISPOSE ALL)"; });
     }
+
+    /// <summary>Offline: decode a raw 85620A SRAM dump and list/export the stored DLP programs (no GPIB).</summary>
+    public sealed class Hp85620ADecodeCommand : Command<Hp85620ADecodeCommand.Settings>
+    {
+        public sealed class Settings : CommandSettings
+        {
+            [CommandArgument(0, "<image>")]
+            [Description("Path to a raw 85620A SRAM dump (e.g. SRAM_85620A.bin).")]
+            public string Image { get; set; }
+
+            [CommandOption("--out <DIR>")]
+            [Description("Write each extracted DLP to this directory as dlp_NN.bin.")]
+            public string OutDir { get; set; }
+        }
+
+        public override int Execute(CommandContext context, Settings settings) => Runner.Guard(() =>
+        {
+            if (!System.IO.File.Exists(settings.Image))
+            {
+                AnsiConsole.MarkupLineInterpolated($"[red]SRAM image not found:[/] {settings.Image}");
+                return 1;
+            }
+
+            var dlps = Hp85620ASramImage.DecodeDlps(System.IO.File.ReadAllBytes(settings.Image));
+            var table = new Table().AddColumn("DLP").AddColumn("Bytes").AddColumn("Preview");
+            for (int i = 0; i < dlps.Count; i++)
+            {
+                var preview = System.Text.Encoding.ASCII.GetString(dlps[i], 0, System.Math.Min(40, dlps[i].Length))
+                    .Replace('\r', ' ').Replace('\n', ' ');
+                table.AddRow((i + 1).ToString(), dlps[i].Length.ToString(), Markup.Escape(preview));
+            }
+            AnsiConsole.Write(table);
+
+            if (!string.IsNullOrWhiteSpace(settings.OutDir))
+            {
+                System.IO.Directory.CreateDirectory(settings.OutDir);
+                for (int i = 0; i < dlps.Count; i++)
+                    System.IO.File.WriteAllBytes(System.IO.Path.Combine(settings.OutDir, $"dlp_{i + 1:00}.bin"), dlps[i]);
+                AnsiConsole.MarkupLineInterpolated($"[green]wrote {dlps.Count} DLP file(s) to {settings.OutDir}[/]");
+            }
+            AnsiConsole.MarkupLineInterpolated($"[grey]{dlps.Count} DLP(s) extracted[/]");
+            return 0;
+        });
+    }
 }
