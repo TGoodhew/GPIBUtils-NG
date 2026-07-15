@@ -33,6 +33,9 @@ the target architecture.
 | `src/GpibUtils.Instruments.Scopes` | Oscilloscopes (`IOscilloscope`). **Rigol DS1054Z** (#27). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Calibrators` | DC voltage calibrators (`IDcVoltageCalibrator`). **Fluke 5440A/5440B** (#35). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Analyzers` | Spectrum/signal analyzers. **HP 8560E** (#13, `ISpectrumAnalyzer`, #43 SRQ-edge), **Agilent E4406A VSA** (#12), **HP 85620A** mass-memory via 8563E (#10/#14). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Plotters` | HP-GL pen plotters (`IPlotter`). **HP 7090A/7475A/7550A** (#38/#39/#40, one canonical `HpPlotter`); previews via #42. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Measurement` | Attenuation-vs-frequency orchestration — `MeasurementEngine` + 11793A `MicrowaveConverter` LO/IF planner (#34), drives 8340B+8673B+11713A+8902A. | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Verification` | Cross-instrument verification — `Fluke5440Verifier` (#37): 5440 → 34401A ppm/PASS-FAIL + CSV. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** (#4). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Counters` | Counters. **HP 53131A** (#21/#5, universal, #43 SRQ) + **HP 5351A** (#20) + **HP 5342A** (#32) microwave. | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.SignalSources` | Signal sources. **HP 8340B** (#7), **8673B** (#8), **8350B** (#22), **3325B** synth (#28/#29), **Keysight E4438C ESG** (#11, ARB). | 🟡 done, awaiting HW verification |
@@ -225,11 +228,24 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     verified. Uses Newtonsoft.Json (first in the solution).
   - **#43 CLOSED** (2026-07-15): the SRQ engine is complete and now wired into the MCP model DB (its last open
     checklist item). Pure-software infrastructure, no bench gate.
-  - **Remaining migration work (all non-scaffold now):** **#38/#39/#40 plotters** (7090A/7550A/HPGL streamer —
-    sources `7090ATest`/`7550ATest`/`HPGLTest`; now unblocked by #42) and the deferred apps: #34 (8340B output
-    test / the attenuation `MeasurementEngine`), #37 (5440Verify runner), the 8340A cal-verify harness, the
-    HP435B PDF report, the E4406A typed-result layer, the 85620A SRAM-image decode (#14). Plus discovery issue
-    **#70** (triage the Manuals folder). **All source repos cloned locally** under `C:\Users\Tony\Source\Repos`.
+  - **Plotters + both apps landed; #45/#54 closed (2026-07-15, PRs #78–#80):**
+    - **#38/#39/#40 plotters** (PR #78, `verify/38-plotters`): one canonical `HpPlotter` (7090A/7475A/7550A) in
+      `GpibUtils.Instruments.Plotters`; streams HP-GL, previews to PNG via #42. 16 tests. CLI `plotter
+      idn|init|plot|window` with `-m <model>`/`--preview`.
+    - **#34 attenuation-measurement app** (PR #79, `verify/34-measurement`): `GpibUtils.Measurement` — ported
+      `MeasurementEngine` + 11793A `MicrowaveConverter` planner; orchestrates 8340B→8673B(LO)→11713A→8902A.
+      Added `IStepAttenuator` (Switches, Hp11713A implements). 8 tests vs an ideal FakeBench. CLI `measure
+      sweep`. **The biggest milestone — the app side of #6.**
+    - **#37 5440 verification runner** (PR #80, `verify/37-verify`): `GpibUtils.Verification` —
+      `Fluke5440Verifier` drives the 5440 (#35) through a plan, reads back on the 34401A (#36), ppm + PASS/FAIL
+      + CSV. 11 tests vs linked simulators. CLI `verify 5440` (exit 1 on FAIL).
+    - **#45 (CLI-first) and #54 (address config) CLOSED** — software-complete standards, no hardware gate:
+      every instrument has a self-documenting CLI branch; `InstrumentAddressStore` + `config address …` persist
+      bench addresses (24 instruments). #54's only deferred piece is WPF surfacing (WPF-panels track).
+  - **Remaining migration work:** deferred app follow-ups — the 8340A cal-verify harness, the HP435B PDF
+    report, the E4406A typed-result layer, the 85620A SRAM-image decode (#14) — plus discovery issue **#70**
+    (triage the ~424-PDF Manuals folder) and future **WPF instrument panels**. **All source repos cloned
+    locally** under `C:\Users\Tony\Source\Repos`.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
@@ -247,8 +263,8 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     canonical migrations — 8673B → #3/#18/#23, 8902A → #2/#24, 8340B → #16. Not yet done.
   - **Blocked:** bench verification of the whole `verification-needed` set until back in Renton (board #46).
 
-- **Test count: 436 green** (2026-07-15), 13 test assemblies, `main` clean, no open PRs. New projects since the
-  driver batch: `GpibUtils.Hpgl` (#42, +51 tests), `GpibUtils.Mcp` (#41, +14 tests). The `mcp serve` command is
+- **Test count: 471 green** (2026-07-15), 16 test assemblies, `main` clean, no open PRs. New projects since the
+  driver batch: `GpibUtils.Hpgl` (#42, +51 tests), `GpibUtils.Mcp` (#41, +14 tests), `Plotters` (#38-40, +16), `Measurement` (#34, +8), `Verification` (#37, +11). The `mcp serve` command is
   the LLM integration surface; `hpgl render` renders captured plots.
 
 > Cross-machine note: this file (in-repo) is the durable handoff and travels via git. The assistant's
