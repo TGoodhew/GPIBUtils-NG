@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.Calibrators</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.Calibrators</AssemblyName>
+    <Description>Calibrator instruments for GPIBUtils-NG (Fluke 5440A/5440B DC voltage calibrator, ...). Drives the shared vendor-neutral transport; no UI or vendor dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.Calibrators.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

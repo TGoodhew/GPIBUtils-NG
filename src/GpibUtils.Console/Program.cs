@@ -325,7 +325,35 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + *RST (clean known state).");
                     dev.AddCommand<Hp3325BSetCommand>("set")
                         .WithDescription("Set waveform / frequency (Hz) / amplitude (V) / DC offset (V).")
-                        .WithExample(new[] { "hp3325b", "set", "-w", "sine", "-f", "1000", "-a", "1", "--provider", "Simulated" });
+                        .WithExample(new[] { "hp3325b", "set", "-w", "sine", "-f", "1000", "-l", "1", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("fluke5440", dev =>
+                {
+                    dev.SetDescription("Drive a Fluke 5440A/5440B DC voltage calibrator (mnemonic HP-IB, no *IDN?).");
+                    dev.AddCommand<Fluke5440IdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (5440 has no *IDN?).");
+                    dev.AddCommand<Fluke5440FirmwareCommand>("firmware")
+                        .WithDescription("Read the firmware version (GVRS).")
+                        .WithExample(new[] { "fluke5440", "firmware", "--provider", "Simulated" });
+                    dev.AddCommand<Fluke5440InitCommand>("init")
+                        .WithDescription("Device clear + RESET (power-on state).");
+                    dev.AddCommand<Fluke5440ResetCommand>("reset")
+                        .WithDescription("Reset to the power-on state (RESET).");
+                    dev.AddCommand<Fluke5440SetCommand>("set")
+                        .WithDescription("Program the output voltage (SOUT); --operate to also go to Operate.")
+                        .WithExample(new[] { "fluke5440", "set", "10", "--operate", "--provider", "Simulated" });
+                    dev.AddCommand<Fluke5440GetCommand>("get")
+                        .WithDescription("Read the present programmed output level (GOUT).");
+                    dev.AddCommand<Fluke5440OperateCommand>("operate")
+                        .WithDescription("Switch the output to Operate (OPER).");
+                    dev.AddCommand<Fluke5440StandbyCommand>("standby")
+                        .WithDescription("Switch the output to Standby (STBY).");
+                    dev.AddCommand<Fluke5440SenseCommand>("sense")
+                        .WithDescription("Select external 4-wire (ext) or internal 2-wire (int) sensing.")
+                        .WithExample(new[] { "fluke5440", "sense", "ext", "--provider", "Simulated" });
+                    dev.AddCommand<Fluke5440StatusCommand>("status")
+                        .WithDescription("Read status / error / doing-state (GSTS / GERR / GONG).");
                 });
 
                 config.AddBranch<CommandSettings>("hp8673b", dev =>
