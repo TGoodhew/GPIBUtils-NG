@@ -242,10 +242,22 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     - **#45 (CLI-first) and #54 (address config) CLOSED** — software-complete standards, no hardware gate:
       every instrument has a self-documenting CLI branch; `InstrumentAddressStore` + `config address …` persist
       bench addresses (24 instruments). #54's only deferred piece is WPF surfacing (WPF-panels track).
-  - **Remaining migration work:** deferred app follow-ups — the 8340A cal-verify harness, the HP435B PDF
-    report, the E4406A typed-result layer, the 85620A SRAM-image decode (#14) — plus discovery issue **#70**
-    (triage the ~424-PDF Manuals folder) and future **WPF instrument panels**. **All source repos cloned
-    locally** under `C:\Users\Tony\Source\Repos`.
+  - **Small software follow-ups done (2026-07-15, PR #81 — pure software, no bench gate):**
+    - **85620A SRAM-image decode** (#14): `Hp85620ASramImage` — offline de-scramble (address + data bit
+      permutations) + DLP extraction between the 0x10,0x80 / 0x3B,0xFF markers; CLI `hp85620a decode`. The
+      extracted DLP bodies feed the existing `FUNCDEF` path. This is #14's remaining non-hardware scope.
+    - **E4406A typed CCDF** (#12): `MeasureCcdf` → `CcdfResult` (PSTatistic [0]/[1]/[8] = avg/prob/PAPR).
+  - **Follow-ups NOT done (with reasons):**
+    - **8340A/8340B output-test harness** — subsumed by #34's `MeasurementEngine` (`DetectSignal` /
+      `MeasureRfPower`); no separate WPF harness planned.
+    - **HP435B PDF report** — the `HP435B-Test` source repo is **not cloned locally** and it used **Syncfusion**
+      (a heavy commercial PDF dependency we don't want). Blocked/skipped until the source is available and a
+      non-Syncfusion report format is chosen.
+    - **Full E4406A typed-result layer** (ACP/Waveform/Spectrum) — needs the multi-model scalar-layout dialect
+      abstraction (kept upstream); larger than a small follow-up, deferred.
+  - **Remaining work:** discovery issue **#70** (triage the ~424-PDF Manuals folder) and future **WPF
+    instrument panels**. **All source repos cloned locally** under `C:\Users\Tony\Source\Repos` (except
+    `HP435B-Test`).
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
@@ -263,7 +275,7 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     canonical migrations — 8673B → #3/#18/#23, 8902A → #2/#24, 8340B → #16. Not yet done.
   - **Blocked:** bench verification of the whole `verification-needed` set until back in Renton (board #46).
 
-- **Test count: 471 green** (2026-07-15), 16 test assemblies, `main` clean, no open PRs. New projects since the
+- **Test count: 484 green** (2026-07-15), 16 test assemblies, `main` clean, no open PRs. New projects since the
   driver batch: `GpibUtils.Hpgl` (#42, +51 tests), `GpibUtils.Mcp` (#41, +14 tests), `Plotters` (#38-40, +16), `Measurement` (#34, +8), `Verification` (#37, +11). The `mcp serve` command is
   the LLM integration surface; `hpgl render` renders captured plots.
 
