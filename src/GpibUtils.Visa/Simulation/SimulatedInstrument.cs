@@ -28,6 +28,17 @@ namespace GpibUtils.Visa.Simulation
         /// <summary>Notifies <see cref="WriteObserver"/> of a write. Called by the simulated session.</summary>
         internal void ObserveWrite(string command) => WriteObserver?.Invoke(command);
 
+        /// <summary>
+        /// Optional hook invoked immediately before every serial poll reads the status byte. Lets a model
+        /// advance a multi-poll state machine — e.g. an SRQ-edge sweep that must go BUSY (the expect bit
+        /// clears) on one poll and assert request-service (RQS) on a later one — so the #43
+        /// <see cref="Srq.CompletionWaiter"/> SRQ-edge flow can be exercised headlessly (used by the HP 8560E).
+        /// </summary>
+        public Action OnSerialPoll { get; set; }
+
+        /// <summary>Advances the model's per-poll state. Called by the simulated session before each poll.</summary>
+        internal void ObserveSerialPoll() => OnSerialPoll?.Invoke();
+
         /// <summary>The status byte returned by a serial poll (RQS/bit-6 is OR-ed in when
         /// <see cref="ServiceRequestPending"/> is set).</summary>
         public byte StatusByte { get; set; }

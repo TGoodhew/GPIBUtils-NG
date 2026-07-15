@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.Calibrators;
 using GpibUtils.Instruments.Counters;
 using GpibUtils.Instruments.Meters;
@@ -57,6 +58,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("ds1054z",  RigolDs1054Z.DefaultResource, "Rigol DS1054Z oscilloscope"),
             new KnownInstrument("fluke5440", Fluke5440A.DefaultResource, "Fluke 5440A/5440B DC voltage calibrator"),
             new KnownInstrument("e4438c",   KeysightE4438C.DefaultResource, "Keysight E4438C ESG vector signal generator"),
+            new KnownInstrument("hp8560e",  Hp8560E.DefaultResource,   "HP 8560E spectrum analyzer"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
