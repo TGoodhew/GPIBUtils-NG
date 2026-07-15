@@ -27,6 +27,7 @@
     <ProjectReference Include="..\GpibUtils.Instruments.Scopes\GpibUtils.Instruments.Scopes.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Calibrators\GpibUtils.Instruments.Calibrators.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Analyzers\GpibUtils.Instruments.Analyzers.csproj" />
+    <ProjectReference Include="..\GpibUtils.Hpgl\GpibUtils.Hpgl.csproj" />
   </ItemGroup>
 
 </Project>
