@@ -4,11 +4,31 @@
     <TargetFramework>net472</TargetFramework>
     <RootNamespace>GpibUtils.Mcp</RootNamespace>
     <AssemblyName>GpibUtils.Mcp</AssemblyName>
-    <Description>MCP server surface exposing the GPIBUtils-NG suite to LLM clients, plus the instrument-model DB. Scaffold — implemented by issue #41.</Description>
+    <Description>MCP (Model Context Protocol) server surface exposing the GPIBUtils-NG suite to LLM clients — discover / query / write / read / clear over the provider model, the shared instrument-model DB, #43 SRQ completion, and #42 HP-GL screen capture. Ported from GPIB-MCP (issue #41).</Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <ProjectReference Include="..\GpibUtils.Hpgl\GpibUtils.Hpgl.csproj" />
+    <ProjectReference Include="..\GpibUtils.Common\GpibUtils.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Mcp.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- Bundled instrument-model database: shipped next to the assembly under data/instruments. -->
+  <ItemGroup>
+    <Content Include="data\instruments\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>data\instruments\%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
 
 </Project>

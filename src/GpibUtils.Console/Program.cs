@@ -49,6 +49,16 @@ namespace GpibUtils.Console
                         .WithDescription("Print the config-file path.");
                 });
 
+                // MCP server (issue #41): expose the suite to an LLM client over JSON-RPC/stdio.
+                config.AddBranch<CommandSettings>("mcp", m =>
+                {
+                    m.SetDescription("Model Context Protocol server exposing the suite to an LLM client.");
+                    m.AddCommand<McpServeCommand>("serve")
+                        .WithDescription("Run the MCP JSON-RPC server over stdio (stdout = protocol only).");
+                    m.AddCommand<McpToolsCommand>("tools")
+                        .WithDescription("List the tools the MCP server exposes and the loaded model DB size.");
+                });
+
                 // HP-GL rendering utility (issue #42): render a captured plot file to PNG/SVG.
                 config.AddBranch<CommandSettings>("hpgl", h =>
                 {
