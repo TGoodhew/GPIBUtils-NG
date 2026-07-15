@@ -31,9 +31,11 @@ the target architecture.
 | `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + 17 device branches). | ✅ done (base + config + 17 devices) |
 | `tests/*` (Visa, Common, Switches, SignalSources, Meters, Counters, PowerSupplies, Scopes, Wpf) | xUnit. | ✅ 286 tests green |
 | `src/GpibUtils.Instruments.Scopes` | Oscilloscopes (`IOscilloscope`). **Rigol DS1054Z** (#27). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Calibrators` | DC voltage calibrators (`IDcVoltageCalibrator`). **Fluke 5440A/5440B** (#35). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.Analyzers` | Spectrum/signal analyzers. **HP 8560E** (#13, `ISpectrumAnalyzer`, #43 SRQ-edge), **Agilent E4406A VSA** (#12), **HP 85620A** mass-memory via 8563E (#10/#14). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Switches` | Switch/attenuator drivers. **HP 11713A** (#6) + **HP 3499A** (#4). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Counters` | Counters. **HP 53131A** (#21/#5, universal, #43 SRQ) + **HP 5351A** (#20) + **HP 5342A** (#32) microwave. | 🟡 done, awaiting HW verification |
-| `src/GpibUtils.Instruments.SignalSources` | Signal sources. **HP 8340B** (#7), **8673B** (#8), **8350B** (#22), **3325B** synth (#28/#29). | 🟡 done, awaiting HW verification |
+| `src/GpibUtils.Instruments.SignalSources` | Signal sources. **HP 8340B** (#7), **8673B** (#8), **8350B** (#22), **3325B** synth (#28/#29), **Keysight E4438C ESG** (#11, ARB). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.Meters` | Receivers / power meters / DMMs. **8902A** (#9), **34401A** (#36/#17), **E4418B** (#25, `IPowerMeter`, #43 SRQ), **438A** (#33), **DM3058** (#26), **3458A** (#31). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.PowerSupplies` | DC power supplies (`IDcPowerSupply`). **HP E3633A** (#19) + **Rigol DP832** (#15, 3-ch). | 🟡 done, awaiting HW verification |
 | `src/GpibUtils.Instruments.*` (Scopes, Analyzers, Calibrators, plotters) | Remaining categories. | ⬜ in progress (this session) |
@@ -166,64 +168,71 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   HP 8902A (#9), HP 34401A (#36/#17), HP 53131A (#21/#5), HP 3499A (#4); tags `verify/6-hp11713a` /
   `verify/7-hp8340b` / `verify/8-hp8673b` / `verify/9-hp8902a` / `verify/36-hp34401a` / `verify/21-hp53131a` /
   `verify/4-hp3499a`. **187 tests green.**
-- **As of 2026-07-15:** `main` green (278 tests), **no open PRs**. **Batch migration in progress** (this
-  session, PRs #57–#68): 34401A (#57), 53131A+3499A (#58), then E3633A (#59), DP832 (#60), E4418B (#61),
-  438A (#62), DM3058 (#63), 3458A (#64), 5351A (#65), 5342A (#66), 8350B (#67), 3325B (#68) — all merged,
-  each `verification-needed` + bench checklist (not closed). **Closed as consolidated/superseded:** #30
-  (→#26), #29 (→#28), #16 (→#7 8340B covers 8340A), #18/#23/#3 (→#8), #24/#2 (→#9). All legacy source repos
-  now cloned locally under `C:\Users\Tony\Source\Repos`.
+- **As of 2026-07-15:** `main` green (**371 tests**), **no open PRs**. Earlier batch migration (PRs #57–#68):
+  34401A (#57), 53131A+3499A (#58), E3633A (#59), DP832 (#60), E4418B (#61), 438A (#62), DM3058 (#63),
+  3458A (#64), 5351A (#65), 5342A (#66), 8350B (#67), 3325B (#68); DS1054Z (#69). Then the **final driver
+  batch (PRs #71–#75):** Fluke 5440A (#71), E4438C (#72), 8560E (#73), E4406A (#74), 85620A (#75) — all
+  merged, each `verification-needed` + bench checklist (not closed). **Every legacy-repo instrument driver is
+  now ported.** **Closed as consolidated/superseded:** #30 (→#26), #29 (→#28), #16 (→#7), #18/#23/#3 (→#8),
+  #24/#2 (→#9). All legacy source repos cloned locally under `C:\Users\Tony\Source\Repos`.
 - **DS1054Z landed** (#27, PR #69): new `GpibUtils.Instruments.Scopes` (`IOscilloscope`) — Rigol DS1054Z
   (run/stop/single/autoscale, channel display, `:MEASure:ITEM?`). USB/LXI (no GPIB).
-- **Remaining to port (specs already gathered — see per-instrument notes below):**
-  1. **#35 Fluke 5440A/5440B calibrator** (new `Calibrators` proj) — source `5440Controller/Program.cs`.
-     Mnemonic, predates *IDN? (use `GVRS` for firmware). Cmds: `SOUT <v>` (G7, <8 sig digits), `OPER`/`STBY`,
-     `ESNS`(ext 4-wire)/`ISNS`(int 2-wire), `GOUT`, `GERR` (no `?`), `RESET`, `SSRQ <n>`/`GSRQ`, `GSTS`,
-     `GONG`(0=idle). Factory addr **7** (confirmed, `5440B-AF User Manual.pdf`). No SRQ in code; settle ~1 s
-     after OPER. Note: the 34401AController already exposes a minimal 5440 subset — this is the full driver.
-  2. **#11 Keysight E4438C ESG** (SignalSources) — source `ESG-SignalCreator.Core/EsgController.cs`. SCPI:
-     `:FREQuency:FIXed <hz> Hz`, `:POWer:LEVel <dbm> dBm`, `:OUTPut:STATe ON|OFF`, `:OUTPut:MODulation:STATe`,
-     `:RADio:ARB:STATe`, ARB download `:MEMory:DATA "WFM1:<name>",<block>` + `*OPC?`. Addr 19 (lab; manual
-     doesn't print a factory value). Completion via `*OPC?` (not SRQ). ARB = interleaved I/Q 16-bit big-endian.
-  3. **#13 HP 8560E spectrum analyzer** (new `Analyzers` proj) — **THE ideal #43 SRQ consumer.** Manual (not
-     the DLPBits app, which only loads DLPs) mnemonics: `IP`, `CF <f>`, `SP <span>`, `RB`/`VB`, `ST`, `SNGLS`,
-     `TS` (take sweep), `MKPK HI`, `TRA?` (trace read), marker `MKF?`/`MKA?`. **RQS mask model** (Table 7-9):
-     status bits RQS=64, ERROR=32, COMMAND-COMPLETE=16, END-OF-SWEEP=4, MESSAGE=2, TRIGGER=1; `RQS <mask>` /
-     `RQS 0`. Sweep-complete: `RQS 16` + `…;TS;` → SRQ on command-complete (SRQ-edge flow, expect bit=RQS 64,
-     errorBit=32) — build the StatusModel like `Hp53131A.StatusModel()`. Factory addr **18**. `DONE?` handshake
-     is the non-SRQ alternative.
-  4. **#10/#14 HP 85620A mass memory + 8563E card** (Analyzers or a Storage helper) — sources `MemCardTest`
-     (8563E, addr 18) + `DLPBits` (85620A DLP loader). Storage cmds: `ID?`, `MSDEV MEM|CARD;`, `CATALOG?;`,
-     `CARDSTORE %name%;`, `CARDLOAD %name%;`, `DONE?;`, `ERR?;`, `DISPOSE ALL;`, `FUNCDEF <dlp>;`. Completion
-     via `DONE?`/`ERR?` (NOT SRQ). SRAM image decode (addr/data bit de-scramble + DLP extraction between
-     markers 0x10,0x80 … 0x3b,0xff) — see `DLPBits/Program.cs`. Card FORMAT can't be done over GPIB.
-  5. **#12 Agilent E4406A VSA** (Analyzers) — source `ESG-SignalCreator.Core/Measure/*`. `:INSTrument:SELect
-     BASIC`, `:INITiate:CONTinuous OFF`, `:SENSe:FREQuency:CENTer <hz> Hz`, per-measurement `:READ:<root>?`
-     (CHPower/ACP/PSTatistic/WAVeform/SPECtrum). No global span. Blocking read (no SRQ). Manual factory addr
-     **18** (app used 17).
-  6. **#42 HP-GL/PCL rendering** (fills `GpibUtils.Hpgl` scaffold) + **#38/#39/#40 plotters** (7090A/7550A/
+- **Driver-migration backlog CLEARED** (2026-07-15, PRs #71–#75 — all 🟡 awaiting HW, `verification-needed`):
+  - **#35 Fluke 5440A/5440B calibrator** (PR #71, tag `verify/35-fluke5440a`): new `Calibrators` proj,
+    `IDcVoltageCalibrator`. Mnemonic (no *IDN?; `GVRS`=firmware). SOUT/GOUT/INCR/SREF/GREF, OPER/STBY,
+    ESNS/ISNS, EGRD/IGRD, DIVY/DIVN, BSTV/BSTC/BSTO, SVLM/SCLM limits, GSTS/GERR/GONG, SSRQ/GSRQ/GSPB,
+    TSTA/TSTD/TSTH. G7 numeric format. Addr **7**. 20 tests. **PR #71 also fixed a pre-existing CLI-wide
+    bug:** `hp3325b set` aliased amplitude to `-a`, colliding with the global `-a|--address` → Spectre model
+    validation failed for the ENTIRE command tree (every command errored "Option -a is duplicated"). The CLI
+    was unrunnable on `main` before this. Amplitude is now `-l|--amplitude`.
+  - **#11 Keysight E4438C ESG** (PR #72, tag `verify/11-e4438c`): `SignalSources`, `ISignalSource` + Hz/ARB
+    surface. `:FREQ:FIXed`/`:POW:LEVel` (+MIN/MAX), RF/mod on-off, reference auto/source; Dual ARB — download
+    interleaved 16-bit two's-complement **big-endian** I/Q to WFM1 as an IEEE-488.2 definite-length block,
+    select/play, copy to/from NVWFM. Completion via `*OPC?` + `:SYST:ERR?` (not SRQ). Addr **19** (lab). 20 tests.
+  - **#13 HP 8560E spectrum analyzer** (PR #73, tag `verify/13-hp8560e`): new `Analyzers` proj,
+    `ISpectrumAnalyzer`. **First #43 SRQ-EDGE consumer** — `SingleSweep` arms `RQS 16` + `SNGLS;TS;`,
+    `CompletionWaiter` waits for busy then request-service (0x40), via `SessionStatusChannel`; StatusModel
+    (Table 7-9, RequestServiceBit set) built in `Hp8560E.StatusModel()`. IP/CF/SP/RB/VB/ST, TRA?, MKPK HI/
+    MKF?/MKA?. Addr **18**. 15 tests (incl. complete/error/timeout). **Added a reusable `OnSerialPoll` hook to
+    the core `SimulatedInstrument`** so an SRQ-edge sweep's busy→done transition can be advanced per poll
+    headlessly (the 53131A's direct-bit flow needed no such hook).
+  - **#12 Agilent E4406A VSA** (PR #74, tag `verify/12-e4406a`): `Analyzers`. Basic single-measurement mode;
+    four SCPI verbs (`:MEASure`/`:CONFigure`/`:READ`/`:FETCh` + result index) → parsed scalar sets; typed
+    ChannelPower (span+integ-BW → [power,PSD]) and ACP (no settable span, FW-truthed). No global span,
+    blocking `:READ` (no SRQ). Addr **18** (manual; app used 17). 15 tests.
+  - **#10/#14 HP 85620A mass memory / 8563E** (PR #75, tag `verify/10-hp85620a`): `Analyzers`. Driven through
+    the analyzer: `ID?`, `MSDEV MEM|CARD`, `CATALOG?;` (parsed entries + BYTES FREE), `CARDSTORE`/`CARDLOAD
+    %name%;`, `DISPOSE ALL;`, `FUNCDEF`. Completion via `DONE?;`/`ERR?;` (NOT SRQ) → typed `Hp85620AException`.
+    Addr **18**. 15 tests. **Deferred (own follow-up on #14):** the raw SRAM-image decode (bit de-scramble +
+    DLP extraction from a binary dump, `DLPBits/Program.cs`) and card FORMAT (not possible over HP-IB) —
+    offline/file utilities, not live-instrument functions.
+- **New tracking issue #70** (2026-07-15): review the ~424 PDFs in the Manuals folder and migrate a driver for
+  every VISA/488.2-controllable device not yet backlogged (triage table + per-instrument issues). This is the
+  next discovery source now that the legacy-repo backlog's drivers are all ported.
+- **All driver-porting from the legacy repos is DONE.** Remaining migration work is non-driver:
+  1. **#42 HP-GL/PCL rendering** (fills `GpibUtils.Hpgl` scaffold) + **#38/#39/#40 plotters** (7090A/7550A/
      HPGL streamer) — sources `7090ATest`, `7550ATest`, `HPGLTest`. Plotters depend on #42.
-  7. **#41 GPIB-MCP server** (fills `GpibUtils.Mcp` scaffold) — source `GPIB-MCP` (local).
-  - Apps deferred to their own follow-ups: #34 (8340B output test), #37 (5440Verify runner), the 8340A
-    cal-verify harness, the HP435B PDF report, the attenuation MeasurementEngine.
+  2. **#41 GPIB-MCP server** (fills `GpibUtils.Mcp` scaffold) — source `GPIB-MCP` (local). Brings the
+     instrument DB → also the `StatusModel` source for the #43 SRQ engine.
+  - Apps deferred to their own follow-ups: #34 (8340B output test / the attenuation `MeasurementEngine`),
+    #37 (5440Verify runner), the 8340A cal-verify harness, the HP435B PDF report, the E4406A typed-result
+    layer, the 85620A SRAM-image decode (#14).
   - **All source repos are cloned locally** under `C:\Users\Tony\Source\Repos`.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
-     instruments (11713A/8340B/8673B/8902A) are now migrated, so the deferred `MeasurementEngine`
+     instruments (11713A/8340B/8673B/8902A) are migrated, so the deferred `MeasurementEngine`
      (orchestrates source→LO→attenuator→receiver) is unblocked. Port it from
      `C:\Users\Tony\Source\Repos\HP-Attenuator\src\HP-Attenuator.Core\Measurement\MeasurementEngine.cs`.
      Maps to issue #34 / the app side of #6. Biggest milestone; first real bench demo.
-  2. **Next driver (breadth):** ~~HP 34401A DMM (#57)~~, ~~HP 53131A counter (#21/#5)~~, ~~HP 3499A switch
-     (#4)~~ ✅ all done. Next candidates: HP 34401A power meters #25/#33 (`Meters`), or the E4418B power
-     meter / HP 5351A counter seen in `GPIBUtils/HPDevices` (own issues). SCPI DMM/counter/switch pattern is
-     now well-trodden.
-  3. **Fill a scaffold:** **#41 GPIB-MCP server** (brings the instrument DB → also the `StatusModel`
+  2. **Fill a scaffold:** **#41 GPIB-MCP server** (brings the instrument DB → also the `StatusModel`
      source for the #43 SRQ engine + a control surface) or **#42 HP-GL rendering** (unblocks plotters
      #38/#39/#40).
+  3. **Work #70** — triage the Manuals folder and migrate any newly-discovered programmable instruments.
   4. **WPF instrument panels** + finish #54's WPF address-config surfacing.
   - **Quick backlog cleanup (any time):** close the consolidated duplicate issues as superseded by the
     canonical migrations — 8673B → #3/#18/#23, 8902A → #2/#24, 8340B → #16. Not yet done.
-  - **Blocked:** bench verification of #6–#9 until back in Renton (board #46).
+  - **Blocked:** bench verification of the whole `verification-needed` set until back in Renton (board #46).
 
 > Cross-machine note: this file (in-repo) is the durable handoff and travels via git. The assistant's
 > local file-memory (`~/.claude/projects/.../memory/`) is machine-local and does NOT follow you — but it
