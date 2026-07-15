@@ -328,6 +328,23 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp3325b", "set", "-w", "sine", "-f", "1000", "-l", "1", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp8560e", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8560E spectrum analyzer (mnemonic HP-IB, #43 SRQ sweep completion).");
+                    dev.AddCommand<Hp8560EIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (ID?).")
+                        .WithExample(new[] { "hp8560e", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8560EInitCommand>("init")
+                        .WithDescription("Device clear + preset + clear SRQ mask (clean known state).");
+                    dev.AddCommand<Hp8560ESweepCommand>("sweep")
+                        .WithDescription("Set center/span/RBW, take a single sweep (SRQ handshake); --peak reports the marker.")
+                        .WithExample(new[] { "hp8560e", "sweep", "-c", "1000", "-s", "10", "--peak", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8560ETraceCommand>("trace")
+                        .WithDescription("Read the current trace (TRA?) and print a summary.");
+                    dev.AddCommand<Hp8560EPeakCommand>("peak")
+                        .WithDescription("Place the marker on the peak and report frequency + amplitude.");
+                });
+
                 config.AddBranch<CommandSettings>("e4438c", dev =>
                 {
                     dev.SetDescription("Drive a Keysight E4438C ESG vector RF signal generator (SCPI).");

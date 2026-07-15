@@ -106,6 +106,7 @@ namespace GpibUtils.Visa.Simulation
         public StatusByte SerialPoll()
         {
             ThrowIfDisposed();
+            _instrument.ObserveSerialPoll();   // let a model advance its per-poll state machine (SRQ-edge)
             return new StatusByte(_instrument.EffectiveStatusByte());
         }
 
