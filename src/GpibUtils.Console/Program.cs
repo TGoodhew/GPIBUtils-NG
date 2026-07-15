@@ -49,6 +49,15 @@ namespace GpibUtils.Console
                         .WithDescription("Print the config-file path.");
                 });
 
+                // HP-GL rendering utility (issue #42): render a captured plot file to PNG/SVG.
+                config.AddBranch<CommandSettings>("hpgl", h =>
+                {
+                    h.SetDescription("HP-GL/2 plot utilities (render a captured plot file to an image).");
+                    h.AddCommand<HpglRenderCommand>("render")
+                        .WithDescription("Render an HP-GL/2 plot file (.plt) to PNG (default) or SVG.")
+                        .WithExample(new[] { "hpgl", "render", "capture.plt", "-o", "capture.png" });
+                });
+
                 // Instrument command branches (issue #45): every device is fully driveable from the CLI.
                 // The branch itself carries no options; each leaf owns the shared instrument options
                 // (provider/address/timeout/…) so they parse in the natural trailing position,
