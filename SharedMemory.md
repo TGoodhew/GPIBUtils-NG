@@ -41,8 +41,8 @@ the target architecture.
 | `src/GpibUtils.Instruments.*` (Scopes, Analyzers, Calibrators, plotters) | Remaining categories. | ⬜ in progress (this session) |
 | `src/GpibUtils.Wpf` | WPF/MVVM desktop shell (providers/discover/query on the core). | ✅ done (needs a visual smoke test) |
 | `src/GpibUtils.Visa/Srq` | Shared SRQ/serial-poll completion engine (`CompletionWaiter` + data-driven `StatusModel`, `IStatusChannel`, `SessionStatusChannel`). **#43 ported.** | ✅ done |
-| `src/GpibUtils.Hpgl` | HP-GL / PCL parser + renderer. | 🏗 scaffold (filled by #42) |
-| `src/GpibUtils.Mcp` | MCP server surface + instrument DB. | 🏗 scaffold (filled by #41) |
+| `src/GpibUtils.Hpgl` | HP-GL/2 parser + renderer (`HpglRenderer.RenderToPng`/`RenderToSvg`). **#42 filled** (ported from GPIB-MCP; KE5FX-derived). | ✅ done |
+| `src/GpibUtils.Mcp` | MCP JSON-RPC/stdio server + 55-model instrument DB, over the provider model; `srq_wait` (→#43), `screen_capture` (→#42). **#41 filled.** | ✅ done |
 | CI | GitHub Actions: build + test whole solution, no NI. | ✅ done |
 
 ## Development workflow (no-hardware build policy)
@@ -209,15 +209,27 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **New tracking issue #70** (2026-07-15): review the ~424 PDFs in the Manuals folder and migrate a driver for
   every VISA/488.2-controllable device not yet backlogged (triage table + per-instrument issues). This is the
   next discovery source now that the legacy-repo backlog's drivers are all ported.
-- **All driver-porting from the legacy repos is DONE.** Remaining migration work is non-driver:
-  1. **#42 HP-GL/PCL rendering** (fills `GpibUtils.Hpgl` scaffold) + **#38/#39/#40 plotters** (7090A/7550A/
-     HPGL streamer) — sources `7090ATest`, `7550ATest`, `HPGLTest`. Plotters depend on #42.
-  2. **#41 GPIB-MCP server** (fills `GpibUtils.Mcp` scaffold) — source `GPIB-MCP` (local). Brings the
-     instrument DB → also the `StatusModel` source for the #43 SRQ engine.
-  - Apps deferred to their own follow-ups: #34 (8340B output test / the attenuation `MeasurementEngine`),
-    #37 (5440Verify runner), the 8340A cal-verify harness, the HP435B PDF report, the E4406A typed-result
-    layer, the 85620A SRAM-image decode (#14).
-  - **All source repos are cloned locally** under `C:\Users\Tony\Source\Repos`.
+- **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
+  - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
+    `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
+    `StrokeFont`. KE5FX `7470.cpp`-derived (attribution preserved). **51 tests** incl. a pixel render-regression
+    vs a golden 8563E capture. CLI `gpibutils hpgl render <file.plt> [-o out] [--svg]`, visually verified.
+    **Unblocks plotters #38/#39/#40.**
+  - **#41 GPIB-MCP server landed** (PR #77, tag `verify/41-mcp`): JSON-RPC 2.0 stdio MCP server + the shared
+    **55-model instrument DB**, rebuilt on the **provider model** (not the source's NI-VISA manager). Tools:
+    `list_providers`/`discover`/`query`/`write`/`read`/`clear`/`identify`/`db_list`/`db_get`/`db_match`/
+    `srq_wait`/`screen_capture`. Cross-wiring: **`srq_wait`** runs a DB `statusModel` through the #43
+    `CompletionWaiter` (a JSON `statusModel` block deserializes straight into `GpibUtils.Visa.Srq.StatusModel`;
+    the 8563E def carries one); **`screen_capture`** renders a model's HP-GL capture profile via #42. CLI
+    `gpibutils mcp serve|tools`; user DB at `%LOCALAPPDATA%\GpibUtils\Mcp`. **14 tests**; live stdio handshake
+    verified. Uses Newtonsoft.Json (first in the solution).
+  - **#43 CLOSED** (2026-07-15): the SRQ engine is complete and now wired into the MCP model DB (its last open
+    checklist item). Pure-software infrastructure, no bench gate.
+  - **Remaining migration work (all non-scaffold now):** **#38/#39/#40 plotters** (7090A/7550A/HPGL streamer —
+    sources `7090ATest`/`7550ATest`/`HPGLTest`; now unblocked by #42) and the deferred apps: #34 (8340B output
+    test / the attenuation `MeasurementEngine`), #37 (5440Verify runner), the 8340A cal-verify harness, the
+    HP435B PDF report, the E4406A typed-result layer, the 85620A SRAM-image decode (#14). Plus discovery issue
+    **#70** (triage the Manuals folder). **All source repos cloned locally** under `C:\Users\Tony\Source\Repos`.
 
 - **Next step — pick a track (recommendation = ①):**
   1. **Build the end-to-end attenuation-measurement app** *(recommended)* — all four `HP-Attenuator`
@@ -229,10 +241,15 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
      source for the #43 SRQ engine + a control surface) or **#42 HP-GL rendering** (unblocks plotters
      #38/#39/#40).
   3. **Work #70** — triage the Manuals folder and migrate any newly-discovered programmable instruments.
-  4. **WPF instrument panels** + finish #54's WPF address-config surfacing.
+  4. **Plotters #38/#39/#40** — now unblocked by #42's renderer (drive the plotter over the bus + render).
+  5. **WPF instrument panels** + finish #54's WPF address-config surfacing.
   - **Quick backlog cleanup (any time):** close the consolidated duplicate issues as superseded by the
     canonical migrations — 8673B → #3/#18/#23, 8902A → #2/#24, 8340B → #16. Not yet done.
   - **Blocked:** bench verification of the whole `verification-needed` set until back in Renton (board #46).
+
+- **Test count: 436 green** (2026-07-15), 13 test assemblies, `main` clean, no open PRs. New projects since the
+  driver batch: `GpibUtils.Hpgl` (#42, +51 tests), `GpibUtils.Mcp` (#41, +14 tests). The `mcp serve` command is
+  the LLM integration surface; `hpgl render` renders captured plots.
 
 > Cross-machine note: this file (in-repo) is the durable handoff and travels via git. The assistant's
 > local file-memory (`~/.claude/projects/.../memory/`) is machine-local and does NOT follow you — but it
