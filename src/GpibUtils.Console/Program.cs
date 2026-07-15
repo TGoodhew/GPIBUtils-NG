@@ -345,6 +345,26 @@ namespace GpibUtils.Console
                         .WithDescription("Place the marker on the peak and report frequency + amplitude.");
                 });
 
+                config.AddBranch<CommandSettings>("e4406a", dev =>
+                {
+                    dev.SetDescription("Drive an Agilent E4406A VSA transmitter tester (SCPI, Basic mode).");
+                    dev.AddCommand<AgilentE4406AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "e4406a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<AgilentE4406AInitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS + Basic single mode (clean known state).");
+                    dev.AddCommand<AgilentE4406AChPowerCommand>("chpower")
+                        .WithDescription("Measure channel power (dBm) + PSD at a center frequency (MHz).")
+                        .WithExample(new[] { "e4406a", "chpower", "1000", "-s", "5", "--provider", "Simulated" });
+                    dev.AddCommand<AgilentE4406AAcpCommand>("acp")
+                        .WithDescription("Measure adjacent channel power at a center frequency (MHz).");
+                    dev.AddCommand<AgilentE4406AMeasureCommand>("measure")
+                        .WithDescription("Run a raw measurement by root (CHPower/ACP/PSTatistic/WAVeform/SPECtrum).")
+                        .WithExample(new[] { "e4406a", "measure", "SPECtrum", "-c", "1000", "--provider", "Simulated" });
+                    dev.AddCommand<AgilentE4406AErrorCommand>("error")
+                        .WithDescription("Read the head of the SCPI error queue (:SYSTem:ERRor?).");
+                });
+
                 config.AddBranch<CommandSettings>("e4438c", dev =>
                 {
                     dev.SetDescription("Drive a Keysight E4438C ESG vector RF signal generator (SCPI).");

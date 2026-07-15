@@ -59,6 +59,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("fluke5440", Fluke5440A.DefaultResource, "Fluke 5440A/5440B DC voltage calibrator"),
             new KnownInstrument("e4438c",   KeysightE4438C.DefaultResource, "Keysight E4438C ESG vector signal generator"),
             new KnownInstrument("hp8560e",  Hp8560E.DefaultResource,   "HP 8560E spectrum analyzer"),
+            new KnownInstrument("e4406a",   AgilentE4406A.DefaultResource, "Agilent E4406A VSA transmitter tester"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)
