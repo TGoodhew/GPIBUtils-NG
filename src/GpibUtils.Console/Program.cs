@@ -345,6 +345,23 @@ namespace GpibUtils.Console
                         .WithDescription("Place the marker on the peak and report frequency + amplitude.");
                 });
 
+                config.AddBranch<CommandSettings>("hp85620a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 85620A mass memory module through an 8563E (catalog / card store-load / DLPs).");
+                    dev.AddCommand<Hp85620AIdnCommand>("idn")
+                        .WithDescription("Show the host analyzer identity (ID?).")
+                        .WithExample(new[] { "hp85620a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp85620ACatalogCommand>("catalog")
+                        .WithDescription("Catalog a storage device (mem or card): list entries + free bytes.")
+                        .WithExample(new[] { "hp85620a", "catalog", "card", "--provider", "Simulated" });
+                    dev.AddCommand<Hp85620AStoreCommand>("store")
+                        .WithDescription("Store a named module entry onto the card (CARDSTORE).");
+                    dev.AddCommand<Hp85620ALoadCommand>("load")
+                        .WithDescription("Load a named entry from the card into module memory (CARDLOAD).");
+                    dev.AddCommand<Hp85620AClearCommand>("clear")
+                        .WithDescription("Dispose all entries in module memory (DISPOSE ALL).");
+                });
+
                 config.AddBranch<CommandSettings>("e4406a", dev =>
                 {
                     dev.SetDescription("Drive an Agilent E4406A VSA transmitter tester (SCPI, Basic mode).");
