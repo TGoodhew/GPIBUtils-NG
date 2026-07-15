@@ -25,6 +25,7 @@
     <ProjectReference Include="..\GpibUtils.Instruments.Counters\GpibUtils.Instruments.Counters.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.PowerSupplies\GpibUtils.Instruments.PowerSupplies.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Scopes\GpibUtils.Instruments.Scopes.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Calibrators\GpibUtils.Instruments.Calibrators.csproj" />
   </ItemGroup>
 
 </Project>

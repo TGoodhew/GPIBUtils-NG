@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GpibUtils.Instruments.Calibrators;
 using GpibUtils.Instruments.Counters;
 using GpibUtils.Instruments.Meters;
 using GpibUtils.Instruments.PowerSupplies;
@@ -54,6 +55,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp8350b",  Hp8350B.DefaultResource,   "HP 8350B sweep oscillator (CW source)"),
             new KnownInstrument("hp3325b",  Hp3325B.DefaultResource,   "HP 3325B synthesizer/function generator"),
             new KnownInstrument("ds1054z",  RigolDs1054Z.DefaultResource, "Rigol DS1054Z oscilloscope"),
+            new KnownInstrument("fluke5440", Fluke5440A.DefaultResource, "Fluke 5440A/5440B DC voltage calibrator"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

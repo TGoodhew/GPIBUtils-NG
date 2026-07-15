@@ -82,7 +82,7 @@ namespace GpibUtils.Console.Instruments
             [Description("Frequency in Hz.")]
             public double? FreqHz { get; set; }
 
-            [CommandOption("-a|--amplitude <V>")]
+            [CommandOption("-l|--amplitude <V>")]
             [Description("Amplitude in volts.")]
             public double? AmplitudeV { get; set; }
 
