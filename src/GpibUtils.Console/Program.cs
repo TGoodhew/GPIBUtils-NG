@@ -49,6 +49,15 @@ namespace GpibUtils.Console
                         .WithDescription("Print the config-file path.");
                 });
 
+                // Cross-instrument verification (issue #37): 5440 calibrator vs 34401A DMM.
+                config.AddBranch<CommandSettings>("verify", v =>
+                {
+                    v.SetDescription("Cross-instrument verification runners.");
+                    v.AddCommand<Verify5440Command>("5440")
+                        .WithDescription("Verify a Fluke 5440 through a list of points, read back on a 34401A (exit 1 on any FAIL).")
+                        .WithExample(new[] { "verify", "5440", "--points", "0,1,-1,10,-10", "--tolerance-ppm", "50", "--provider", "Simulated" });
+                });
+
                 // Attenuation-measurement app (issue #34): orchestrate source+LO+attenuator+receiver.
                 config.AddBranch<CommandSettings>("measure", m =>
                 {

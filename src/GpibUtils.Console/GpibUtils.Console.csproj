@@ -31,6 +31,7 @@
     <ProjectReference Include="..\GpibUtils.Mcp\GpibUtils.Mcp.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Plotters\GpibUtils.Instruments.Plotters.csproj" />
     <ProjectReference Include="..\GpibUtils.Measurement\GpibUtils.Measurement.csproj" />
+    <ProjectReference Include="..\GpibUtils.Verification\GpibUtils.Verification.csproj" />
   </ItemGroup>
 
 </Project>
