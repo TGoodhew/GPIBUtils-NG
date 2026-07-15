@@ -56,6 +56,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp3325b",  Hp3325B.DefaultResource,   "HP 3325B synthesizer/function generator"),
             new KnownInstrument("ds1054z",  RigolDs1054Z.DefaultResource, "Rigol DS1054Z oscilloscope"),
             new KnownInstrument("fluke5440", Fluke5440A.DefaultResource, "Fluke 5440A/5440B DC voltage calibrator"),
+            new KnownInstrument("e4438c",   KeysightE4438C.DefaultResource, "Keysight E4438C ESG vector signal generator"),
         };
 
         public static bool TryGet(string key, out KnownInstrument instrument)

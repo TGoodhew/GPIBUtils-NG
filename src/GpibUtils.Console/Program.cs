@@ -328,6 +328,29 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp3325b", "set", "-w", "sine", "-f", "1000", "-l", "1", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("e4438c", dev =>
+                {
+                    dev.SetDescription("Drive a Keysight E4438C ESG vector RF signal generator (SCPI).");
+                    dev.AddCommand<KeysightE4438CIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "e4438c", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<KeysightE4438CInitCommand>("init")
+                        .WithDescription("Device clear + *RST + *CLS + RF off (clean known state).");
+                    dev.AddCommand<KeysightE4438CCwCommand>("cw")
+                        .WithDescription("Set frequency (MHz) + power (dBm) and turn the RF on.")
+                        .WithExample(new[] { "e4438c", "cw", "1000", "-10", "--provider", "Simulated" });
+                    dev.AddCommand<KeysightE4438CFreqCommand>("freq")
+                        .WithDescription("Set the CW carrier frequency (MHz).");
+                    dev.AddCommand<KeysightE4438CPowerCommand>("power")
+                        .WithDescription("Set the output power (dBm).");
+                    dev.AddCommand<KeysightE4438CRfCommand>("rf")
+                        .WithDescription("Turn the RF output on or off.");
+                    dev.AddCommand<KeysightE4438CModCommand>("mod")
+                        .WithDescription("Enable or disable all modulation.");
+                    dev.AddCommand<KeysightE4438CErrorCommand>("error")
+                        .WithDescription("Read the head of the SCPI error queue (:SYSTem:ERRor?).");
+                });
+
                 config.AddBranch<CommandSettings>("fluke5440", dev =>
                 {
                     dev.SetDescription("Drive a Fluke 5440A/5440B DC voltage calibrator (mnemonic HP-IB, no *IDN?).");
