@@ -11,7 +11,7 @@ namespace GpibUtils.Instruments.Switches
     /// over any <see cref="IInstrumentSession"/>, drives the independent switches S9/S0, and keeps a
     /// software shadow of state — the 11713A is <b>listen-only</b> and cannot be queried.
     /// </summary>
-    public sealed class Hp11713A
+    public sealed class Hp11713A : IStepAttenuator
     {
         /// <summary>GPIB address of the 11713A — 28, the manual factory default (11713A manual: "factory
         /// preset address of decimal 28"; verified 2026-07). Override with <c>--address</c>.</summary>

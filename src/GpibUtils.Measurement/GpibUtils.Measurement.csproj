@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Measurement</RootNamespace>
+    <AssemblyName>GpibUtils.Measurement</AssemblyName>
+    <Description>Attenuation-vs-frequency measurement orchestration for GPIBUtils-NG (issue #34): drives a source, LO, step attenuator and measuring receiver through a frequency/attenuation sweep. Ported from HP-Attenuator's MeasurementEngine.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.SignalSources\GpibUtils.Instruments.SignalSources.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Switches\GpibUtils.Instruments.Switches.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Measurement.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
