@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Verification</RootNamespace>
+    <AssemblyName>GpibUtils.Verification</AssemblyName>
+    <Description>Cross-instrument verification runners for GPIBUtils-NG (issue #37): drive a Fluke 5440 calibrator through a plan of voltage points and read each back through a 34401A DMM, computing ppm error and PASS/FAIL. Ported from 5440Verify.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Instruments.Calibrators\GpibUtils.Instruments.Calibrators.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Verification.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
