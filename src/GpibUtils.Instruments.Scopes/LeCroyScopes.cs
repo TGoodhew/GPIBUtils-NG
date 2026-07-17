@@ -51,9 +51,31 @@ namespace GpibUtils.Instruments.Scopes
         public void SetChannelDisplay(int channel, bool on) =>
             Send("C" + Check(channel) + ":TRA " + (on ? "ON" : "OFF"));
 
-        /// <summary>Peak-to-peak volts (<c>Cn:PAVA? PKPK</c>; reply e.g. <c>C1:PAVA PKPK,4.96E-01,V</c>).</summary>
-        public double MeasureVpp(int channel) =>
-            ParseReading(Query("C" + Check(channel) + ":PAVA? PKPK"));
+        /// <summary>Peak-to-peak volts — shorthand for <see cref="Measure"/>.</summary>
+        public double MeasureVpp(int channel) => Measure(channel, ScopeMeasurementType.PeakToPeak);
+
+        /// <summary>Takes an automatic measurement (<c>Cn:PAVA? &lt;param&gt;</c>; reply e.g.
+        /// <c>C1:PAVA PKPK,4.96E-01,V</c>).</summary>
+        public double Measure(int channel, ScopeMeasurementType type) =>
+            ParseReading(Query("C" + Check(channel) + ":PAVA? " + Parameter(type)));
+
+        private static string Parameter(ScopeMeasurementType type)
+        {
+            switch (type)
+            {
+                case ScopeMeasurementType.PeakToPeak: return "PKPK";
+                case ScopeMeasurementType.Maximum: return "MAX";
+                case ScopeMeasurementType.Minimum: return "MIN";
+                case ScopeMeasurementType.Amplitude: return "AMPL";
+                case ScopeMeasurementType.Mean: return "MEAN";
+                case ScopeMeasurementType.Rms: return "RMS";
+                case ScopeMeasurementType.Frequency: return "FREQ";
+                case ScopeMeasurementType.Period: return "PER";
+                case ScopeMeasurementType.RiseTime: return "RISE";
+                case ScopeMeasurementType.FallTime: return "FALL";
+                default: throw new System.ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
 
         /// <summary>Parses a LeCroy reading — a bare number, or a <c>Cn:PAVA PKPK,&lt;value&gt;,&lt;unit&gt;</c>
         /// reply (returns the first comma-separated field that parses as a number).</summary>
