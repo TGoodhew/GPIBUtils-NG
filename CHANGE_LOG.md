@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8903B Audio Analyzer** (issue [#131](https://github.com/TGoodhew/GPIBUtils-NG/issues/131), from the
+  #70 triage) — a driver in a **new `GpibUtils.Instruments.Audio` project** implementing a **new
+  `IAudioAnalyzer` interface** (P1 #86): a combined audio source + voltmeter + distortion analyzer + counter.
+  Legacy keystroke-mnemonic language (`FR`/`AP`/`M`/`S`/`A`/`T` codes). Completion is a **#96 consumer**: the
+  Special-Function-22 SRQ enable (`22.{mask}SP` — there is no `*SRE`) + the 8903B status-byte bit table, via
+  the shared `CompletionWaiter` SRQ-edge flow; 12-byte scientific output parsed to a value. `Hp8903BSimulatedDevice`
+  + 10 tests; `gpibutils hp8903b idn|init|measure`. Default `GPIB0::28::INSTR`. **Bench caveat documented:**
+  the real 8903B re-triggers a measurement on every serial poll, so the poll-loop completion needs
+  bench-confirmation (or a wait-for-SRQ-line + single-poll fallback). 🟡 **Verification Needed.**
 - **HP 4275A Multi-Frequency LCR Meter** (issue [#109](https://github.com/TGoodhew/GPIBUtils-NG/issues/109),
   from the #70 triage) — a driver in a **new `GpibUtils.Instruments.LcrMeters` project** implementing a **new
   `ILcrMeter` interface** (P1 #83): the first impedance/LCR meter, no existing category fit. 1979 pre-SCPI
