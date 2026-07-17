@@ -398,6 +398,40 @@ namespace GpibUtils.Console
                         .WithDescription("Place the marker on the peak and report frequency + amplitude.");
                 });
 
+                config.AddBranch<CommandSettings>("hp8591e", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8591E spectrum analyzer (8590-family legacy mnemonics, RQS/STB? sweep completion).");
+                    dev.AddCommand<Hp8591EIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (ID?).")
+                        .WithExample(new[] { "hp8591e", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8591EInitCommand>("init")
+                        .WithDescription("Device clear + preset + clear SRQ mask (clean known state).");
+                    dev.AddCommand<Hp8591ESweepCommand>("sweep")
+                        .WithDescription("Set center/span/RBW, take a single sweep (RQS/STB? handshake); --peak reports the marker.")
+                        .WithExample(new[] { "hp8591e", "sweep", "-c", "300", "-s", "20", "--peak", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8591ETraceCommand>("trace")
+                        .WithDescription("Read the current trace (TRA?) and print a summary.");
+                    dev.AddCommand<Hp8591EPeakCommand>("peak")
+                        .WithDescription("Place the marker on the peak and report frequency + amplitude.");
+                });
+
+                config.AddBranch<CommandSettings>("hp3585", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3585A/3585B spectrum analyzer (legacy mnemonics, CQ op-complete SRQ).");
+                    dev.AddCommand<Hp3585IdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (3585 has no *IDN?).")
+                        .WithExample(new[] { "hp3585", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp3585InitCommand>("init")
+                        .WithDescription("Device clear + preset + disable op-complete SRQ (clean known state).");
+                    dev.AddCommand<Hp3585SweepCommand>("sweep")
+                        .WithDescription("Set center/span/RBW, take a single sweep (CQ/serial-poll handshake); --peak reports the peak.")
+                        .WithExample(new[] { "hp3585", "sweep", "-c", "10", "-s", "100", "--peak", "--provider", "Simulated" });
+                    dev.AddCommand<Hp3585TraceCommand>("trace")
+                        .WithDescription("Read the current trace (D3 dump) and print a summary.");
+                    dev.AddCommand<Hp3585MarkerCommand>("marker")
+                        .WithDescription("Read the marker frequency + amplitude (D2 / D1 dumps).");
+                });
+
                 config.AddBranch<CommandSettings>("hp85620a", dev =>
                 {
                     dev.SetDescription("Drive an HP 85620A mass memory module through an 8563E (catalog / card store-load / DLPs).");
