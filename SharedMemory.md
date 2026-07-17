@@ -123,9 +123,17 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     SignalSources project: multi-channel DC V/I + waveform source (`APPLY DCV/DCI`, `USE 0/100`, `OUTPUT?`,
     `ID?`, `RQS` mask), factory address 9. This was the last unbuilt new-interface family.
   - **P1 interface issues reconciled:** #82–89, #91, #92 CLOSED (interface implemented + landed driver);
-    **#90 IMultifunctionCalibrator CLOSED not-planned** (datron4708 not owned). **Still open by design:**
-    #93 ILegacyFrequencyCounter (unify the standalone legacy counters), #94 IAudioDistortionAnalyzer,
-    #95 extend IOscilloscope — optional future core-redesign refactors, not blocking.
+    **#90 IMultifunctionCalibrator CLOSED not-planned** (datron4708 not owned).
+  - **The three P1 refactors are now ALSO done (2026-07-18):** **#93** `ILegacyFrequencyCounter` unifies the
+    5342A/5343A/5351A (pure refactor, no bench needed — PR #159); **#94** `IAudioDistortionAnalyzer` adds the
+    Keithley 2015's THD/THD+N/SINAD surface (PR #160); **#95** extends `IOscilloscope` with parameterized
+    `Measure(channel, ScopeMeasurementType)` across all 4 scope dialects + a new opt-in `IWaveformCapture`
+    (Rigol/Agilent SCPI `:WAVeform:DATA?`; Tek/LeCroy binary transfer is a documented follow-up — PR #162).
+  - **HP 8757D (#129) UNBLOCKED + BUILT (PR #161).** The user supplied `8757D Operating-User.pdf`
+    (08757-90130) with the "HP 8757D/E Programming Codes" table that was previously missing. Driver implements
+    `INetworkAnalyzer` (IP/OI/IA-IB-IR/SP/CS/SV1/FD0/OD); scalar-detector semantics (source-driven frequency →
+    `SetSourcePowerDbm` no-op, FA/FB are labels, S11→det-A / S21→det-B, peak marker computed host-side).
+    **There is now NO blocked driver.** #129 body updated with the full programming reference.
   - Final batches:
   - **New-interface families:** `INetworkAnalyzer` (hp8714 #82, hp8720c), `ISourceMeasureUnit` (keithley2400
     #84), `IVectorVoltmeter` (**HP 8508A** #104 — re-scoped from the mislabeled "Fluke 8508A", which the user
@@ -136,8 +144,8 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     (standalone counter, 26.5 GHz sibling of the 5342A).
   - **Dropped as not-owned:** Fluke 8508A DMM (#104 re-scoped to the HP 8508A VVM instead), Datron 4708 /
     `IMultifunctionCalibrator` (#98/#90 — user downloaded the manual for research only).
-  - **ONLY remaining blocked item: HP 8757D #129** — no Quick Reference / programming guide available; command
-    syntax unavailable, so it is deferred, NOT fabricated (honoring the "never invent command syntax" rule).
+  - **NO blocked items remain.** HP 8757D #129 was unblocked 2026-07-18 (user supplied its User's Guide) and
+    built. All P1 design refactors (#93/#94/#95) are done. **Only open issues: trackers #44/#46/#70/#97.**
   - **Next real work is bench verification** of the whole Needs-Verification set (epic #97 / board #46), which
     requires hardware in Renton. No further no-hardware driver work is outstanding.
 
