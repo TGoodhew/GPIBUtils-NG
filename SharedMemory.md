@@ -303,6 +303,14 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     hp54845a #116 (Agilent SCPI base), lc574a #135, waverunner6000 #140 (LeCroy base — bench-confirm, remote
     manuals unreadable). All on existing `IOscilloscope`; 3 shared dialect base classes; generic `ctl` CLI
     (`RegisterScope<T>`). `verify/*` tagged, closed on merge per the new policy.
+  - **Analyzer/meter/supply batch LANDED (6):** dsa800 #102 + n9320a #136 (`ScpiSpectrumAnalyzer` base,
+    `*OPC?` sweep, bench-confirm), keithley2015 #133 (full `IDigitalMultimeter`), hp437b #111 + hp436a #110
+    (`IPowerMeter`; 436A parses the 14-char output), hp6625a #117 (`IDcPowerSupply`, SelectedChannel). Generic
+    `sweep`/`measure` CLIs. **Still to do:** fluke8508a #104 (**cannot build — no command set in any manual;
+    body says do not invent**), hp5343a #114 (legacy mnemonic + SRQ; wants ILegacyFrequencyCounter #93),
+    hp8901 #130 (needs IModulationAnalyzer #91), hp8663a #124, hp3335a #107, datron4708 #98
+    (IMultifunctionCalibrator #90), and the NEW-interface families (INetworkAnalyzer #82 hp8714/8720c/8757d,
+    ISourceMeasureUnit #84 keithley2400, INoiseFigureMeter #85 hp8970b, IModulationDomainAnalyzer #87 hp53310a).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
