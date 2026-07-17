@@ -280,11 +280,19 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     via Special-Function-22 SRQ enable (`22.{mask}SP`, no `*SRE`) + status-byte bit table.
     `Hp8903BSimulatedDevice` + 10 tests. Default addr 28. **Bench caveat:** hardware re-triggers on every
     serial poll — poll-loop completion needs bench confirmation (fallback: wait-for-SRQ-line + single poll).
-  - **BATCH COMPLETE (2026-07-17):** all six #96-unblocked legacy drivers landed (#121, #108, #126, #112,
-    #109, #131) — each merged sim-green + CI-green, `verify/<n>-<slug>` tagged, issue kept OPEN (Needs
-    Verification). Also landed a #96 engine follow-up (ExpectBitCleared works without an EnableMask) and two
-    new category projects (LcrMeters, Audio). NEXT: the remaining P2 devices on existing interfaces (the
-    SignalSources RF generators, scopes, etc.) whenever picked up; or the other P1 interface designs.
+  - **6 #96-unblocked legacy drivers landed (#121, #108, #126, #112, #109, #131)** — merged sim-green +
+    CI-green, `verify/<n>-<slug>` tagged, kept OPEN. Plus a #96 engine follow-up (ExpectBitCleared works
+    without an EnableMask) and two new category projects (LcrMeters, Audio).
+- **#70 driver build-out STARTED (2026-07-17)** — building the rest of the P2 backlog family by family.
+  Decision: **`IFunctionGenerator` lives in `SignalSources`** (#88 placement resolved, not a new Waveforms
+  project). **Landed:** `IFunctionGenerator` + **HP 33120A** (#106, SCPI, addr 10), **Rigol DG1000Z** (#99,
+  SCPI dual-channel, addr 2), **HP 8116A** (#118, legacy mnemonic, addr 16 — waveform mnemonic is a bench
+  follow-up, `SetWaveform` throws for now). `verify/88-*` tags. **Remaining backlog (families):** ISignalSource
+  RF generators (e4436b, hp83620a, hp83712b, hp8656/57b/63a/64a, rs-sme/smt, hp3335a), IUniversalSource
+  (hp3245a), Scopes (7), Analyzers (dsa800, n9320a), Meters (hp436a/437b/fluke8508a/keithley2015),
+  IModulationAnalyzer (hp8901), hp5343a counter, hp6625a supply, IMultifunctionCalibrator (datron4708), and
+  the new-interface families INetworkAnalyzer (hp8714/8720c/8757d), ISourceMeasureUnit (keithley2400),
+  INoiseFigureMeter (hp8970b), IModulationDomainAnalyzer (hp53310a).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

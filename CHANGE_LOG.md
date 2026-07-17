@@ -15,6 +15,17 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`IFunctionGenerator` + three function generators** (issue
+  [#88](https://github.com/TGoodhew/GPIBUtils-NG/issues/88) resolved: the interface lives in
+  `GpibUtils.Instruments.SignalSources`, not a separate Waveforms project) — a new interface (waveform /
+  frequency / Vpp amplitude / offset / output), distinct from the RF-oriented `ISignalSource`. Drivers:
+  **HP 33120A** ([#106](https://github.com/TGoodhew/GPIBUtils-NG/issues/106), SCPI, addr 10),
+  **Rigol DG1000Z** ([#99](https://github.com/TGoodhew/GPIBUtils-NG/issues/99), SCPI, dual-channel via
+  `SelectedChannel`, GPIB-via-USB-converter, addr 2), and **HP 8116A**
+  ([#118](https://github.com/TGoodhew/GPIBUtils-NG/issues/118), 1982 legacy mnemonics, addr 16; output via
+  `D0`/`D1`, SRQ-on-error surfaced via serial poll + `IERR`; its waveform-select mnemonic wasn't in the manual
+  excerpt so `SetWaveform` throws rather than invent one — bench follow-up). Each with a simulator + tests
+  (+16); `gpibutils hp33120a|dg1000z|hp8116a …`. 🟡 **Verification Needed.**
 - **HP 8903B Audio Analyzer** (issue [#131](https://github.com/TGoodhew/GPIBUtils-NG/issues/131), from the
   #70 triage) — a driver in a **new `GpibUtils.Instruments.Audio` project** implementing a **new
   `IAudioAnalyzer` interface** (P1 #86): a combined audio source + voltmeter + distortion analyzer + counter.
