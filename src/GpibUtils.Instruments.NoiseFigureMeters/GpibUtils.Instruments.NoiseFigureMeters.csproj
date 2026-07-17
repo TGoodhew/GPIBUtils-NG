@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.NoiseFigureMeters</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.NoiseFigureMeters</AssemblyName>
+    <Description>Noise-figure meters for GPIBUtils-NG (HP 8970B, ...). Drives the shared vendor-neutral transport; no UI or vendor dependency.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.NoiseFigureMeters.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
