@@ -261,9 +261,13 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     Completion via a **custom non-`RQS` enable command** (`CQ`/`CC` op-complete SRQ) + serial poll; `D1/D2/D3`
     dumps. `Hp3585SimulatedDevice` + 12 tests. Default addr 11. (3585A `T5`/limit-test SRQ + peak-search
     mnemonic = bench follow-ups.)
-  - **Still to build:** 8672A #126 (`ISignalSource`, `ExpectBitCleared` consumer), 5005B #112 (new
-    `ISignatureAnalyzer` in Meters), 4275A #109 (new `ILcrMeter` + LcrMeters project), 8903B #131 (new
-    `IAudioAnalyzer` + Audio project).
+  - **HP 8672A** (#126, `verify/126-hp8672a`): `SignalSources`/`ISignalSource`, 2–18 GHz pre-488.2
+    program-code source. **`ExpectBitCleared` consumer** — phase-lock settle waits for the not-phase-locked
+    bit to clear via the engine (direct-bit, **no enable mask** — a small #96 follow-up let the waiter run
+    without one). Frequency `P<kHz>Z` reliable; RANGE/VERNIER/ALC letters reconstructed/TBD (garbled OCR).
+    `Hp8672ASimulatedDevice` + 12 tests. Default addr 19 (bench-remap vs 8673B/8340B).
+  - **Still to build:** 5005B #112 (new `ISignatureAnalyzer` in Meters), 4275A #109 (new `ILcrMeter` +
+    LcrMeters project), 8903B #131 (new `IAudioAnalyzer` + Audio project).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

@@ -92,7 +92,10 @@ namespace GpibUtils.Visa.Srq
                 return CompletionResult.Dispatch(CompletionOutcome.NeedsDefinition,
                     PromptMissing(modelName, operationName,
                         "operation '" + operationName + "' expects bit '" + op.ExpectBit + "', not defined in statusModel.bits"));
-            if (model.EnableMask == null || string.IsNullOrEmpty(model.EnableMask.SetCommand))
+            // An enable mask is required for every flow EXCEPT a cleared-settle operation (#96): some legacy
+            // sources (e.g. the HP 8672A) have no *SRE-equivalent arm at all - completion is pure polling of a
+            // fault/settle bit going to 0, with nothing to enable. Those set ExpectBitCleared and omit EnableMask.
+            if (!op.ExpectBitCleared && (model.EnableMask == null || string.IsNullOrEmpty(model.EnableMask.SetCommand)))
                 return CompletionResult.Dispatch(CompletionOutcome.NeedsDefinition,
                     PromptMissing(modelName, operationName, "statusModel.enableMask.setCommand is missing"));
 
@@ -198,8 +201,12 @@ namespace GpibUtils.Visa.Srq
             int stale = ReadStatus(model, channel);
             log("pre-clear status read -> 0x" + stale.ToString("X2"));
 
-            string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
-            channel.Send(setCmd); log("send (arm mask): " + setCmd);
+            // Arm the enable mask if the model has one; a cleared-settle op may have none (nothing to enable).
+            if (model.EnableMask != null && !string.IsNullOrEmpty(model.EnableMask.SetCommand))
+            {
+                string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
+                channel.Send(setCmd); log("send (arm mask): " + setCmd);
+            }
             if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
 
             int busyConfirm = (model.BusyConfirmMs.HasValue && model.BusyConfirmMs.Value > 0)
@@ -230,7 +237,7 @@ namespace GpibUtils.Visa.Srq
                 sleep(pollIntervalMs);
             }
 
-            SafeSend(channel, model.EnableMask.ClearCommand, "clear mask", log);
+            SafeSend(channel, model.EnableMask?.ClearCommand, "clear mask", log);
             SafeSend(channel, op.Restore, "restore", log);
 
             bool done = cleared ? (stb & expect) == 0 : (stb & expect) == expect;

@@ -42,6 +42,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp11713a", Hp11713A.DefaultResource, "HP 11713A attenuator/switch driver"),
             new KnownInstrument("hp8340b",  Hp8340B.DefaultResource,  "HP 8340B synthesized sweeper (CW source)"),
             new KnownInstrument("hp8673b",  Hp8673B.DefaultResource,  "HP 8673B synthesized signal generator / LO"),
+            new KnownInstrument("hp8672a",  Hp8672A.DefaultResource,  "HP 8672A synthesized microwave signal generator"),
             new KnownInstrument("hp8902a",  Hp8902A.DefaultResource,  "HP 8902A measuring receiver"),
             new KnownInstrument("hp34401a", Hp34401A.DefaultResource, "HP 34401A digital multimeter"),
             new KnownInstrument("hp53131a", Hp53131A.DefaultResource, "HP 53131A universal frequency counter"),
