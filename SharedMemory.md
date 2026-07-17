@@ -212,6 +212,36 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 - **New tracking issue #70** (2026-07-15): review the ~424 PDFs in the Manuals folder and migrate a driver for
   every VISA/488.2-controllable device not yet backlogged (triage table + per-instrument issues). This is the
   next discovery source now that the legacy-repo backlog's drivers are all ported.
+- **#70 Manuals-folder triage COMPLETE (2026-07-17):** researched all **49** candidate devices (Tier A core +
+  Tier B large systems + 7 uncertain) against their manuals; authored a full migration issue body per
+  programmable device (control mechanism + SRQ/completion mechanism read from each manual, never invented).
+  Filed to GitHub as one all-or-nothing block:
+  - **Epic #97** ("Needs Verification", open) — cross-links all device issues grouped by target category + the
+    P1 list; `Part of #44`.
+  - **15 P1 core-interface/engine issues #82–#96 (open):** new interfaces `INetworkAnalyzer` (#82, + NEW
+    NetworkAnalyzers proj), `ILcrMeter` (#83, + NEW LcrMeters), `ISourceMeasureUnit` (#84, + NEW SourceMeasure),
+    `INoiseFigureMeter` (#85, + NEW NoiseFigureMeters), `IAudioAnalyzer` (#86, + NEW Audio),
+    `IModulationDomainAnalyzer` (#87, + NEW ModulationDomain), `IFunctionGenerator` (#88 — resolve
+    SignalSources-vs-new-Waveforms placement), `IUniversalSource` (#89), `IMultifunctionCalibrator` (#90 —
+    broaden Calibrators beyond DCV-only `IDcVoltageCalibrator`), `IModulationAnalyzer` (#91),
+    `ISignatureAnalyzer`/`IMaskedSrqMeasurement` (#92), `ILegacyFrequencyCounter` (#93),
+    `IAudioDistortionAnalyzer` (#94); extend `IOscilloscope` (#95 — parameterized measure + waveform transfer);
+    **`GpibUtils.Visa.Srq` StatusModel: pluggable pre-488.2 legacy status-byte tables (#96, relates #43)** —
+    the cross-cutting enabler hit independently by 6 legacy-mnemonic devices.
+  - **43 P2 device issues #98–#140 — created then CLOSED** (reopen when a driver is picked up; each tracked in
+    #97). By category: SignalSources 15, Scopes 7, Analyzers 4, Meters 6, Counters 1, PowerSupplies 1,
+    Calibrators 1, + 8 seeding the 6 NEW category projects (NetworkAnalyzers 3, LcrMeters/SourceMeasure/
+    NoiseFigureMeters/Audio/ModulationDomain 1 each).
+  - **Out of scope — no issue: Fluke 5200A AC Calibrator** (remote only via a proprietary parallel/serial TTL
+    RCU card; no GPIB/USB-TMC/LXI/RS-232) and **Agilent 16902B Logic Analysis System** (no GPIB/SCPI; LAN
+    frame-sharing + proprietary COM/.NET SDK only). Neither fits the `IInstrumentSession`/VISA transport model.
+  - **Low-confidence, confirm at bench:** fluke8508a (no valid manual found; model-number collision with the
+    HP 8508A vector voltmeter), lc574a (remote manual is a scanned image — command set/SRQ bits unconfirmed),
+    n9320a (no programmer's guide), dpo4000, dsa800, e4436b, hp54845a, hp8757d, rs-smt, tds784, waverunner6000.
+    **Address collision:** hp83712b vs Hp8673B (both factory HP-IB 19) — remap one at the bench.
+  - Durable working artifacts (issue bodies, `manifest.tsv` slug→issue#, `GITHUB_PLAN.md`, creation scripts)
+    under `C:\Users\Tony\.claude\gpib-triage-70\`. **No code landed** — this is a backlog-shaping pass; drivers
+    get built when each #98–#140 is reopened.
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
