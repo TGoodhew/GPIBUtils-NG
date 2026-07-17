@@ -57,8 +57,8 @@ HW-verification tracking issue **#46**); changes logged in [`CHANGE_LOG.md`](CHA
 - **`main`** = always-green integration line (builds + passes **Simulated**-provider tests). Everything stacks on it.
 - Per issue: branch **`feat/<issue#>-<slug>`** → port driver + simulator + tests + CLI branch (#45).
 - **Merge to `main` on simulator/unit-test green — HW verification is _not_ a merge gate** (lets the next driver build immediately).
-- **Do not close the issue on merge.** Label it **`verification-needed`**, add the bench checklist, register it on the board, and tag the merge commit **`verify/<issue#>-<instrument>`**.
-- At the bench: run the checklist against real HW, record pass/fail + FW/serial/date, **then** close (or open a follow-up on a discrepancy).
+- **Close the issue on merge (policy changed 2026-07-17).** Label it **`Needs Verification`**, add the bench checklist, cross-link + register it in its verification tracker — the **#70-triage epic #97** (or the master board **#46** for pre-#70 drivers) — tag the merge commit **`verify/<issue#>-<instrument>`**, then **close it** so the open issue list only shows work still to build. The trackers **#46 and #97 stay open**. (Previously issues were left open; ~48 merged-but-unverified issues were retroactively closed on 2026-07-17.)
+- At the bench: run the checklist against real HW, record pass/fail + FW/serial/date on the board/epic; on a ✅ pass mark it verified, on a ⚠️ discrepancy **reopen** the issue (or open a follow-up).
 
 ## Build & test
 
