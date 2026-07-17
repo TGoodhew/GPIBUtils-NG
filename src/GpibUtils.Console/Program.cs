@@ -248,6 +248,17 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp53310a", "measure", "freq", "-c", "2", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp8901", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8901A/8901B modulation analyzer (AM/FM/PM/power/frequency).");
+                    dev.AddCommand<Hp8901IdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (8901 has no *IDN?).")
+                        .WithExample(new[] { "hp8901", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8901MeasureCommand>("measure")
+                        .WithDescription("Tune (-f MHz) and measure am|fm|pm|power|freq (trigger-with-settling).")
+                        .WithExample(new[] { "hp8901", "measure", "fm", "-f", "104.5", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8508a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8508A vector voltmeter (A/B voltage, phase, SWR, transmission, ...).");

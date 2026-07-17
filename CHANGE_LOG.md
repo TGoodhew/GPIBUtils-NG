@@ -15,6 +15,12 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8901A/8901B Modulation Analyzer** (issue [#130](https://github.com/TGoodhew/GPIBUtils-NG/issues/130)) —
+  a driver in `GpibUtils.Instruments.Meters` implementing a **new `IModulationAnalyzer` interface** (P1 #91):
+  tunes to a carrier and measures AM/FM/ΦM/RF-power/frequency. Legacy concatenated function codes (`IP`,
+  `AU <f> MZ`, `M1`=AM/`M2`=FM, `T3` trigger-with-settling), 17-char exponential ASCII result. Tests (+5);
+  `gpibutils hp8901 idn|measure am|fm|… -f <MHz>`. M3–M5 (ΦM/power/freq) codes are bench-confirm. 🟡
+  **Verification Needed.**
 - **`IModulationDomainAnalyzer` + new `GpibUtils.Instruments.ModulationDomain` project** (P1 #87) with the
   **HP 53310A** ([#113](https://github.com/TGoodhew/GPIBUtils-NG/issues/113), SCPI, addr 12): frequency-vs-time
   / time-interval-vs-time (and histogram) measurements via the `:CONFigure` + blocking `:READ?` flow — a data
