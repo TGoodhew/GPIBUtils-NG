@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using GpibUtils.Visa.Srq;
 
 namespace GpibUtils.Visa.Tests.Srq
@@ -19,6 +21,17 @@ namespace GpibUtils.Visa.Tests.Srq
     {
         // 8560-series read-back layout (8560E Programming Guide, Table 7-266), hardware-confirmed.
         public const int Message = 2, EndOfSweep = 4, CommandComplete = 16, Error = 32, RequestService = 64;
+
+        // An "operating"/settling bit that is ASSERTED while a sweep runs and CLEARS when it settles - the
+        // inverse of CommandComplete - used to exercise StatusOperation.ExpectBitCleared (e.g. HP 8672A).
+        public const int Operating = 8;
+
+        /// <summary>
+        /// Formats the reply to a status QUERY (e.g. "STB?"), for exercising the query-based status read.
+        /// Default: plain decimal. Override to emit padded / exponential / prefixed text and prove the
+        /// waiter's numeric parser tolerates it.
+        /// </summary>
+        public Func<int, string> FormatStatusReply = v => v.ToString(CultureInfo.InvariantCulture);
 
         private long _now;
         private int _mask;
@@ -77,9 +90,13 @@ namespace GpibUtils.Visa.Tests.Srq
             LatchRqs();
         }
 
+        /// <summary>True while a triggered sweep is in flight (drives the <see cref="Operating"/> bit).</summary>
+        private bool Busy => _sweepDoneAt >= 0;
+
         /// <summary>The condition bits currently true (no request-service bit).</summary>
         private int Conditions() =>
-            (_error ? Error : 0) | (_commandComplete ? CommandComplete : 0) | (_endOfSweep ? EndOfSweep : 0);
+            (_error ? Error : 0) | (_commandComplete ? CommandComplete : 0) | (_endOfSweep ? EndOfSweep : 0) |
+            (Busy ? Operating : 0);
 
         /// <summary>Request-service latches whenever an armed (masked) condition is currently true.</summary>
         private void LatchRqs()
@@ -117,7 +134,15 @@ namespace GpibUtils.Visa.Tests.Srq
             }
         }
 
-        public int SerialPoll()
+        public int SerialPoll() => ReadStatusByte();
+
+        /// <summary>
+        /// A status QUERY (e.g. "STB?"): returns the same status byte a serial poll would, formatted as
+        /// text via <see cref="FormatStatusReply"/>. The waiter only ever queries the status command.
+        /// </summary>
+        public string Query(string command) => FormatStatusReply(ReadStatusByte());
+
+        private int ReadStatusByte()
         {
             Tick();
             // The read returns the condition bits plus the held request-service bit (GPIB RQS, 0x40),

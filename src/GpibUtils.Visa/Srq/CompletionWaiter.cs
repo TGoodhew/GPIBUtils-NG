@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace GpibUtils.Visa.Srq
 {
@@ -132,8 +133,8 @@ namespace GpibUtils.Visa.Srq
 
             // Disarm + drain so an already-true armed condition cannot pre-fire the next arm.
             SafeSend(channel, model.EnableMask.ClearCommand, "disarm", log);
-            int drained = channel.SerialPoll();
-            log("drain serial poll -> 0x" + drained.ToString("X2"));
+            int drained = ReadStatus(model, channel);
+            log("drain status read -> 0x" + drained.ToString("X2"));
 
             string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
             channel.Send(setCmd); log("send (arm mask): " + setCmd);
@@ -147,7 +148,7 @@ namespace GpibUtils.Visa.Srq
             long elapsed = 0;
             while (true)
             {
-                stb = channel.SerialPoll();
+                stb = ReadStatus(model, channel);
                 elapsed = nowMs() - start;
                 if (!busy)
                 {
@@ -169,40 +170,62 @@ namespace GpibUtils.Visa.Srq
 
             bool serviced = (stb & rqsBit) != 0;
             bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
-            return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, log);
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, serviced, err, false, log);
         }
 
         /// <summary>
         /// Legacy direct-bit flow: arm the mask (expect|error) and poll the status byte until the expect
         /// (or error) bit appears. Used when the model does not declare a <see cref="StatusModel.RequestServiceBit"/>.
+        /// When <see cref="StatusOperation.ExpectBitCleared"/> is set, completion is inverted: the operation
+        /// is done when the expect bit CLEARS (a settle/operating bit that is asserted while busy and drops
+        /// when settled - e.g. the HP 8672A). To avoid reading an already-settled bit as a finished
+        /// operation, that mode first waits for the bit to go SET (busy) before waiting for it to clear.
         /// </summary>
         private static CompletionResult RunDirectBit(StatusModel model, string modelName, string operationName,
             StatusOperation op, int expect, int? errorBit, int timeoutMs, IStatusChannel channel,
             Func<long> nowMs, Action<int> sleep, int pollIntervalMs, Action<string> log)
         {
+            bool cleared = op.ExpectBitCleared;
             int mask = expect | (errorBit ?? 0);
             long start = nowMs();
-            log("run '" + operationName + "' on " + modelName + ": expect '" + op.ExpectBit + "'=0x" +
-                expect.ToString("X2") + ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
+            log("run '" + operationName + "' on " + modelName + (cleared ? " [expect-cleared]" : "") + ": expect '" +
+                op.ExpectBit + "'=0x" + expect.ToString("X2") + (cleared ? " (completes when CLEARED)" : "") +
+                ", errorBit '" + (model.ErrorBit ?? "-") + "'=0x" + (errorBit ?? 0).ToString("X2") +
                 ", mask=" + mask + " (0x" + mask.ToString("X2") + "), timeout=" + timeoutMs + "ms");
 
             // Pre-clear any STALE latched status (e.g. an END OF SWEEP left set by a prior sweep) so the
             // just-armed mask cannot fire on old state and we wait for a FRESH completion.
-            int stale = channel.SerialPoll();
-            log("pre-clear serial poll -> 0x" + stale.ToString("X2"));
+            int stale = ReadStatus(model, channel);
+            log("pre-clear status read -> 0x" + stale.ToString("X2"));
 
             string setCmd = model.EnableMask.SetCommand.Replace("{mask}", mask.ToString(CultureInfo.InvariantCulture));
             channel.Send(setCmd); log("send (arm mask): " + setCmd);
             if (!string.IsNullOrEmpty(op.Arm)) { channel.Send(op.Arm); log("send (start op): " + op.Arm); }
 
+            int busyConfirm = (model.BusyConfirmMs.HasValue && model.BusyConfirmMs.Value > 0)
+                ? model.BusyConfirmMs.Value : BusyConfirmMs;
+            long busyDeadline = start + Math.Min(timeoutMs, busyConfirm);
+            bool busy = !cleared;   // set-mode has no busy phase; cleared-mode must first see the bit SET
             int stb = 0;
             long elapsed = 0;
             while (true)
             {
-                stb = channel.SerialPoll();
+                stb = ReadStatus(model, channel);
                 elapsed = nowMs() - start;
-                log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
-                if ((stb & mask) != 0) break;          // completion or error bit appeared
+                bool errNow = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
+                if (errNow) { log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2") + " (error bit set)"); break; }
+
+                if (!busy)   // cleared-mode only: wait for the operating bit to assert
+                {
+                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2") + " (awaiting busy)");
+                    if ((stb & expect) == expect) { busy = true; log("busy confirmed (expect bit set - operation running)"); }
+                    else if (nowMs() >= busyDeadline) { busy = true; log("busy not confirmed within " + busyConfirm + " ms; proceeding"); }
+                }
+                else
+                {
+                    log("poll @ " + elapsed + "ms -> 0x" + stb.ToString("X2"));
+                    if (cleared ? (stb & expect) == 0 : (stb & mask) != 0) break;   // settled / completed
+                }
                 if (elapsed >= timeoutMs) break;       // backstop
                 sleep(pollIntervalMs);
             }
@@ -210,14 +233,14 @@ namespace GpibUtils.Visa.Srq
             SafeSend(channel, model.EnableMask.ClearCommand, "clear mask", log);
             SafeSend(channel, op.Restore, "restore", log);
 
-            bool done = (stb & expect) == expect;
+            bool done = cleared ? (stb & expect) == 0 : (stb & expect) == expect;
             bool err = errorBit.HasValue && (stb & errorBit.Value) == errorBit.Value;
-            return Finish(model, operationName, op, stb, elapsed, timeoutMs, done, err, log);
+            return Finish(model, operationName, op, stb, elapsed, timeoutMs, done, err, cleared, log);
         }
 
         /// <summary>Builds the final result + message from the terminal status byte (shared by both flows).</summary>
         private static CompletionResult Finish(StatusModel model, string operationName, StatusOperation op,
-            int stb, long elapsed, int timeoutMs, bool done, bool err, Action<string> log)
+            int stb, long elapsed, int timeoutMs, bool done, bool err, bool expectCleared, Action<string> log)
         {
             IReadOnlyList<string> bits = model.SetBitNames(stb);
             string detail = "status byte " + stb + " (0x" + stb.ToString("X2") + ") [" + Describe(bits) + "]";
@@ -233,10 +256,37 @@ namespace GpibUtils.Visa.Srq
             else
                 result = new CompletionResult(CompletionOutcome.TimedOut,
                     "Timed out after " + timeoutMs + " ms waiting for '" + operationName + "' (expected bit '" +
-                    op.ExpectBit + "' not set) - " + detail + ". Mask cleared; bus left usable.", stb, elapsed, bits);
+                    op.ExpectBit + (expectCleared ? "' not cleared" : "' not set") + ") - " + detail +
+                    ". Mask cleared; bus left usable.", stb, elapsed, bits);
 
             log("=> " + result.Outcome + ": " + result.Message);
             return result;
+        }
+
+        /// <summary>
+        /// Reads the status byte: a hardware serial poll by default, or - when the model declares a
+        /// <see cref="StatusModel.StatusQuery"/> - the numeric reply to that query (e.g. a legacy analyzer's
+        /// <c>STB?</c>). Centralised so every read in both flows honours the model's chosen mechanism.
+        /// </summary>
+        private static int ReadStatus(StatusModel model, IStatusChannel channel)
+        {
+            if (model.StatusQuery != null && !string.IsNullOrEmpty(model.StatusQuery.Command))
+                return ParseStatus(channel.Query(model.StatusQuery.Command));
+            return channel.SerialPoll();
+        }
+
+        /// <summary>
+        /// Parses a status-byte reply: the leading signed integer/decimal/exponent numeric run, rounded to
+        /// an int (tolerates surrounding text, sign, and "8.0E+01"-style formats some instruments emit).
+        /// </summary>
+        private static int ParseStatus(string reply)
+        {
+            if (string.IsNullOrEmpty(reply)) return 0;
+            Match m = Regex.Match(reply, @"[-+]?\d+(\.\d+)?([eE][-+]?\d+)?");
+            double d;
+            if (m.Success && double.TryParse(m.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out d))
+                return (int)Math.Round(d);
+            return 0;
         }
 
         private static void SafeSend(IStatusChannel channel, string command, string what, Action<string> log)

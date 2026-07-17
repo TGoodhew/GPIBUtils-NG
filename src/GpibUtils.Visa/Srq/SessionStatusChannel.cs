@@ -28,5 +28,7 @@ namespace GpibUtils.Visa.Srq
         public void Send(string command) => _session.Write(command);
 
         public int SerialPoll() => _session.SerialPoll().Value;
+
+        public string Query(string command) => _session.Query(command);
     }
 }
