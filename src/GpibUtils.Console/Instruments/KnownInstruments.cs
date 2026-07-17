@@ -58,6 +58,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp8656",   Hp8656.DefaultResource,   "HP 8656A/8656B signal generator"),
             new KnownInstrument("hp8663a",  Hp8663A.DefaultResource,  "HP 8663A synthesized signal generator"),
             new KnownInstrument("hp3335a",  Hp3335A.DefaultResource,  "HP 3335A synthesizer/level generator (listen-only)"),
+            new KnownInstrument("hp3245a",  Hp3245A.DefaultResource,  "HP 3245A universal source (DC V/I + waveform)"),
             new KnownInstrument("hp8657b",  Hp8657B.DefaultResource,  "HP 8657B signal generator"),
             new KnownInstrument("hp8664a",  Hp8664A.DefaultResource,  "HP 8664A signal generator (HP-SL)"),
             new KnownInstrument("rs-sme",   RohdeSchwarzSme.DefaultResource, "Rohde & Schwarz SME signal generator"),

@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 3245A Universal Source** (issue [#105](https://github.com/TGoodhew/GPIBUtils-NG/issues/105)) —
+  a driver in `GpibUtils.Instruments.SignalSources` implementing a **new `IUniversalSource` interface** (P1 #89):
+  a multi-channel precision DC voltage/current source + low-frequency waveform generator, a shape that
+  `ISignalSource` / `IDcVoltageCalibrator` / `IDcPowerSupply` cannot express. Keyword language (`APPLY DCV`/
+  `APPLY DCI`, `USE 0`/`USE 100`, `ARANGE`, `OUTPUT?`, `RST`, `ID?` — no `*`-prefixed 488.2 command), ±10.25 V /
+  ±0.1 A range enforcement, `RQS` mask exposed for the shared Srq engine (custom 6-bit status register). CLI
+  `hp3245a idn|dc`, default address **9** (factory-confirmed). Tests (+6). **Needs bench verification.**
+
 - **HP 8663A Synthesized Signal Generator** (issue [#124](https://github.com/TGoodhew/GPIBUtils-NG/issues/124)) —
   a driver in `GpibUtils.Instruments.SignalSources` implementing `ISignalSource` (legacy two-letter mnemonics
   `FR…MZ` / `AP…DM`, Device-Clear preset). The 8663A has no dedicated RF on/off key, so `RfOff()` mutes to the
