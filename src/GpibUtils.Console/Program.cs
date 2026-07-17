@@ -194,6 +194,16 @@ namespace GpibUtils.Console
                         .WithDescription("Serial-poll the status byte and read any error (IERR).");
                 });
 
+                // ISignalSource RF-generator batch (#103/#119/#120/#122/#123/#125/#137/#138): idn + apply.
+                RegisterSignalSource<E4436BSourceSettings>(config, "e4436b", "Agilent E4436B ESG-D signal generator (SCPI).");
+                RegisterSignalSource<Hp83620ASourceSettings>(config, "hp83620a", "HP 83620A synthesized swept-signal generator (SCPI, CW).");
+                RegisterSignalSource<Hp83712BSourceSettings>(config, "hp83712b", "HP 83712B synthesized CW generator (SCPI).");
+                RegisterSignalSource<Hp8656SourceSettings>(config, "hp8656", "HP 8656A/8656B signal generator (legacy mnemonic, write-only).");
+                RegisterSignalSource<Hp8657BSourceSettings>(config, "hp8657b", "HP 8657B signal generator (legacy mnemonic, listen-only).");
+                RegisterSignalSource<Hp8664ASourceSettings>(config, "hp8664a", "HP 8664A signal generator (HP-SL).");
+                RegisterSignalSource<RsSmeSourceSettings>(config, "rs-sme", "Rohde & Schwarz SME signal generator (SCPI).");
+                RegisterSignalSource<RsSmtSourceSettings>(config, "rs-smt", "Rohde & Schwarz SMT signal generator (SCPI).");
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
@@ -639,6 +649,19 @@ namespace GpibUtils.Console
                 });
             });
             return app.Run(args);
+        }
+
+        /// <summary>Registers an <c>idn</c> + <c>apply</c> CLI branch for an ISignalSource RF generator.</summary>
+        private static void RegisterSignalSource<TSettings>(IConfigurator config, string key, string description)
+            where TSettings : SignalSourceSettings
+        {
+            config.AddBranch<CommandSettings>(key, dev =>
+            {
+                dev.SetDescription(description);
+                dev.AddCommand<SignalSourceApplyCommand<TSettings>>("apply")
+                    .WithDescription("Set frequency/level (and RF on/off).")
+                    .WithExample(new[] { key, "apply", "-f", "1000", "-l", "-10", "--rf", "on", "--provider", "Simulated" });
+            });
         }
     }
 }

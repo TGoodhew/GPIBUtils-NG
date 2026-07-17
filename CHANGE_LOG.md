@@ -15,6 +15,18 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Eight ISignalSource RF generators** (from the #70 triage) in `GpibUtils.Instruments.SignalSources`, all
+  CW frequency/power/RF-on-off: **Agilent E4436B** ([#103](https://github.com/TGoodhew/GPIBUtils-NG/issues/103),
+  SCPI, addr 19), **HP 83620A** ([#119](https://github.com/TGoodhew/GPIBUtils-NG/issues/119), SCPI, addr 19),
+  **HP 83712B** ([#120](https://github.com/TGoodhew/GPIBUtils-NG/issues/120), SCPI, addr 19),
+  **HP 8656A/B** ([#122](https://github.com/TGoodhew/GPIBUtils-NG/issues/122), legacy mnemonic, write-only,
+  addr 7), **HP 8657B** ([#123](https://github.com/TGoodhew/GPIBUtils-NG/issues/123), legacy mnemonic,
+  listen-only, addr 7), **HP 8664A** ([#125](https://github.com/TGoodhew/GPIBUtils-NG/issues/125), HP-SL,
+  addr 19), **R&S SME** ([#137](https://github.com/TGoodhew/GPIBUtils-NG/issues/137), SCPI, addr 28),
+  **R&S SMT** ([#138](https://github.com/TGoodhew/GPIBUtils-NG/issues/138), SCPI, addr 28). Batch tests (+8);
+  a generic `gpibutils <device> apply -f <MHz> -l <dBm> --rf on|off` CLI (shared over all ISignalSource
+  drivers). The three addr-19 HP sources (83620A/83712B/8664A) clash with the 8673B/8340B — remap on a shared
+  bus. 🟡 **Verification Needed.**
 - **`IFunctionGenerator` + three function generators** (issue
   [#88](https://github.com/TGoodhew/GPIBUtils-NG/issues/88) resolved: the interface lives in
   `GpibUtils.Instruments.SignalSources`, not a separate Waveforms project) — a new interface (waveform /
