@@ -15,6 +15,17 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8757D Scalar Network Analyzer** (issue [#129](https://github.com/TGoodhew/GPIBUtils-NG/issues/129)) —
+  a driver in `GpibUtils.Instruments.NetworkAnalyzers` implementing `INetworkAnalyzer` (P1 #82), completing the
+  network-analyzer family. **Previously blocked** on unavailable command syntax; **unblocked** when the user
+  supplied `8757D Operating-User.pdf` (P/N 08757-90130) — the driver uses its two-letter program-code table
+  (`IP`, `OI`, `IA`/`IB`/`IR`, `SP`, `CS`/`SV1`, `FD0`/`OD`). Because the 8757D is a **scalar detector** that
+  does not own its frequency axis (the swept source does, via the SYSTEM INTERFACE port), `SetSourcePowerDbm`
+  is a documented no-op, `FA`/`FB` set display labels, `SetMeasurement` maps S11→detector-A / S21→detector-B
+  absolute power (and InputA/B/R directly), and the peak marker is computed host-side from the trace (no
+  cursor-search code invented). CLI `hp8757d sweep`, default address **16**. Tests (+10). 🟡 **Verification
+  Needed** (A/R·B/R ratio codes and exact `FA`/`FB` syntax live in the Programming Guide 08757-90109).
+
 - **Keithley 2015 audio-distortion surface** via a **new `IAudioDistortionAnalyzer` interface** (issue
   [#94](https://github.com/TGoodhew/GPIBUtils-NG/issues/94)) — the 2015 now exposes THD / THD+N / SINAD
   (`:SENS:FUNC 'DIST'`, `:SENS:DIST:TYPE`, `:SENS:DIST:FREQ`, low/high cutoffs) alongside its existing
@@ -85,9 +96,9 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   SCPI, addr 16) and **HP 8720C** microwave VNA ([#128](https://github.com/TGoodhew/GPIBUtils-NG/issues/128),
   legacy front-panel mnemonics + IEEE-488.2, addr 16). Scalar-first, vector-extensible interface: frequency
   sweep, source power, S-parameter select, single-sweep blocking on `*OPC?` (mandatory before any data read),
-  formatted-trace read, peak marker. Tests (+3); generic `gpibutils hp8714|hp8720c sweep` CLI. The scalar
-  **HP 8757D (#129) is deferred** — its command syntax lives only in an unavailable Quick Reference Guide, so
-  building it would mean inventing mnemonics. 🟡 **Verification Needed.**
+  formatted-trace read, peak marker. Tests (+3); generic `gpibutils hp8714|hp8720c sweep` CLI. (The scalar
+  **HP 8757D (#129)** was later unblocked and landed once the user supplied its User’s Guide — see above.)
+  🟡 **Verification Needed.**
 
 - **Analyzers / meters / supply batch (6)** (from the #70 triage): **Rigol DSA800**
   ([#102](https://github.com/TGoodhew/GPIBUtils-NG/issues/102)) + **Agilent N9320A**

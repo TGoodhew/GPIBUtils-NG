@@ -64,4 +64,11 @@ namespace GpibUtils.Console.Instruments
         { session = OpenSession("hp8720c", Hp8720C.DefaultResource); return new Hp8720C(session); }
         internal override IReadOnlyList<string> HistoryOf(INetworkAnalyzer a) => ((Hp8720C)a).History;
     }
+
+    public sealed class Hp8757dNaSettings : NetworkAnalyzerSettings
+    {
+        internal override INetworkAnalyzer Open(out Visa.IInstrumentSession session)
+        { session = OpenSession("hp8757d", Hp8757D.DefaultResource); return new Hp8757D(session); }
+        internal override IReadOnlyList<string> HistoryOf(INetworkAnalyzer a) => ((Hp8757D)a).History;
+    }
 }

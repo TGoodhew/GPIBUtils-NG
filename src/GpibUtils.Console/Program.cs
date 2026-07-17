@@ -240,6 +240,7 @@ namespace GpibUtils.Console
                 // Network analyzers (#127/#128): single-sweep + trace/marker.
                 RegisterNetworkAnalyzer<Hp8714NaSettings>(config, "hp8714", "HP 8711C-8714C RF network analyzer (SCPI).");
                 RegisterNetworkAnalyzer<Hp8720cNaSettings>(config, "hp8720c", "HP 8720C microwave vector network analyzer (mnemonic).");
+                RegisterNetworkAnalyzer<Hp8757dNaSettings>(config, "hp8757d", "HP 8757D scalar network analyzer (mnemonic; source-driven frequency).");
 
                 config.AddBranch<CommandSettings>("hp53310a", dev =>
                 {
