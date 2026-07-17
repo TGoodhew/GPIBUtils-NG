@@ -15,6 +15,24 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8591E Spectrum Analyzer** (issue [#121](https://github.com/TGoodhew/GPIBUtils-NG/issues/121), from the
+  #70 Manuals-folder triage) — a driver in `GpibUtils.Instruments.Analyzers` (`ISpectrumAnalyzer`) for the
+  8590 D/E/L-series legacy-mnemonic family. Center/span/RBW/VBW/sweep-time, single sweep, trace (`TRA?`) and
+  markers (`MKPK HI`/`MKF?`/`MKA?`). **First consumer of the #96 `StatusModel.StatusQuery` path:** the
+  pre-488.2 sweep completion reads the status byte via the `STB?` query (not a hardware serial poll) and arms
+  with the legacy `RQS <mask>` mnemonic + 8590-family bit table, all through the shared `CompletionWaiter`.
+  `Hp8591ESimulatedDevice` + 13 tests; `gpibutils hp8591e idn|init|sweep|trace|peak`. Default
+  `GPIB0::18::INSTR` (family default). 🟡 **Verification Needed.**
+- **HP 3585A/3585B Spectrum Analyzer** (issue [#108](https://github.com/TGoodhew/GPIBUtils-NG/issues/108),
+  from the #70 triage) — a driver in `GpibUtils.Instruments.Analyzers` (`ISpectrumAnalyzer`) for the 1970s
+  low-frequency (10 Hz–40.1 MHz) mnemonic analyzer with no `*IDN?`/`*OPC`. CF/FS/FA/FB/RB/VB/RL/ST, single
+  sweep, trace (`D3`) and marker (`D1`/`D2`) dumps. Sweep completion drives the shared `CompletionWaiter`
+  SRQ-edge flow with a **custom (non-`RQS`) enable command** — `CQ`/`CC` operation-complete-SRQ — proving the
+  engine hardcodes no mask mnemonic (#96). `Hp3585SimulatedDevice` + 12 tests; `gpibutils hp3585
+  idn|init|sweep|trace|marker`. Default `GPIB0::11::INSTR`. Targets the 3585B op-complete-SRQ path (3585A
+  `T5` data-ready and limit-test SRQ are bench follow-ups; peak found in software from the trace). 🟡
+  **Verification Needed.**
+
 - **Rigol DS1054Z Oscilloscope** (issue [#27](https://github.com/TGoodhew/GPIBUtils-NG/issues/27), ported from
   [GPIBUtils](https://github.com/TGoodhew/GPIBUtils)) — the first driver in a new `GpibUtils.Instruments.Scopes`
   project (`IOscilloscope`). Acquisition control (`:RUN`/`:STOP`/`:SINGle`/`:AUToscale`), per-channel display

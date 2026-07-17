@@ -60,6 +60,8 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("fluke5440", Fluke5440A.DefaultResource, "Fluke 5440A/5440B DC voltage calibrator"),
             new KnownInstrument("e4438c",   KeysightE4438C.DefaultResource, "Keysight E4438C ESG vector signal generator"),
             new KnownInstrument("hp8560e",  Hp8560E.DefaultResource,   "HP 8560E spectrum analyzer"),
+            new KnownInstrument("hp8591e",  Hp8591E.DefaultResource,   "HP 8591E spectrum analyzer (8590 family)"),
+            new KnownInstrument("hp3585",   Hp3585.DefaultResource,    "HP 3585A/3585B spectrum analyzer"),
             new KnownInstrument("e4406a",   AgilentE4406A.DefaultResource, "Agilent E4406A VSA transmitter tester"),
             new KnownInstrument("hp85620a", Hp85620A.DefaultResource,  "HP 85620A mass memory module (via 8563E)"),
             new KnownInstrument("plotter",  HpPlotter.DefaultResource, "HP 7090A/7475A/7550A HP-GL pen plotter"),

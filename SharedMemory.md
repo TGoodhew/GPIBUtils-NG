@@ -252,6 +252,18 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   tests → 16; full suite green.** Unblocks the legacy-mnemonic P2 drivers (8591E #121, 3585 #108, 4275A #109,
   8903B #131, 5005B #112, 8672A #126). 🟡 verify tag `verify/96-srq-legacy` — headless sim only, no HW.
   #96 stays OPEN per no-hardware policy.
+- **#70 legacy-driver batch IN PROGRESS (2026-07-17)** — building the six #96-unblocked P2 drivers, all →
+  Needs Verification (no HW). **Landed so far:**
+  - **HP 8591E** (#121, `verify/121-hp8591e`): `Analyzers`/`ISpectrumAnalyzer`, 8590-family legacy mnemonics.
+    **First `StatusModel.StatusQuery` (`STB?`) consumer** — completion reads status by query, not serial poll.
+    `Hp8591ESimulatedDevice` + 13 tests. Default addr 18.
+  - **HP 3585A/B** (#108, `verify/108-hp3585`): `Analyzers`/`ISpectrumAnalyzer`, 1970s mnemonic, no `*IDN?`.
+    Completion via a **custom non-`RQS` enable command** (`CQ`/`CC` op-complete SRQ) + serial poll; `D1/D2/D3`
+    dumps. `Hp3585SimulatedDevice` + 12 tests. Default addr 11. (3585A `T5`/limit-test SRQ + peak-search
+    mnemonic = bench follow-ups.)
+  - **Still to build:** 8672A #126 (`ISignalSource`, `ExpectBitCleared` consumer), 5005B #112 (new
+    `ISignatureAnalyzer` in Meters), 4275A #109 (new `ILcrMeter` + LcrMeters project), 8903B #131 (new
+    `IAudioAnalyzer` + Audio project).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
