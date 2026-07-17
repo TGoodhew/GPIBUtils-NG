@@ -36,7 +36,7 @@ namespace GpibUtils.Instruments.Counters
     /// out-of-limit conditions talk dashes or all-9s instead of a number — surfaced here as an
     /// <see cref="InvalidOperationException"/>.</para>
     /// </summary>
-    public sealed class Hp5342A
+    public sealed class Hp5342A : ILegacyFrequencyCounter
     {
         /// <summary>GPIB address of the 5342A. There is no stated numeric factory default (a rear-panel
         /// 5-bit address switch; 31 = talk-only); the manual's programming examples use address 2. Override

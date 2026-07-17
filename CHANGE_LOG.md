@@ -368,6 +368,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Changed
 
+- **Legacy microwave counters unified behind `ILegacyFrequencyCounter`** (issue
+  [#93](https://github.com/TGoodhew/GPIBUtils-NG/issues/93)) — the HP 5342A, 5343A and 5351A standalone drivers
+  now implement a shared narrow interface (`ResourceName`, `Identify`, `Initialize`, `ReadFrequency`), so the
+  family can be identified/initialized/read uniformly while their model-specific controls (manual center
+  frequency, resolution, range, sample mode, oven/reference status) stay on the concrete classes. They remain
+  **not** `IFrequencyCounter` (that numbered-channel + selectable-impedance shape fits the SCPI 53131A). Pure
+  refactor of working drivers — no behaviour change; verified by tests (+1), **no bench verification needed**.
+
 - **`GpibUtils.Visa.Srq` `ExpectBitCleared` now works without an enable mask** (follow-up to #96, for issue
   [#126](https://github.com/TGoodhew/GPIBUtils-NG/issues/126)) — a cleared-settle operation may omit
   `EnableMask` entirely, for legacy sources (e.g. the HP 8672A) that have no `*SRE`-equivalent arm at all:
