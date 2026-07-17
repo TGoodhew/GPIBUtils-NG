@@ -31,6 +31,35 @@ namespace GpibUtils.Instruments.Meters.Tests
         }
 
         [Fact]
+        public void Keithley2015_measures_distortion()
+        {
+            using (var s = Open(Keithley2015.DefaultResource, c => c.Trim() == "READ?" ? "0.0512" : null))
+            {
+                var d = new Keithley2015(s);
+                Assert.IsAssignableFrom<IAudioDistortionAnalyzer>(d);
+                d.ConfigureDistortion(DistortionType.ThdPlusNoise);
+                d.SetFundamentalFrequency(1000);
+                d.SetLowCutoff(500);
+                d.SetHighCutoff(10000);
+                Assert.Contains(":SENS:FUNC 'DIST'", d.History);
+                Assert.Contains(":SENS:DIST:TYPE THDN", d.History);
+                Assert.Contains(":SENS:DIST:FREQ 1000", d.History);
+                Assert.Contains(":SENS:DIST:LCO:STAT ON", d.History);
+                Assert.Contains(":SENS:DIST:HCO:STAT ON", d.History);
+                Assert.Equal(0.0512, d.MeasureDistortion(), 4);
+            }
+        }
+
+        [Theory]
+        [InlineData(DistortionType.Thd, "THD")]
+        [InlineData(DistortionType.ThdPlusNoise, "THDN")]
+        [InlineData(DistortionType.Sinad, "SINAD")]
+        public void Keithley2015_distortion_type_codes(DistortionType type, string code)
+        {
+            Assert.Equal(code, Keithley2015.DistortionCode(type));
+        }
+
+        [Fact]
         public void Hp437B_measures_dbm()
         {
             using (var s = Open(Hp437B.DefaultResource, c => c.Trim() == "TR2" ? "-10.50" : null))

@@ -225,6 +225,9 @@ namespace GpibUtils.Console
                     dev.AddCommand<Keithley2015MeasureCommand>("measure")
                         .WithDescription("Configure a function and read a value.")
                         .WithExample(new[] { "keithley2015", "measure", "dcv", "--provider", "Simulated" });
+                    dev.AddCommand<Keithley2015DistortionCommand>("distortion")
+                        .WithDescription("Measure audio distortion: thd | thdn | sinad (-f fundamental, --lco/--hco cutoffs).")
+                        .WithExample(new[] { "keithley2015", "distortion", "thdn", "-f", "1000", "--provider", "Simulated" });
                 });
                 config.AddBranch<CommandSettings>("hp6625a", dev =>
                 {
