@@ -189,6 +189,23 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp438a", "measure", "A", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp5005b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 5005B signature multimeter (legacy mnemonics, QM-mask/SRQ measurement).");
+                    dev.AddCommand<Hp5005BIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (ID).")
+                        .WithExample(new[] { "hp5005b", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp5005BInitCommand>("init")
+                        .WithDescription("Device clear + reset to power-up defaults (clean known state).");
+                    dev.AddCommand<Hp5005BMeasureCommand>("measure")
+                        .WithDescription("Select a numeric function and read a measurement (QM/SRQ handshake).")
+                        .WithExample(new[] { "hp5005b", "measure", "resistance", "--provider", "Simulated" });
+                    dev.AddCommand<Hp5005BSignatureCommand>("signature")
+                        .WithDescription("Capture a logic signature (NORM/--qual QUAL) via the SRQ handshake.");
+                    dev.AddCommand<Hp5005BErrorCommand>("error")
+                        .WithDescription("Read the decimal error code (SE).");
+                });
+
                 config.AddBranch<CommandSettings>("hp8902a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");

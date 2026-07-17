@@ -266,8 +266,12 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     bit to clear via the engine (direct-bit, **no enable mask** — a small #96 follow-up let the waiter run
     without one). Frequency `P<kHz>Z` reliable; RANGE/VERNIER/ALC letters reconstructed/TBD (garbled OCR).
     `Hp8672ASimulatedDevice` + 12 tests. Default addr 19 (bench-remap vs 8673B/8340B).
-  - **Still to build:** 5005B #112 (new `ISignatureAnalyzer` in Meters), 4275A #109 (new `ILcrMeter` +
-    LcrMeters project), 8903B #131 (new `IAudioAnalyzer` + Audio project).
+  - **HP 5005B** (#112, `verify/112-hp5005b`): `Meters` project, **new `ISignatureAnalyzer` interface** (P1
+    #92) — hybrid logic-signature analyzer + multimeter, legacy mnemonics. **#96 consumer:** vendor
+    `QM<mask>`/`QM0` SRQ-mask enable + legacy status-byte bit table via the engine. `Hp5005BSimulatedDevice`
+    + 11 tests. Default addr 3.
+  - **Still to build:** 4275A #109 (new `ILcrMeter` + LcrMeters project), 8903B #131 (new `IAudioAnalyzer` +
+    Audio project).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

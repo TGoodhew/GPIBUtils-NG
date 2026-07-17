@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 5005B Signature Multimeter** (issue [#112](https://github.com/TGoodhew/GPIBUtils-NG/issues/112), from
+  the #70 triage) — a driver in `GpibUtils.Instruments.Meters` implementing a **new `ISignatureAnalyzer`
+  interface** (P1 #92): a hybrid logic-signature analyzer + multimeter (frequency/totalize/time-interval/Ω/
+  DCV/differential/peak-V) that fits none of the existing Meters interfaces. Legacy pre-SCPI mnemonics
+  (`Fn`/`TDn`/`PCn`/`PSn`/`RS`/`ID`/`SE`/`SU`). Measurement completion is a **#96 consumer**: the vendor
+  `QM<mask>`/`QM0` Service-Request-Mask enable (a custom, non-`*SRE` command) + the legacy 5005B status-byte
+  bit table, driven through the shared `CompletionWaiter` SRQ-edge flow (data-ready = 0x01, error = 0x04,
+  SRQ = 0x40). `Hp5005BSimulatedDevice` + 11 tests; `gpibutils hp5005b idn|init|measure|signature|error`.
+  Default `GPIB0::3::INSTR`. 🟡 **Verification Needed.**
 - **HP 8672A Synthesized Microwave Signal Generator** (issue
   [#126](https://github.com/TGoodhew/GPIBUtils-NG/issues/126), from the #70 triage) — a driver in
   `GpibUtils.Instruments.SignalSources` (`ISignalSource`) for the 2–18 GHz pre-488.2 microwave source (older
