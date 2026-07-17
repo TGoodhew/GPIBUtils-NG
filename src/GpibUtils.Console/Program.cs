@@ -221,6 +221,19 @@ namespace GpibUtils.Console
                         .WithDescription("Perform an OPEN (zero) correction.");
                 });
 
+                config.AddBranch<CommandSettings>("hp8903b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8903B audio analyzer (legacy mnemonics, SF22/SRQ measurement).");
+                    dev.AddCommand<Hp8903BIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (8903B has no *IDN?).")
+                        .WithExample(new[] { "hp8903b", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8903BInitCommand>("init")
+                        .WithDescription("Device clear + Automatic Operation reset (clean known state).");
+                    dev.AddCommand<Hp8903BMeasureCommand>("measure")
+                        .WithDescription("Set source + measurement, trigger and read (SF22/SRQ handshake).")
+                        .WithExample(new[] { "hp8903b", "measure", "-f", "1000", "-m", "distortion", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8902a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");

@@ -275,7 +275,16 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     custom `I1`/`I0` Data-Ready-SRQ enable + fully custom status-byte bit table. `Hp4275ASimulatedDevice` +
     9 tests. Default addr 17 (**provisional** — factory switch unreadable in scan). Format-A parse = first
     two numbers (exact layout TBD at bench).
-  - **Still to build:** 8903B #131 (new `IAudioAnalyzer` + Audio project).
+  - **HP 8903B** (#131, `verify/131-hp8903b`): **new `GpibUtils.Instruments.Audio` project + new
+    `IAudioAnalyzer` interface** (P1 #86) — audio source + voltmeter + distortion analyzer. **#96 consumer**
+    via Special-Function-22 SRQ enable (`22.{mask}SP`, no `*SRE`) + status-byte bit table.
+    `Hp8903BSimulatedDevice` + 10 tests. Default addr 28. **Bench caveat:** hardware re-triggers on every
+    serial poll — poll-loop completion needs bench confirmation (fallback: wait-for-SRQ-line + single poll).
+  - **BATCH COMPLETE (2026-07-17):** all six #96-unblocked legacy drivers landed (#121, #108, #126, #112,
+    #109, #131) — each merged sim-green + CI-green, `verify/<n>-<slug>` tagged, issue kept OPEN (Needs
+    Verification). Also landed a #96 engine follow-up (ExpectBitCleared works without an EnableMask) and two
+    new category projects (LcrMeters, Audio). NEXT: the remaining P2 devices on existing interfaces (the
+    SignalSources RF generators, scopes, etc.) whenever picked up; or the other P1 interface designs.
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
