@@ -293,6 +293,12 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   IModulationAnalyzer (hp8901), hp5343a counter, hp6625a supply, IMultifunctionCalibrator (datron4708), and
   the new-interface families INetworkAnalyzer (hp8714/8720c/8757d), ISourceMeasureUnit (keithley2400),
   INoiseFigureMeter (hp8970b), IModulationDomainAnalyzer (hp53310a).
+  - **ISignalSource RF-generator batch LANDED (8):** e4436b #103, hp83620a #119, hp83712b #120, hp8656 #122,
+    hp8657b #123, hp8664a #125, rs-sme #137, rs-smt #138 — all CW freq/power/RF-on-off, `verify/<n>-*` tagged.
+    Generic `apply` CLI shared over ISignalSource (`RegisterSignalSource<T>` in Program.cs; drivers add their
+    own `Identify()` since ISignalSource has none). **Still to do in this family:** hp8663a #124 (SRQ-capable,
+    RF-on/off mnemonic uncertain) and hp3335a #107 (standalone class, not ISignalSource, per Hp8350B
+    precedent — needs its command set read).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke
