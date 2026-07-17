@@ -237,6 +237,17 @@ namespace GpibUtils.Console
                 RegisterNetworkAnalyzer<Hp8714NaSettings>(config, "hp8714", "HP 8711C-8714C RF network analyzer (SCPI).");
                 RegisterNetworkAnalyzer<Hp8720cNaSettings>(config, "hp8720c", "HP 8720C microwave vector network analyzer (mnemonic).");
 
+                config.AddBranch<CommandSettings>("hp8508a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8508A vector voltmeter (A/B voltage, phase, SWR, transmission, ...).");
+                    dev.AddCommand<Hp8508AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hp8508a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8508AMeasureCommand>("measure")
+                        .WithDescription("Measure a vector quantity (avol|bvol|phase|trans|swr|...).")
+                        .WithExample(new[] { "hp8508a", "measure", "trans", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("keithley2400", dev =>
                 {
                     dev.SetDescription("Drive a Keithley 2400 SourceMeter SMU (source V/I with compliance, measure V/I/R).");
