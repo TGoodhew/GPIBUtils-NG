@@ -20,7 +20,7 @@ namespace GpibUtils.Instruments.Counters
     /// (Hz), and reports oven / reference status. Ported from the working <c>GPIBUtils/HPDevices</c> driver
     /// (issue #20). Runs over any <see cref="IInstrumentSession"/>.
     /// </summary>
-    public sealed class Hp5351A
+    public sealed class Hp5351A : ILegacyFrequencyCounter
     {
         /// <summary>GPIB address of the 5351A. The counter has no fixed factory-default HP-IB address (it is
         /// set on a rear-panel switch); the legacy test app used <c>GPIB0::14::INSTR</c>. Override with

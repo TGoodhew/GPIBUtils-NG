@@ -39,7 +39,7 @@ namespace GpibUtils.Instruments.Counters
     /// <c>GpibUtils.Visa.Srq</c> direct-bit flow (as a follow-up, matching the 5342A). Overload/overflow/
     /// insufficient-signal readings are surfaced as an <see cref="InvalidOperationException"/>.</para>
     /// </summary>
-    public sealed class Hp5343A
+    public sealed class Hp5343A : ILegacyFrequencyCounter
     {
         /// <summary>GPIB address of the 5343A. There is no stated numeric factory default (a rear-panel
         /// 5-bit address switch; a separate TALK-ONLY toggle); the manual's programming examples use address
