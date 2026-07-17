@@ -213,6 +213,26 @@ namespace GpibUtils.Console
                 RegisterScope<Lc574aScopeSettings>(config, "lc574a", "LeCroy LC574A oscilloscope (LeCroy dialect; bench-confirm).");
                 RegisterScope<WaveRunner6000ScopeSettings>(config, "waverunner6000", "LeCroy WaveRunner 6000 oscilloscope (LeCroy dialect; bench-confirm).");
 
+                // SCPI spectrum analyzers (#102/#136) and power meters (#111/#110): generic sweep / measure.
+                RegisterAnalyzer<Dsa800AnalyzerSettings>(config, "dsa800", "Rigol DSA800 spectrum analyzer (SCPI; bench-confirm).");
+                RegisterAnalyzer<N9320aAnalyzerSettings>(config, "n9320a", "Agilent N9320A spectrum analyzer (SCPI/USB-TMC; bench-confirm).");
+                RegisterPowerMeter<Hp437bPmSettings>(config, "hp437b", "HP 437B RF power meter (mnemonic + *IDN?).");
+                RegisterPowerMeter<Hp436aPmSettings>(config, "hp436a", "HP 436A power meter (legacy single-char codes).");
+                config.AddBranch<CommandSettings>("keithley2015", dev =>
+                {
+                    dev.SetDescription("Drive a Keithley 2015 THD multimeter (SCPI DMM).");
+                    dev.AddCommand<Keithley2015MeasureCommand>("measure")
+                        .WithDescription("Configure a function and read a value.")
+                        .WithExample(new[] { "keithley2015", "measure", "dcv", "--provider", "Simulated" });
+                });
+                config.AddBranch<CommandSettings>("hp6625a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 6625A system DC power supply (channel-scoped mnemonics).");
+                    dev.AddCommand<Hp6625ASetCommand>("set")
+                        .WithDescription("Set voltage/current-limit on an output and enable it.")
+                        .WithExample(new[] { "hp6625a", "set", "5", "-i", "0.5", "-c", "1", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
@@ -684,6 +704,32 @@ namespace GpibUtils.Console
                 dev.AddCommand<ScopeCtlCommand<TSettings>>("ctl")
                     .WithDescription("Identify / acquisition (--acq run|stop|single|auto) / channel display / --vpp.")
                     .WithExample(new[] { key, "ctl", "--acq", "single", "--vpp", "-c", "1", "--provider", "Simulated" });
+            });
+        }
+
+        /// <summary>Registers a <c>sweep</c> CLI command for a SCPI ISpectrumAnalyzer driver.</summary>
+        private static void RegisterAnalyzer<TSettings>(IConfigurator config, string key, string description)
+            where TSettings : BatchAnalyzerSettings
+        {
+            config.AddBranch<CommandSettings>(key, dev =>
+            {
+                dev.SetDescription(description);
+                dev.AddCommand<BatchAnalyzerSweepCommand<TSettings>>("sweep")
+                    .WithDescription("Set center/span, take a single sweep; --peak reports the marker.")
+                    .WithExample(new[] { key, "sweep", "--center", "1e9", "--span", "1e6", "--peak", "--provider", "Simulated" });
+            });
+        }
+
+        /// <summary>Registers a <c>measure</c> CLI command for an IPowerMeter driver.</summary>
+        private static void RegisterPowerMeter<TSettings>(IConfigurator config, string key, string description)
+            where TSettings : BatchPowerMeterSettings
+        {
+            config.AddBranch<CommandSettings>(key, dev =>
+            {
+                dev.SetDescription(description);
+                dev.AddCommand<BatchPowerMeterMeasureCommand<TSettings>>("measure")
+                    .WithDescription("Initialize and read power (dBm); --zero to zero/cal first.")
+                    .WithExample(new[] { key, "measure", "--zero", "--provider", "Simulated" });
             });
         }
     }

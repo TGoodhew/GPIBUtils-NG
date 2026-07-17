@@ -15,6 +15,18 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Analyzers / meters / supply batch (6)** (from the #70 triage): **Rigol DSA800**
+  ([#102](https://github.com/TGoodhew/GPIBUtils-NG/issues/102)) + **Agilent N9320A**
+  ([#136](https://github.com/TGoodhew/GPIBUtils-NG/issues/136)) SCPI spectrum analyzers (shared
+  `ScpiSpectrumAnalyzer` base, `*OPC?`-blocking single sweep, `ISpectrumAnalyzer`; bench-confirm — no readable
+  programming guides); **Keithley 2015** ([#133](https://github.com/TGoodhew/GPIBUtils-NG/issues/133)) THD DMM
+  (full `IDigitalMultimeter`, Keithley 2000-family SCPI); **HP 437B**
+  ([#111](https://github.com/TGoodhew/GPIBUtils-NG/issues/111)) + **HP 436A**
+  ([#110](https://github.com/TGoodhew/GPIBUtils-NG/issues/110)) RF power meters (`IPowerMeter`; 437B has
+  `*IDN?`, 436A parses the fixed 14-char output string); **HP 6625A**
+  ([#117](https://github.com/TGoodhew/GPIBUtils-NG/issues/117)) dual-output DC supply (`IDcPowerSupply`,
+  channel-scoped `VSET`/`ISET`/`VOUT?`). Batch tests (+8); generic `sweep`/`measure` CLIs + `keithley2015
+  measure` / `hp6625a set`. 🟡 **Verification Needed.**
 - **Seven oscilloscopes** (from the #70 triage) on the existing `IOscilloscope` in
   `GpibUtils.Instruments.Scopes`, across three command dialects (one shared base each): **Tektronix**
   DPO3000 ([#100](https://github.com/TGoodhew/GPIBUtils-NG/issues/100)), DPO4000
