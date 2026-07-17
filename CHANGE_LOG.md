@@ -15,6 +15,19 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Seven oscilloscopes** (from the #70 triage) on the existing `IOscilloscope` in
+  `GpibUtils.Instruments.Scopes`, across three command dialects (one shared base each): **Tektronix**
+  DPO3000 ([#100](https://github.com/TGoodhew/GPIBUtils-NG/issues/100)), DPO4000
+  ([#101](https://github.com/TGoodhew/GPIBUtils-NG/issues/101)), TDS784
+  ([#139](https://github.com/TGoodhew/GPIBUtils-NG/issues/139)) — Tek SCPI (`ACQuire`/`SELect`/`AUTOSet`/
+  `MEASUrement:IMMed`); **Agilent** 54622A ([#115](https://github.com/TGoodhew/GPIBUtils-NG/issues/115)),
+  54845A Infiniium ([#116](https://github.com/TGoodhew/GPIBUtils-NG/issues/116)) — root-level `:RUN`/`:STOP`/
+  `:SINGle`/`:AUToscale`, `:MEASure:VPP?`; **LeCroy** LC574A
+  ([#135](https://github.com/TGoodhew/GPIBUtils-NG/issues/135)), WaveRunner 6000
+  ([#140](https://github.com/TGoodhew/GPIBUtils-NG/issues/140)) — `Cn:`-prefixed dialect (`TRMD`/`Cn:TRA`/
+  `ASET`/`Cn:PAVA?`, bench-confirm — the LeCroy remote manuals were unreadable). Batch tests (+8); a generic
+  `gpibutils <scope> ctl --acq run|stop|single|auto --vpp -c <n>` CLI shared over all IOscilloscope drivers.
+  🟡 **Verification Needed.**
 - **Eight ISignalSource RF generators** (from the #70 triage) in `GpibUtils.Instruments.SignalSources`, all
   CW frequency/power/RF-on-off: **Agilent E4436B** ([#103](https://github.com/TGoodhew/GPIBUtils-NG/issues/103),
   SCPI, addr 19), **HP 83620A** ([#119](https://github.com/TGoodhew/GPIBUtils-NG/issues/119), SCPI, addr 19),
