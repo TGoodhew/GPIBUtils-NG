@@ -142,6 +142,24 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + preset + RF off (clean known state).");
                 });
 
+                config.AddBranch<CommandSettings>("hp8672a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8672A synthesized microwave signal generator (legacy program-code, #96 phase-lock settle).");
+                    dev.AddCommand<Hp8672AInitCommand>("init")
+                        .WithDescription("Device clear + RF off (resets to 3 GHz).");
+                    dev.AddCommand<Hp8672ACwCommand>("cw")
+                        .WithDescription("Set frequency (settle for phase lock) + power, and turn the RF on.")
+                        .WithExample(new[] { "hp8672a", "cw", "12000", "-10", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8672AFreqCommand>("freq")
+                        .WithDescription("Set the CW frequency (MHz) and wait for phase lock.");
+                    dev.AddCommand<Hp8672APowerCommand>("power")
+                        .WithDescription("Set the output power (dBm).");
+                    dev.AddCommand<Hp8672ARfCommand>("rf")
+                        .WithDescription("Turn the RF output on or off.");
+                    dev.AddCommand<Hp8672AStatusCommand>("status")
+                        .WithDescription("Serial-poll and report the status byte (phase-lock / fault bits).");
+                });
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");

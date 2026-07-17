@@ -175,6 +175,29 @@ namespace GpibUtils.Visa.Tests.Srq
         }
 
         [Fact]
+        public void ExpectBitCleared_NoEnableMask_Completes()
+        {
+            // A settle-on-clear source with NO *SRE-equivalent arm at all (e.g. the HP 8672A): completion is
+            // pure polling of the operating bit going to 0, with no EnableMask to send. The waiter must not
+            // demand one for a cleared-settle operation.
+            var model = new StatusModel
+            {
+                SrqSupported = true,
+                Bits = new Dictionary<string, int> { ["operating"] = 8 },
+                Operations = new Dictionary<string, StatusOperation>
+                {
+                    ["settle"] = new StatusOperation { Arm = "TS;", ExpectBit = "operating", ExpectBitCleared = true }
+                }
+                // no EnableMask, no RequestServiceBit
+            };
+            var sim = new SimulatedStatusChannel { SweepDurationMs = 1500 };
+            var result = Run(model, "settle", 30000, sim);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(0, result.StatusByte & SimulatedStatusChannel.Operating);
+        }
+
+        [Fact]
         public void LegacyCustomVocabulary_DirectBit_Completes()
         {
             // Proves the engine hardcodes no bit names or commands: a fully custom pre-488.2 bit table and a

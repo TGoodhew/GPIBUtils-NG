@@ -15,6 +15,16 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8672A Synthesized Microwave Signal Generator** (issue
+  [#126](https://github.com/TGoodhew/GPIBUtils-NG/issues/126), from the #70 triage) — a driver in
+  `GpibUtils.Instruments.SignalSources` (`ISignalSource`) for the 2–18 GHz pre-488.2 microwave source (older
+  sibling of the 8673B, but a distinct weighted "program-code + argument + EXECUTE" language). Frequency
+  `P<kHz>Z`, power (10-dB RANGE + 1-dB VERNIER), RF on/off, and — the point of this driver — a **phase-lock
+  settle that consumes the #96 `StatusOperation.ExpectBitCleared` path**: after a retune it waits (via the
+  shared `CompletionWaiter`, direct-bit, **no enable mask**) for the not-phase-locked status bit to *clear*.
+  `Hp8672ASimulatedDevice` + 12 tests; `gpibutils hp8672a init|cw|freq|power|rf|status`. Default
+  `GPIB0::19::INSTR` (bench-remap if it clashes with the 8673B/8340B). The frequency form is reliable; the
+  RANGE/VERNIER/ALC code letters are reconstructed and flagged TBD (garbled manual OCR). 🟡 **Verification Needed.**
 - **HP 8591E Spectrum Analyzer** (issue [#121](https://github.com/TGoodhew/GPIBUtils-NG/issues/121), from the
   #70 Manuals-folder triage) — a driver in `GpibUtils.Instruments.Analyzers` (`ISpectrumAnalyzer`) for the
   8590 D/E/L-series legacy-mnemonic family. Center/span/RBW/VBW/sweep-time, single sweep, trace (`TRA?`) and
@@ -213,6 +223,11 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Changed
 
+- **`GpibUtils.Visa.Srq` `ExpectBitCleared` now works without an enable mask** (follow-up to #96, for issue
+  [#126](https://github.com/TGoodhew/GPIBUtils-NG/issues/126)) — a cleared-settle operation may omit
+  `EnableMask` entirely, for legacy sources (e.g. the HP 8672A) that have no `*SRE`-equivalent arm at all:
+  completion is pure polling of a fault/settle bit going to 0. The `CompletionWaiter` no longer demands an
+  enable mask for such operations. +1 Srq test (17 total).
 - **`GpibUtils.Visa.Srq` now models pre-488.2 legacy completion** (issue
   [#96](https://github.com/TGoodhew/GPIBUtils-NG/issues/96), the cross-cutting enabler from the #70 triage) —
   still fully data-driven, no per-device code in the waiter. Two additions to the `StatusModel`:
