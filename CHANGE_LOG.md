@@ -15,6 +15,12 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`IModulationDomainAnalyzer` + new `GpibUtils.Instruments.ModulationDomain` project** (P1 #87) with the
+  **HP 53310A** ([#113](https://github.com/TGoodhew/GPIBUtils-NG/issues/113), SCPI, addr 12): frequency-vs-time
+  / time-interval-vs-time (and histogram) measurements via the `:CONFigure` + blocking `:READ?` flow — a data
+  model that fits neither a spectrum analyzer, counter, nor scope. Tests (+5); `gpibutils hp53310a
+  idn|measure freq|tinterval|…`. (The manual's `:STATus:OPERation` bit-4 SRQ-edge completion maps onto the
+  shared Srq engine — a follow-up if async completion is needed.) 🟡 **Verification Needed.**
 - **HP 8508A Vector Voltmeter** (issue [#104](https://github.com/TGoodhew/GPIBUtils-NG/issues/104),
   **re-scoped** from the mislabeled "Fluke 8508A" — the physical instrument is the HP vector voltmeter, a
   model-number collision) — a driver in `GpibUtils.Instruments.Meters` implementing a **new `IVectorVoltmeter`
