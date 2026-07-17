@@ -108,6 +108,96 @@ namespace GpibUtils.Visa.Tests.Srq
             Assert.InRange(result.ElapsedMs, 2000, 2150);
         }
 
+        // ---- #96: pre-488.2 legacy status models --------------------------------
+
+        [Fact]
+        public void StatusReadViaQuery_ParsesMessyReply_AndCompletes()
+        {
+            // A pre-488.2 instrument whose status byte is read by an ASCII query ("STB?") rather than a
+            // hardware serial poll. The reply is deliberately noisy (leading spaces, sign, exponent, CRLF)
+            // to exercise the waiter's numeric parser. Completion is otherwise the normal SRQ-edge flow.
+            var model = Model8563();
+            model.StatusQuery = new StatusQuerySpec { Command = "STB?" };
+            var sim = new SimulatedStatusChannel { SweepDurationMs = 2000 };
+            sim.FormatStatusReply = v => string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                "  +{0:0.0000E+00} \r\n", v);   // e.g. "  +8.4000E+01 \r\n"
+
+            var result = Run(model, "sweepComplete", 30000, sim);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(SimulatedStatusChannel.RequestService, result.StatusByte & SimulatedStatusChannel.RequestService);
+            Assert.InRange(result.ElapsedMs, 2000, 2150);
+        }
+
+        [Fact]
+        public void ExpectBitCleared_SettlesWhenOperatingBitDrops()
+        {
+            // A legacy source whose "operating" bit is asserted while busy and CLEARS when settled (the
+            // HP 8672A pattern). Direct-bit flow (no requestServiceBit); completion is the bit going to 0.
+            var model = new StatusModel
+            {
+                SrqSupported = true,
+                SerialPoll = new SerialPollSpec { ClearsRqs = true },
+                EnableMask = new EnableMaskSpec { SetCommand = "RQS {mask}", ClearCommand = "RQS 0" },
+                ErrorBit = "error",
+                Bits = new Dictionary<string, int> { ["operating"] = 8, ["error"] = 32 },
+                Operations = new Dictionary<string, StatusOperation>
+                {
+                    ["settle"] = new StatusOperation { Arm = "TS;", ExpectBit = "operating", ExpectBitCleared = true }
+                }
+            };
+            var sim = new SimulatedStatusChannel { SweepDurationMs = 2000 };
+            var result = Run(model, "settle", 30000, sim);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(0, result.StatusByte & SimulatedStatusChannel.Operating);   // settled (bit cleared)
+            Assert.InRange(result.ElapsedMs, 2000, 2150);                            // waited for the real settle
+        }
+
+        [Fact]
+        public void ExpectBitCleared_NeverSettles_TimesOut()
+        {
+            var model = new StatusModel
+            {
+                SrqSupported = true,
+                EnableMask = new EnableMaskSpec { SetCommand = "RQS {mask}", ClearCommand = "RQS 0" },
+                Bits = new Dictionary<string, int> { ["operating"] = 8 },
+                Operations = new Dictionary<string, StatusOperation>
+                {
+                    ["settle"] = new StatusOperation { Arm = "TS;", ExpectBit = "operating", ExpectBitCleared = true }
+                }
+            };
+            var sim = new SimulatedStatusChannel { SweepDurationMs = 100000 };   // never settles within timeout
+            var result = Run(model, "settle", 3000, sim);
+
+            Assert.Equal(CompletionOutcome.TimedOut, result.Outcome);
+            Assert.Contains("not cleared", result.Message);
+        }
+
+        [Fact]
+        public void LegacyCustomVocabulary_DirectBit_Completes()
+        {
+            // Proves the engine hardcodes no bit names or commands: a fully custom pre-488.2 bit table and a
+            // non-"RQS" enable-mask command (5005B-style "QM{mask}") complete through the direct-bit flow.
+            var model = new StatusModel
+            {
+                SrqSupported = true,
+                EnableMask = new EnableMaskSpec { SetCommand = "QM{mask}", ClearCommand = "QM0" },
+                ErrorBit = "fault",
+                Bits = new Dictionary<string, int> { ["ready"] = 16, ["fault"] = 32 },
+                Operations = new Dictionary<string, StatusOperation>
+                {
+                    ["measure"] = new StatusOperation { Arm = "TS;", ExpectBit = "ready" }
+                }
+            };
+            var sim = new SimulatedStatusChannel { SweepDurationMs = 1500 };
+            var result = Run(model, "measure", 30000, sim);
+
+            Assert.Equal(CompletionOutcome.Completed, result.Outcome);
+            Assert.Equal(16, result.StatusByte & 16);
+            Assert.Contains("QM48", sim.Sent);    // {mask}=ready|fault=16|32=48, substituted into the custom command
+        }
+
         // ---- dispatch states (no I/O) -------------------------------------------
 
         [Fact]

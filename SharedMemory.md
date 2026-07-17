@@ -242,6 +242,16 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   - Durable working artifacts (issue bodies, `manifest.tsv` slug→issue#, `GITHUB_PLAN.md`, creation scripts)
     under `C:\Users\Tony\.claude\gpib-triage-70\`. **No code landed** — this is a backlog-shaping pass; drivers
     get built when each #98–#140 is reopened.
+- **First #70 work item landed — engine P1 #96 (2026-07-17, `feat/96-srq-legacy-status`):**
+  extended `GpibUtils.Visa.Srq` to model pre-488.2 legacy completion, still fully data-driven (no per-device
+  code in `CompletionWaiter`). `StatusModel.StatusQuery` reads the status byte via a device query (e.g.
+  `STB?`, numeric-parsed) instead of a hardware serial poll (8591E); `StatusOperation.ExpectBitCleared`
+  inverts completion for settle-on-clear sources (8672A, direct-bit, busy-first handshake). Arbitrary bit
+  tables + custom (non-`RQS`) enable-mask commands were already expressible (proven by a new test).
+  `IStatusChannel` gained `Query` (2 implementors updated: `SessionStatusChannel`, the test sim). **+4 Srq
+  tests → 16; full suite green.** Unblocks the legacy-mnemonic P2 drivers (8591E #121, 3585 #108, 4275A #109,
+  8903B #131, 5005B #112, 8672A #126). 🟡 verify tag `verify/96-srq-legacy` — headless sim only, no HW.
+  #96 stays OPEN per no-hardware policy.
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

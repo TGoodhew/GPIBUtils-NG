@@ -32,6 +32,15 @@ namespace GpibUtils.Visa.Srq
         public DoneSupportSpec DoneSupport { get; set; }
 
         /// <summary>
+        /// How to READ the status byte. When null (the default) the waiter uses a hardware GPIB serial
+        /// poll. When set, it instead sends <see cref="StatusQuerySpec.Command"/> and parses the numeric
+        /// reply - for pre-488.2 instruments whose status byte is only reachable via an ASCII query (e.g.
+        /// the 8591E's <c>STB?</c>), not a true serial poll. The rest of the completion flow (arm mask,
+        /// bit tables, RQS-edge vs direct-bit) is identical either way.
+        /// </summary>
+        public StatusQuerySpec StatusQuery { get; set; }
+
+        /// <summary>
         /// Name (in <see cref="Bits"/>) of the bit that signals an operation FAILURE, so the waiter
         /// includes it in the mask and a failure interrupts the wait. Instrument-specific - e.g.
         /// "error" on the 8560 series, "fail" on the 3325. Optional.
@@ -110,6 +119,17 @@ namespace GpibUtils.Visa.Srq
         public string Mnemonic { get; set; }
     }
 
+    /// <summary>
+    /// Reads the status byte via a device query instead of a hardware serial poll. Set
+    /// <see cref="StatusModel.StatusQuery"/> for pre-488.2 instruments that expose the status byte only
+    /// through an ASCII command (the reply's leading integer is the status byte).
+    /// </summary>
+    public sealed class StatusQuerySpec
+    {
+        /// <summary>The query whose numeric reply is the status byte, e.g. "STB?".</summary>
+        public string Command { get; set; }
+    }
+
     /// <summary>A named completion operation: how to arm it, which status bit confirms it, optional restore.</summary>
     public sealed class StatusOperation
     {
@@ -118,6 +138,15 @@ namespace GpibUtils.Visa.Srq
 
         /// <summary>Name (in <see cref="StatusModel.Bits"/>) of the bit that signals completion.</summary>
         public string ExpectBit { get; set; }
+
+        /// <summary>
+        /// Inverts completion for this operation: the operation is DONE when <see cref="ExpectBit"/>
+        /// CLEARS (goes to 0) rather than sets. For legacy sources whose settle/operating bit is asserted
+        /// while busy and drops when settled (e.g. the HP 8672A). The waiter first waits for the bit to be
+        /// SET (operation running), then for it to clear. <b>Direct-bit flow only</b> - omit
+        /// <see cref="StatusModel.RequestServiceBit"/> for such a device. Default false.
+        /// </summary>
+        public bool ExpectBitCleared { get; set; }
 
         /// <summary>Optional command sent after completion to restore prior state, e.g. "CONTS;".</summary>
         public string Restore { get; set; }

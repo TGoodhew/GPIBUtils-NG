@@ -13,5 +13,13 @@ namespace GpibUtils.Visa.Srq
 
         /// <summary>Serial-polls and returns the status byte (0-255). On most instruments this clears the latched bits.</summary>
         int SerialPoll();
+
+        /// <summary>
+        /// Sends a query and returns the raw textual reply. Used only when a <see cref="StatusModel"/>
+        /// reads its status byte via a device command (e.g. a pre-488.2 HP analyzer's <c>STB?</c>) instead
+        /// of a hardware serial poll - see <see cref="StatusModel.StatusQuery"/>. Implementations that only
+        /// ever serial-poll may leave this unsupported.
+        /// </summary>
+        string Query(string command);
     }
 }

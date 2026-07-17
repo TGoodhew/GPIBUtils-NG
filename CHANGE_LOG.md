@@ -195,6 +195,19 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Changed
 
+- **`GpibUtils.Visa.Srq` now models pre-488.2 legacy completion** (issue
+  [#96](https://github.com/TGoodhew/GPIBUtils-NG/issues/96), the cross-cutting enabler from the #70 triage) —
+  still fully data-driven, no per-device code in the waiter. Two additions to the `StatusModel`:
+  (1) **`StatusQuery`** — read the status byte via a device query (e.g. a legacy analyzer's `STB?`, parsed
+  from a possibly-noisy ASCII reply) instead of a hardware serial poll, for instruments that expose no true
+  serial poll (e.g. the 8591E); (2) **`StatusOperation.ExpectBitCleared`** — invert completion so an
+  operation is done when its expect bit **clears** rather than sets, for legacy sources whose settle/operating
+  bit is asserted while busy and drops when settled (e.g. the 8672A; direct-bit flow, with a busy-first
+  handshake so an already-settled bit isn't read as complete). Arbitrary bit-meaning tables and custom
+  (non-`RQS`) enable-mask commands were already expressible — a new headless test proves it. `IStatusChannel`
+  gains `Query`; +4 Srq tests (16 total). Unblocks the legacy-mnemonic drivers below (8591E, 3585, 4275A,
+  8903B, 5005B, 8672A). 🟡 **Verification Needed** (no hardware — headless sim-verified only).
+
 - **`GpibUtils.Visa.Ni` now degrades gracefully without NI-VISA.** When the official NI/IVI VISA.NET
   assemblies aren't present at build time, the project compiles an "NI-VISA unavailable" provider stub
   (reported via the registry) instead of failing the build. The whole solution — including `Console` and
