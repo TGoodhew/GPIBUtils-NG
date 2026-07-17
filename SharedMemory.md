@@ -299,6 +299,10 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     own `Identify()` since ISignalSource has none). **Still to do in this family:** hp8663a #124 (SRQ-capable,
     RF-on/off mnemonic uncertain) and hp3335a #107 (standalone class, not ISignalSource, per Hp8350B
     precedent — needs its command set read).
+  - **Scope batch LANDED (7):** dpo3000 #100, dpo4000 #101, tds784 #139 (Tek SCPI base), hp54622 #115,
+    hp54845a #116 (Agilent SCPI base), lc574a #135, waverunner6000 #140 (LeCroy base — bench-confirm, remote
+    manuals unreadable). All on existing `IOscilloscope`; 3 shared dialect base classes; generic `ctl` CLI
+    (`RegisterScope<T>`). `verify/*` tagged, closed on merge per the new policy.
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

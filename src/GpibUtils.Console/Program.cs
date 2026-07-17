@@ -204,6 +204,15 @@ namespace GpibUtils.Console
                 RegisterSignalSource<RsSmeSourceSettings>(config, "rs-sme", "Rohde & Schwarz SME signal generator (SCPI).");
                 RegisterSignalSource<RsSmtSourceSettings>(config, "rs-smt", "Rohde & Schwarz SMT signal generator (SCPI).");
 
+                // IOscilloscope batch (#100/#101/#139/#115/#116/#135/#140): a single `ctl` op per scope.
+                RegisterScope<Dpo3000ScopeSettings>(config, "dpo3000", "Tektronix DPO3000/MSO3000 oscilloscope (Tek SCPI).");
+                RegisterScope<Dpo4000ScopeSettings>(config, "dpo4000", "Tektronix DPO4000/MSO4000 oscilloscope (Tek SCPI).");
+                RegisterScope<Tds784ScopeSettings>(config, "tds784", "Tektronix TDS784C/D oscilloscope (Tek SCPI).");
+                RegisterScope<Hp54622ScopeSettings>(config, "hp54622", "HP/Agilent 54622A/D oscilloscope (Agilent SCPI).");
+                RegisterScope<Hp54845ScopeSettings>(config, "hp54845a", "Agilent 54845A Infiniium oscilloscope (Agilent SCPI).");
+                RegisterScope<Lc574aScopeSettings>(config, "lc574a", "LeCroy LC574A oscilloscope (LeCroy dialect; bench-confirm).");
+                RegisterScope<WaveRunner6000ScopeSettings>(config, "waverunner6000", "LeCroy WaveRunner 6000 oscilloscope (LeCroy dialect; bench-confirm).");
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
@@ -661,6 +670,20 @@ namespace GpibUtils.Console
                 dev.AddCommand<SignalSourceApplyCommand<TSettings>>("apply")
                     .WithDescription("Set frequency/level (and RF on/off).")
                     .WithExample(new[] { key, "apply", "-f", "1000", "-l", "-10", "--rf", "on", "--provider", "Simulated" });
+            });
+        }
+
+        /// <summary>Registers a <c>ctl</c> CLI command for an IOscilloscope driver (idn / acquisition /
+        /// channel-display / Vpp in one op).</summary>
+        private static void RegisterScope<TSettings>(IConfigurator config, string key, string description)
+            where TSettings : ScopeSettings
+        {
+            config.AddBranch<CommandSettings>(key, dev =>
+            {
+                dev.SetDescription(description);
+                dev.AddCommand<ScopeCtlCommand<TSettings>>("ctl")
+                    .WithDescription("Identify / acquisition (--acq run|stop|single|auto) / channel display / --vpp.")
+                    .WithExample(new[] { key, "ctl", "--acq", "single", "--vpp", "-c", "1", "--provider", "Simulated" });
             });
         }
     }
