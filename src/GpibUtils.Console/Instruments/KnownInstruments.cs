@@ -104,6 +104,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp6625a",  Hp6625A.DefaultResource,   "HP 6625A system DC power supply"),
             new KnownInstrument("hp8714",   Hp8714.DefaultResource,    "HP 8711C-8714C RF network analyzer"),
             new KnownInstrument("hp8720c",  Hp8720C.DefaultResource,   "HP 8720C microwave vector network analyzer"),
+            new KnownInstrument("hp8757d",  Hp8757D.DefaultResource,   "HP 8757D scalar network analyzer"),
             new KnownInstrument("keithley2400", Keithley2400.DefaultResource, "Keithley 2400 SourceMeter SMU"),
             new KnownInstrument("hp53310a", Hp53310A.DefaultResource,  "HP 53310A modulation domain analyzer"),
             new KnownInstrument("hp3585",   Hp3585.DefaultResource,    "HP 3585A/3585B spectrum analyzer"),
