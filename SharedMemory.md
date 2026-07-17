@@ -117,8 +117,16 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 ## Current status / resume point
 
 - **DRIVER BACK-LOG COMPLETE (2026-07-18).** Every buildable instrument in the #70 triage + pre-#70 backlog
-  is migrated — **40 drivers landed this arc**, all sim-green with tests, all **Needs Verification** and
-  closed into verification epic **#97** / board **#46** per the verify-in-epic policy. Final batches:
+  is migrated — **41 drivers landed this arc**, all sim-green with tests, all **Needs Verification** and
+  closed into verification epic **#97** / board **#46** per the verify-in-epic policy.
+  - **HP 3245A Universal Source** (#105, PR #158) — new **`IUniversalSource`** interface (P1 #89) in the
+    SignalSources project: multi-channel DC V/I + waveform source (`APPLY DCV/DCI`, `USE 0/100`, `OUTPUT?`,
+    `ID?`, `RQS` mask), factory address 9. This was the last unbuilt new-interface family.
+  - **P1 interface issues reconciled:** #82–89, #91, #92 CLOSED (interface implemented + landed driver);
+    **#90 IMultifunctionCalibrator CLOSED not-planned** (datron4708 not owned). **Still open by design:**
+    #93 ILegacyFrequencyCounter (unify the standalone legacy counters), #94 IAudioDistortionAnalyzer,
+    #95 extend IOscilloscope — optional future core-redesign refactors, not blocking.
+  - Final batches:
   - **New-interface families:** `INetworkAnalyzer` (hp8714 #82, hp8720c), `ISourceMeasureUnit` (keithley2400
     #84), `IVectorVoltmeter` (**HP 8508A** #104 — re-scoped from the mislabeled "Fluke 8508A", which the user
     does not own), `IModulationDomainAnalyzer` (hp53310a #87), `IModulationAnalyzer` (hp8901 #130),
