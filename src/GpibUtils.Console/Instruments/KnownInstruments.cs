@@ -11,6 +11,7 @@ using GpibUtils.Instruments.NetworkAnalyzers;
 using GpibUtils.Instruments.Plotters;
 using GpibUtils.Instruments.PowerSupplies;
 using GpibUtils.Instruments.Scopes;
+using GpibUtils.Instruments.SourceMeasure;
 using GpibUtils.Instruments.SignalSources;
 using GpibUtils.Instruments.Switches;
 
@@ -94,6 +95,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp6625a",  Hp6625A.DefaultResource,   "HP 6625A system DC power supply"),
             new KnownInstrument("hp8714",   Hp8714.DefaultResource,    "HP 8711C-8714C RF network analyzer"),
             new KnownInstrument("hp8720c",  Hp8720C.DefaultResource,   "HP 8720C microwave vector network analyzer"),
+            new KnownInstrument("keithley2400", Keithley2400.DefaultResource, "Keithley 2400 SourceMeter SMU"),
             new KnownInstrument("hp3585",   Hp3585.DefaultResource,    "HP 3585A/3585B spectrum analyzer"),
             new KnownInstrument("e4406a",   AgilentE4406A.DefaultResource, "Agilent E4406A VSA transmitter tester"),
             new KnownInstrument("hp85620a", Hp85620A.DefaultResource,  "HP 85620A mass memory module (via 8563E)"),

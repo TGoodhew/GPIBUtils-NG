@@ -15,6 +15,11 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`ISourceMeasureUnit` + new `GpibUtils.Instruments.SourceMeasure` project** (P1 #84) with the **Keithley
+  2400 SourceMeter** ([#134](https://github.com/TGoodhew/GPIBUtils-NG/issues/134), SCPI, addr 24). Sources
+  voltage or current with a compliance limit (current limit when sourcing V, voltage limit when sourcing I)
+  and reads back V/I/R with a single blocking `:READ?` (`:FORMat:ELEMents VOLTage,CURRent,RESistance`). Tests
+  (+4); `gpibutils keithley2400 idn|measure`. 🟡 **Verification Needed.**
 - **`INetworkAnalyzer` + new `GpibUtils.Instruments.NetworkAnalyzers` project** (P1 #82) with two implementers
   from the #70 triage: **HP 8711C-8714C** ([#127](https://github.com/TGoodhew/GPIBUtils-NG/issues/127), native
   SCPI, addr 16) and **HP 8720C** microwave VNA ([#128](https://github.com/TGoodhew/GPIBUtils-NG/issues/128),
