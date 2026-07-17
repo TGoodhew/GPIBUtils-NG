@@ -15,6 +15,12 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Keithley 2015 audio-distortion surface** via a **new `IAudioDistortionAnalyzer` interface** (issue
+  [#94](https://github.com/TGoodhew/GPIBUtils-NG/issues/94)) — the 2015 now exposes THD / THD+N / SINAD
+  (`:SENS:FUNC 'DIST'`, `:SENS:DIST:TYPE`, `:SENS:DIST:FREQ`, low/high cutoffs) alongside its existing
+  `IDigitalMultimeter` DMM surface; the 2015P `:DIST:PEAK:*` spectrum peak-search is exposed as extra concrete
+  methods. CLI `keithley2015 distortion thd|thdn|sinad`. Tests (+4). 🟡 **Verification Needed.**
+
 - **HP 3245A Universal Source** (issue [#105](https://github.com/TGoodhew/GPIBUtils-NG/issues/105)) —
   a driver in `GpibUtils.Instruments.SignalSources` implementing a **new `IUniversalSource` interface** (P1 #89):
   a multi-channel precision DC voltage/current source + low-frequency waveform generator, a shape that

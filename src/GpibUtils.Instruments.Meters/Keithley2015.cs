@@ -8,11 +8,11 @@ namespace GpibUtils.Instruments.Meters
     /// <summary>
     /// Driver for the Keithley 2015/2015P THD Multimeter — a SCPI (IEEE-488.2) DMM in the Keithley 2000
     /// family. Implements the standard <see cref="IDigitalMultimeter"/> surface (CONFigure / READ? / FUNC?)
-    /// over any <see cref="IInstrumentSession"/> (issue #133). The 2015's audio-distortion functions
-    /// (THD/THD+N/SINAD) and the 2015P peak-search spectrum commands are a follow-up (P1 #94
-    /// IAudioDistortionAnalyzer); this driver covers the DMM measurement surface.
+    /// <b>and</b> the <see cref="IAudioDistortionAnalyzer"/> surface (THD/THD+N/SINAD) over any
+    /// <see cref="IInstrumentSession"/> (issues #133, #94). The 2015P frequency-spectrum peak-search commands
+    /// (<c>:DIST:PEAK:*</c>) are exposed as extra concrete methods.
     /// </summary>
-    public sealed class Keithley2015 : IDigitalMultimeter
+    public sealed class Keithley2015 : IDigitalMultimeter, IAudioDistortionAnalyzer
     {
         /// <summary>GPIB address of the 2015 — factory default 16 (Keithley convention). Override with
         /// <c>--address</c>.</summary>
@@ -116,6 +116,56 @@ namespace GpibUtils.Instruments.Meters
         }
 
         public bool SelfTest() => Query("*TST?").Trim().StartsWith("0");
+
+        // --- IAudioDistortionAnalyzer (THD / THD+N / SINAD; issue #94) ---
+
+        /// <summary>Selects the distortion function (<c>:SENS:FUNC 'DIST'</c>) and type (<c>:SENS:DIST:TYPE</c>).</summary>
+        public void ConfigureDistortion(DistortionType type)
+        {
+            Send(":SENS:FUNC 'DIST'");
+            Send(":SENS:DIST:TYPE " + DistortionCode(type));
+        }
+
+        /// <summary>Sets the fundamental frequency in Hz (disables auto-fundamental first).</summary>
+        public void SetFundamentalFrequency(double hertz)
+        {
+            Send(":SENS:DIST:FREQ:AUTO OFF");
+            Send(":SENS:DIST:FREQ " + hertz.ToString("G9", CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>Enables and sets the low-cutoff (high-pass) frequency in Hz.</summary>
+        public void SetLowCutoff(double hertz)
+        {
+            Send(":SENS:DIST:LCO " + hertz.ToString("G9", CultureInfo.InvariantCulture));
+            Send(":SENS:DIST:LCO:STAT ON");
+        }
+
+        /// <summary>Enables and sets the high-cutoff (low-pass) frequency in Hz.</summary>
+        public void SetHighCutoff(double hertz)
+        {
+            Send(":SENS:DIST:HCO " + hertz.ToString("G9", CultureInfo.InvariantCulture));
+            Send(":SENS:DIST:HCO:STAT ON");
+        }
+
+        /// <summary>Triggers and reads one distortion measurement (<c>:READ?</c>); % for THD/THD+N, dB for SINAD.</summary>
+        public double MeasureDistortion() => ParseReading(Query("READ?"));
+
+        /// <summary>Reads the largest spectrum peak (2015P; <c>:DIST:PEAK:MAX?</c>) — beyond the interface.</summary>
+        public string QueryPeakMax() => Query(":DIST:PEAK:MAX?");
+
+        /// <summary>Reads the next spectrum peak (2015P; <c>:DIST:PEAK:NEXT?</c>) — beyond the interface.</summary>
+        public string QueryPeakNext() => Query(":DIST:PEAK:NEXT?");
+
+        internal static string DistortionCode(DistortionType type)
+        {
+            switch (type)
+            {
+                case DistortionType.Thd: return "THD";
+                case DistortionType.ThdPlusNoise: return "THDN";
+                case DistortionType.Sinad: return "SINAD";
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
 
         internal static double ParseReading(string raw)
         {

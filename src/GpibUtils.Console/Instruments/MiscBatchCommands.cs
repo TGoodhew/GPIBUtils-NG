@@ -136,6 +136,50 @@ namespace GpibUtils.Console.Instruments
         }
     }
 
+    /// <summary>Measure audio distortion (THD / THD+N / SINAD) on the Keithley 2015.</summary>
+    public sealed class Keithley2015DistortionCommand : Command<Keithley2015DistortionCommand.Settings>
+    {
+        public sealed class Settings : InstrumentSettings
+        {
+            [CommandArgument(0, "<TYPE>")]
+            [Description("thd | thdn | sinad.")]
+            public string Type { get; set; }
+            [CommandOption("-f|--fundamental <HZ>")] [Description("Fundamental frequency, in Hz.")] public double? FundamentalHz { get; set; }
+            [CommandOption("--lco <HZ>")] [Description("Low-cutoff (high-pass) frequency, in Hz.")] public double? LowCutoffHz { get; set; }
+            [CommandOption("--hco <HZ>")] [Description("High-cutoff (low-pass) frequency, in Hz.")] public double? HighCutoffHz { get; set; }
+        }
+
+        public override int Execute(CommandContext context, Settings s) => Runner.Guard(() =>
+        {
+            var session = s.OpenSession("keithley2015", Keithley2015.DefaultResource);
+            var d = new Keithley2015(session);
+            using (session)
+            {
+                d.Initialize();
+                var type = ParseType(s.Type);
+                d.ConfigureDistortion(type);
+                if (s.FundamentalHz.HasValue) d.SetFundamentalFrequency(s.FundamentalHz.Value);
+                if (s.LowCutoffHz.HasValue) d.SetLowCutoff(s.LowCutoffHz.Value);
+                if (s.HighCutoffHz.HasValue) d.SetHighCutoff(s.HighCutoffHz.Value);
+                double v = d.MeasureDistortion();
+                foreach (var sent in d.History) AnsiConsole.MarkupLineInterpolated($"[grey]sent[/]: [green]{sent}[/]");
+                AnsiConsole.MarkupLineInterpolated($"[green]{type} = {v}[/]");
+            }
+            return 0;
+        });
+
+        private static DistortionType ParseType(string t)
+        {
+            switch ((t ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "thd": return DistortionType.Thd;
+                case "thdn": case "thd+n": return DistortionType.ThdPlusNoise;
+                case "sinad": return DistortionType.Sinad;
+                default: throw new ArgumentException($"Unknown distortion type '{t}'.");
+            }
+        }
+    }
+
     // ---- HP 6625A supply -----------------------------------------------------
 
     public sealed class Hp6625ASetCommand : Command<Hp6625ASetCommand.Settings>
