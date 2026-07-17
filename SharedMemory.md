@@ -270,8 +270,12 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
     #92) — hybrid logic-signature analyzer + multimeter, legacy mnemonics. **#96 consumer:** vendor
     `QM<mask>`/`QM0` SRQ-mask enable + legacy status-byte bit table via the engine. `Hp5005BSimulatedDevice`
     + 11 tests. Default addr 3.
-  - **Still to build:** 4275A #109 (new `ILcrMeter` + LcrMeters project), 8903B #131 (new `IAudioAnalyzer` +
-    Audio project).
+  - **HP 4275A** (#109, `verify/109-hp4275a`): **new `GpibUtils.Instruments.LcrMeters` project + new
+    `ILcrMeter` interface** (P1 #83) — first LCR meter. 1979 program-code language; **#96 consumer** via the
+    custom `I1`/`I0` Data-Ready-SRQ enable + fully custom status-byte bit table. `Hp4275ASimulatedDevice` +
+    9 tests. Default addr 17 (**provisional** — factory switch unreadable in scan). Format-A parse = first
+    two numbers (exact layout TBD at bench).
+  - **Still to build:** 8903B #131 (new `IAudioAnalyzer` + Audio project).
 - **Both scaffolds FILLED (2026-07-15, PRs #76–#77) + #43 closed:**
   - **#42 HP-GL/2 rendering landed** (PR #76, tag `verify/42-hpgl`): ported GPIB-MCP's `Hpgl.Rendering` into
     `GpibUtils.Hpgl` — `HpglRenderer.RenderToPng` (System.Drawing) / `RenderToSvg`, `HpglParser`, single-stroke

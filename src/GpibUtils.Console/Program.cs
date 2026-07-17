@@ -206,6 +206,21 @@ namespace GpibUtils.Console
                         .WithDescription("Read the decimal error code (SE).");
                 });
 
+                config.AddBranch<CommandSettings>("hp4275a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 4275A multi-frequency LCR meter (legacy program-codes, I1/SRQ measurement).");
+                    dev.AddCommand<Hp4275AIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (4275A has no *IDN?).")
+                        .WithExample(new[] { "hp4275a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp4275AInitCommand>("init")
+                        .WithDescription("Device clear + HOLD/MANUAL trigger (clean known state).");
+                    dev.AddCommand<Hp4275AMeasureCommand>("measure")
+                        .WithDescription("Configure parameter/frequency/circuit and take one measurement (SRQ handshake).")
+                        .WithExample(new[] { "hp4275a", "measure", "-p", "c", "-f", "100k", "--provider", "Simulated" });
+                    dev.AddCommand<Hp4275AZeroOpenCommand>("zero-open")
+                        .WithDescription("Perform an OPEN (zero) correction.");
+                });
+
                 config.AddBranch<CommandSettings>("hp8902a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8902A measuring receiver (RF power / Tuned RF Level / frequency).");

@@ -4,6 +4,7 @@ using System.Linq;
 using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.Calibrators;
 using GpibUtils.Instruments.Counters;
+using GpibUtils.Instruments.LcrMeters;
 using GpibUtils.Instruments.Meters;
 using GpibUtils.Instruments.Plotters;
 using GpibUtils.Instruments.PowerSupplies;
@@ -52,6 +53,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("e4418b",   HpE4418B.DefaultResource,  "HP E4418B RF power meter"),
             new KnownInstrument("hp438a",   Hp438A.DefaultResource,    "HP 438A RF power meter"),
             new KnownInstrument("hp5005b",  Hp5005B.DefaultResource,   "HP 5005B signature multimeter"),
+            new KnownInstrument("hp4275a",  Hp4275A.DefaultResource,   "HP 4275A multi-frequency LCR meter"),
             new KnownInstrument("dm3058",   RigolDm3058.DefaultResource, "Rigol DM3058 digital multimeter"),
             new KnownInstrument("hp3458a",  Hp3458A.DefaultResource,   "HP 3458A 8.5-digit DMM"),
             new KnownInstrument("hp5351a",  Hp5351A.DefaultResource,   "HP 5351A microwave frequency counter"),
