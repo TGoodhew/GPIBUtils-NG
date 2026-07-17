@@ -91,6 +91,13 @@ namespace GpibUtils.Console.Instruments
         internal override System.Collections.Generic.IReadOnlyList<string> HistoryOf(ISignalSource s) => ((Hp8656)s).History;
     }
 
+    public sealed class Hp8663SourceSettings : SignalSourceSettings
+    {
+        internal override ISignalSource OpenSource(out Visa.IInstrumentSession session)
+        { session = OpenSession("hp8663a", Hp8663A.DefaultResource); return new Hp8663A(session); }
+        internal override System.Collections.Generic.IReadOnlyList<string> HistoryOf(ISignalSource s) => ((Hp8663A)s).History;
+    }
+
     public sealed class Hp8657BSourceSettings : SignalSourceSettings
     {
         internal override ISignalSource OpenSource(out Visa.IInstrumentSession session)

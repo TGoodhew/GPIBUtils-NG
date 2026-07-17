@@ -199,6 +199,7 @@ namespace GpibUtils.Console
                 RegisterSignalSource<Hp83620ASourceSettings>(config, "hp83620a", "HP 83620A synthesized swept-signal generator (SCPI, CW).");
                 RegisterSignalSource<Hp83712BSourceSettings>(config, "hp83712b", "HP 83712B synthesized CW generator (SCPI).");
                 RegisterSignalSource<Hp8656SourceSettings>(config, "hp8656", "HP 8656A/8656B signal generator (legacy mnemonic, write-only).");
+                RegisterSignalSource<Hp8663SourceSettings>(config, "hp8663a", "HP 8663A synthesized signal generator (legacy mnemonic).");
                 RegisterSignalSource<Hp8657BSourceSettings>(config, "hp8657b", "HP 8657B signal generator (legacy mnemonic, listen-only).");
                 RegisterSignalSource<Hp8664ASourceSettings>(config, "hp8664a", "HP 8664A signal generator (HP-SL).");
                 RegisterSignalSource<RsSmeSourceSettings>(config, "rs-sme", "Rohde & Schwarz SME signal generator (SCPI).");
@@ -527,6 +528,28 @@ namespace GpibUtils.Console
                     dev.AddCommand<Hp5342AFreqCommand>("freq")
                         .WithDescription("Measure the input frequency (Hz); --center for manual mode.")
                         .WithExample(new[] { "hp5342a", "freq", "--center", "10000", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("hp5343a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 5343A microwave frequency counter (mnemonic HP-IB, 26.5 GHz).");
+                    dev.AddCommand<Hp5343AIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (5343A has no *IDN?).");
+                    dev.AddCommand<Hp5343AInitCommand>("init")
+                        .WithDescription("Device clear + RESET + AUTO mode.");
+                    dev.AddCommand<Hp5343AFreqCommand>("freq")
+                        .WithDescription("Measure the input frequency (Hz); --center for manual mode, --high for high range.")
+                        .WithExample(new[] { "hp5343a", "freq", "--center", "10000", "--high", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("hp3335a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3335A synthesizer/level generator (listen-only, single-char codes).");
+                    dev.AddCommand<Hp3335AIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (3335A is listen-only, no readback).");
+                    dev.AddCommand<Hp3335ASetCommand>("set")
+                        .WithDescription("Set output frequency (-f MHz) and/or amplitude (-l dBm).")
+                        .WithExample(new[] { "hp3335a", "set", "-f", "12.5", "-l", "-10", "--provider", "Simulated" });
                 });
 
                 config.AddBranch<CommandSettings>("hp3499a", dev =>
