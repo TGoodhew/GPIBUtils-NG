@@ -116,6 +116,23 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 
 ## Current status / resume point
 
+- **DRIVER BACK-LOG COMPLETE (2026-07-18).** Every buildable instrument in the #70 triage + pre-#70 backlog
+  is migrated — **40 drivers landed this arc**, all sim-green with tests, all **Needs Verification** and
+  closed into verification epic **#97** / board **#46** per the verify-in-epic policy. Final batches:
+  - **New-interface families:** `INetworkAnalyzer` (hp8714 #82, hp8720c), `ISourceMeasureUnit` (keithley2400
+    #84), `IVectorVoltmeter` (**HP 8508A** #104 — re-scoped from the mislabeled "Fluke 8508A", which the user
+    does not own), `IModulationDomainAnalyzer` (hp53310a #87), `IModulationAnalyzer` (hp8901 #130),
+    **`INoiseFigureMeter` + new `GpibUtils.Instruments.NoiseFigureMeters` project** (hp8970b #132, PR #156).
+  - **Legacy stragglers (PR #157):** **HP 8663A** #124 (ISignalSource; no RF-on/off key → RfOff mutes to floor),
+    **HP 3335A** #107 (standalone listen-only, not ISignalSource per the 8350B precedent), **HP 5343A** #114
+    (standalone counter, 26.5 GHz sibling of the 5342A).
+  - **Dropped as not-owned:** Fluke 8508A DMM (#104 re-scoped to the HP 8508A VVM instead), Datron 4708 /
+    `IMultifunctionCalibrator` (#98/#90 — user downloaded the manual for research only).
+  - **ONLY remaining blocked item: HP 8757D #129** — no Quick Reference / programming guide available; command
+    syntax unavailable, so it is deferred, NOT fabricated (honoring the "never invent command syntax" rule).
+  - **Next real work is bench verification** of the whole Needs-Verification set (epic #97 / board #46), which
+    requires hardware in Renton. No further no-hardware driver work is outstanding.
+
 - **Foundation (#1) essentially complete:** core transport + Common + Console + **WPF shell** + **CI** all
   landed; `Hpgl`/`Mcp` scaffolded (filled by #42, #41); `Visa.Ni` degrades gracefully without NI so the
   whole solution builds with zero NI setup. **WPF visual smoke test passed** (2026-07-09) — #1 ready to close.
