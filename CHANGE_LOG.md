@@ -15,6 +15,17 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 4275A Multi-Frequency LCR Meter** (issue [#109](https://github.com/TGoodhew/GPIBUtils-NG/issues/109),
+  from the #70 triage) — a driver in a **new `GpibUtils.Instruments.LcrMeters` project** implementing a **new
+  `ILcrMeter` interface** (P1 #83): the first impedance/LCR meter, no existing category fit. 1979 pre-SCPI
+  program-code language (`A`/`C`/`F`/`T`/`E`/`I` codes); primary parameter (L/C/R/|Z|), ten spot frequencies,
+  circuit mode, triggered `Measure()` → primary + secondary reading, OPEN/SHORT zero. Completion is a **#96
+  consumer**: the custom `I1`/`I0` Data-Ready-SRQ enable (there is no `*SRE` register) + the fully custom
+  4275A status-byte bit table, driven through the shared `CompletionWaiter` SRQ-edge flow.
+  `Hp4275ASimulatedDevice` + 9 tests; `gpibutils hp4275a idn|init|measure|zero-open`. Default
+  `GPIB0::17::INSTR` — **provisional** (factory switch setting unreadable in the scan; from the manual's
+  sample programs). Format-A field parsing extracts the two display values, exact layout TBD at bench. 🟡
+  **Verification Needed.**
 - **HP 5005B Signature Multimeter** (issue [#112](https://github.com/TGoodhew/GPIBUtils-NG/issues/112), from
   the #70 triage) — a driver in `GpibUtils.Instruments.Meters` implementing a **new `ISignatureAnalyzer`
   interface** (P1 #92): a hybrid logic-signature analyzer + multimeter (frequency/totalize/time-interval/Ω/
