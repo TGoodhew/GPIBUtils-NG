@@ -15,6 +15,24 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8663A Synthesized Signal Generator** (issue [#124](https://github.com/TGoodhew/GPIBUtils-NG/issues/124)) —
+  a driver in `GpibUtils.Instruments.SignalSources` implementing `ISignalSource` (legacy two-letter mnemonics
+  `FR…MZ` / `AP…DM`, Device-Clear preset). The 8663A has no dedicated RF on/off key, so `RfOff()` mutes to the
+  spec floor and `RfOn()` restores the last commanded amplitude; the RQS mask (`@1`) is exposed for the shared
+  Srq engine. CLI `hp8663a apply`. Tests (+5). **Needs bench verification** (no documented GPIB address —
+  placeholder 19; RF-off mapping).
+- **HP 3335A Synthesizer/Level Generator** (issue [#107](https://github.com/TGoodhew/GPIBUtils-NG/issues/107)) —
+  a standalone driver in `GpibUtils.Instruments.SignalSources` (single-character key codes `F…`/`A…`, the unit
+  key doubling as the entry terminator and amplitude-sign selector: `K`=+dBm, `M`=−dBm). Deliberately **not**
+  `ISignalSource` — the instrument is listen-only (no readback, no `*IDN?`) and has no remote RF on/off, the
+  same decision as the HP 8350B. CLI `hp3335a idn|set`. Tests (+3). **Needs bench verification** (address).
+- **HP 5343A Microwave Frequency Counter** (issue [#114](https://github.com/TGoodhew/GPIBUtils-NG/issues/114)) —
+  a standalone driver in `GpibUtils.Instruments.Counters` (26.5 GHz sibling of the 5342A): `AU`/`M` acquisition,
+  `L`/`H` range, `SR{n}` resolution, `SM…E` manual center frequency, `ST{n}` output mode, and a fixed-width
+  `F NNNNN.NNNNNN E 06` reading parsed to Hz with dashes/all-9s/all-0s error indications surfaced as exceptions.
+  Follows the 5342A/5351A precedent (not `IFrequencyCounter`). CLI `hp5343a idn|init|freq`. Tests (+9).
+  **Needs bench verification** (OCR-ambiguous one-letter `M`/`R` codes; example address 2).
+
 - **HP 8970B Noise Figure Meter** (issue [#132](https://github.com/TGoodhew/GPIBUtils-NG/issues/132)) —
   a driver in a **new `GpibUtils.Instruments.NoiseFigureMeters` project** implementing a **new
   `INoiseFigureMeter` interface** (P1 #85): sets a fixed or start/stop frequency, selects uncorrected NF
