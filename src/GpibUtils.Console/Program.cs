@@ -259,6 +259,17 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp8901", "measure", "fm", "-f", "104.5", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp8970b", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8970B noise figure meter (noise figure / gain).");
+                    dev.AddCommand<Hp8970BIdnCommand>("idn")
+                        .WithDescription("Show the instrument descriptor (8970B has no *IDN?).")
+                        .WithExample(new[] { "hp8970b", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8970BMeasureCommand>("measure")
+                        .WithDescription("Tune (-f MHz) and measure noise figure; -g for corrected NF+Gain.")
+                        .WithExample(new[] { "hp8970b", "measure", "-f", "45.5", "-g", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp8508a", dev =>
                 {
                     dev.SetDescription("Drive an HP 8508A vector voltmeter (A/B voltage, phase, SWR, transmission, ...).");
