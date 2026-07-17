@@ -47,13 +47,34 @@ namespace GpibUtils.Instruments.Scopes
         public void SetChannelDisplay(int channel, bool on) =>
             Send("SELect:CH" + Check(channel) + (on ? " ON" : " OFF"));
 
-        /// <summary>Peak-to-peak volts via the immediate-measurement path
-        /// (<c>MEASUrement:IMMed:TYPe PK2Pk; :SOURce CH&lt;n&gt;; :VALue?</c>).</summary>
-        public double MeasureVpp(int channel)
+        /// <summary>Peak-to-peak volts — shorthand for <see cref="Measure"/>.</summary>
+        public double MeasureVpp(int channel) => Measure(channel, ScopeMeasurementType.PeakToPeak);
+
+        /// <summary>Takes an automatic measurement via the immediate-measurement path
+        /// (<c>MEASUrement:IMMed:TYPe &lt;type&gt;; :SOURce CH&lt;n&gt;; :VALue?</c>).</summary>
+        public double Measure(int channel, ScopeMeasurementType type)
         {
-            Send("MEASUrement:IMMed:TYPe PK2Pk");
+            Send("MEASUrement:IMMed:TYPe " + TypeCode(type));
             Send("MEASUrement:IMMed:SOURce CH" + Check(channel));
             return ParseReading(Query("MEASUrement:IMMed:VALue?"));
+        }
+
+        private static string TypeCode(ScopeMeasurementType type)
+        {
+            switch (type)
+            {
+                case ScopeMeasurementType.PeakToPeak: return "PK2Pk";
+                case ScopeMeasurementType.Maximum: return "MAXImum";
+                case ScopeMeasurementType.Minimum: return "MINImum";
+                case ScopeMeasurementType.Amplitude: return "AMPlitude";
+                case ScopeMeasurementType.Mean: return "MEAN";
+                case ScopeMeasurementType.Rms: return "RMS";
+                case ScopeMeasurementType.Frequency: return "FREQuency";
+                case ScopeMeasurementType.Period: return "PERIod";
+                case ScopeMeasurementType.RiseTime: return "RISe";
+                case ScopeMeasurementType.FallTime: return "FALL";
+                default: throw new System.ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
 
         internal static double ParseReading(string raw)

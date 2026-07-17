@@ -93,5 +93,75 @@ namespace GpibUtils.Instruments.Scopes.Tests
             Assert.Equal(0.496, LeCroyScope.ParseReading("C1:PAVA PKPK,4.960E-01,V"), 3);
             Assert.Equal(1.5, LeCroyScope.ParseReading("1.5"), 3);
         }
+
+        // ---- #95: parameterized Measure + IWaveformCapture ----
+
+        [Fact]
+        public void Tektronix_parameterized_measure_maps_the_type_code()
+        {
+            using (var s = Open(TektronixDpo3000.DefaultResource, c => c.Trim() == "MEASUrement:IMMed:VALue?" ? "1000.0" : null))
+            {
+                var d = new TektronixDpo3000(s);
+                Assert.Equal(1000.0, d.Measure(1, ScopeMeasurementType.Frequency), 3);
+                Assert.Contains("MEASUrement:IMMed:TYPe FREQuency", d.History);
+            }
+        }
+
+        [Fact]
+        public void Agilent_parameterized_measure_and_waveform_capture()
+        {
+            using (var s = Open(Hp54622A.DefaultResource, c =>
+            {
+                var t = c.Trim();
+                if (t.StartsWith(":MEASure:RISetime?")) return "1.2E-9";
+                if (t == ":WAVeform:DATA?") return "0.1,0.2,0.3,0.25";
+                return null;
+            }))
+            {
+                var d = new Hp54622A(s);
+                Assert.IsAssignableFrom<IWaveformCapture>(d);
+                Assert.Equal(1.2e-9, d.Measure(1, ScopeMeasurementType.RiseTime), 12);
+                Assert.Contains(":MEASure:RISetime? CHANnel1", d.History);
+
+                var wf = d.CaptureWaveform(1);
+                Assert.Equal(new[] { 0.1, 0.2, 0.3, 0.25 }, wf);
+                Assert.Contains(":DIGitize CHANnel1", d.History);
+            }
+        }
+
+        [Fact]
+        public void LeCroy_parameterized_measure_maps_the_param()
+        {
+            using (var s = Open(LeCroyLC574A.DefaultResource, c => c.Contains("PAVA? MEAN") ? "C1:PAVA MEAN,1.234E+00,V" : null))
+            {
+                var d = new LeCroyLC574A(s);
+                Assert.Equal(1.234, d.Measure(1, ScopeMeasurementType.Mean), 3);
+            }
+        }
+
+        [Fact]
+        public void Rigol_parameterized_measure_and_waveform_capture()
+        {
+            using (var s = Open(RigolDs1054Z.DefaultResource, c =>
+            {
+                var t = c.Trim();
+                if (t.StartsWith(":MEASure:ITEM? VMAX")) return "3.30";
+                if (t == ":WAVeform:DATA?") return "0.0,1.0,2.0";
+                return null;
+            }))
+            {
+                var d = new RigolDs1054Z(s);
+                Assert.IsAssignableFrom<IWaveformCapture>(d);
+                Assert.Equal(3.30, d.Measure(1, ScopeMeasurementType.Maximum), 3);
+                Assert.Equal(new[] { 0.0, 1.0, 2.0 }, d.CaptureWaveform(1));
+            }
+        }
+
+        [Fact]
+        public void Rigol_waveform_parse_strips_tmc_block_header()
+        {
+            // "#9000000006" is a 2+9-char TMC header preceding "1.0,2.0".
+            Assert.Equal(new[] { 1.0, 2.0 }, RigolDs1054Z.ParseWaveform("#9000000006\n1.0,2.0"));
+        }
     }
 }

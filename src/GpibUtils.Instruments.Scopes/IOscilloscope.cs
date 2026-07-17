@@ -1,8 +1,10 @@
 namespace GpibUtils.Instruments.Scopes
 {
     /// <summary>
-    /// A digital oscilloscope (Rigol DS1054Z, …). Run/stop/single acquisition control, per-channel display,
-    /// and simple automatic measurements, over any <see cref="Visa.IInstrumentSession"/>.
+    /// A digital oscilloscope (Rigol DS1054Z, Tektronix/Agilent/LeCroy families, …). Run/stop/single
+    /// acquisition control, per-channel display, and parameterized automatic measurements, over any
+    /// <see cref="Visa.IInstrumentSession"/>. Raw waveform transfer is the separate opt-in
+    /// <see cref="IWaveformCapture"/> (not every scope dialect exposes it uniformly).
     /// </summary>
     public interface IOscilloscope
     {
@@ -30,7 +32,39 @@ namespace GpibUtils.Instruments.Scopes
         /// <summary>Turns a channel's display trace on or off.</summary>
         void SetChannelDisplay(int channel, bool on);
 
-        /// <summary>Measures peak-to-peak voltage on a channel (volts).</summary>
+        /// <summary>Measures peak-to-peak voltage on a channel (volts) — shorthand for
+        /// <see cref="Measure"/> with <see cref="ScopeMeasurementType.PeakToPeak"/>.</summary>
         double MeasureVpp(int channel);
+
+        /// <summary>Takes an automatic measurement of the given type on a channel. Units follow the type:
+        /// volts for the voltage measurements, Hz for <see cref="ScopeMeasurementType.Frequency"/>, seconds for
+        /// period/rise/fall.</summary>
+        double Measure(int channel, ScopeMeasurementType type);
+    }
+
+    /// <summary>An automatic-measurement quantity common to the supported scope dialects (each maps it to its
+    /// own measurement keyword).</summary>
+    public enum ScopeMeasurementType
+    {
+        /// <summary>Peak-to-peak voltage.</summary>
+        PeakToPeak,
+        /// <summary>Maximum voltage.</summary>
+        Maximum,
+        /// <summary>Minimum voltage.</summary>
+        Minimum,
+        /// <summary>Amplitude (top − base).</summary>
+        Amplitude,
+        /// <summary>Mean (average) voltage.</summary>
+        Mean,
+        /// <summary>RMS voltage.</summary>
+        Rms,
+        /// <summary>Frequency (Hz).</summary>
+        Frequency,
+        /// <summary>Period (seconds).</summary>
+        Period,
+        /// <summary>Rise time (seconds).</summary>
+        RiseTime,
+        /// <summary>Fall time (seconds).</summary>
+        FallTime
     }
 }

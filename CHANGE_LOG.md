@@ -385,6 +385,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Changed
 
+- **`IOscilloscope` extended with parameterized measurement + a companion `IWaveformCapture`** (issue
+  [#95](https://github.com/TGoodhew/GPIBUtils-NG/issues/95)) — added `Measure(channel, ScopeMeasurementType)`
+  (Vpp / Vmax / Vmin / amplitude / mean / RMS / frequency / period / rise / fall) alongside the existing
+  `MeasureVpp` (now a shorthand), implemented across all four dialect families (Tektronix `MEASUrement:IMMed`,
+  Agilent `:MEASure:*`, Rigol `:MEASure:ITEM?`, LeCroy `Cn:PAVA?`). New opt-in `IWaveformCapture` interface
+  (`CaptureWaveform`) implemented on the SCPI dialects (Rigol + Agilent/Keysight) via `:DIGitize`/`:STOP` gate
+  + `:WAVeform:DATA?` (ASCII, TMC-header aware); the Tektronix/LeCroy binary formats are a documented
+  follow-up. CLI `<scope> ctl --measure <type>`. Tests (+6). 🟡 **Verification Needed** for the new paths.
+
 - **Legacy microwave counters unified behind `ILegacyFrequencyCounter`** (issue
   [#93](https://github.com/TGoodhew/GPIBUtils-NG/issues/93)) — the HP 5342A, 5343A and 5351A standalone drivers
   now implement a shared narrow interface (`ResourceName`, `Identify`, `Initialize`, `ReadFrequency`), so the

@@ -35,6 +35,10 @@ namespace GpibUtils.Console.Instruments
         [Description("Measure peak-to-peak volts on --channel.")]
         public bool Vpp { get; set; }
 
+        [CommandOption("--measure <TYPE>")]
+        [Description("Measure on --channel: vpp | vmax | vmin | vamp | mean | rms | freq | period | rise | fall.")]
+        public string Measure { get; set; }
+
         internal abstract IOscilloscope OpenScope(out Visa.IInstrumentSession session);
         internal abstract IReadOnlyList<string> HistoryOf(IOscilloscope scope);
     }
@@ -64,6 +68,11 @@ namespace GpibUtils.Console.Instruments
                     scope.SetChannelDisplay(s.Channel.Value, string.Equals(s.Display, "on", StringComparison.OrdinalIgnoreCase));
                 if (s.Vpp && s.Channel.HasValue)
                     result = $"Vpp(CH{s.Channel}) = {scope.MeasureVpp(s.Channel.Value)} V";
+                if (!string.IsNullOrWhiteSpace(s.Measure) && s.Channel.HasValue)
+                {
+                    var type = ParseMeasurement(s.Measure);
+                    result = $"{type}(CH{s.Channel}) = {scope.Measure(s.Channel.Value, type)}";
+                }
 
                 foreach (var sent in s.HistoryOf(scope))
                     AnsiConsole.MarkupLineInterpolated($"[grey]sent[/]: [green]{sent}[/]");
@@ -72,6 +81,24 @@ namespace GpibUtils.Console.Instruments
             }
             return 0;
         });
+
+        private static ScopeMeasurementType ParseMeasurement(string m)
+        {
+            switch ((m ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "vpp": case "pk2pk": return ScopeMeasurementType.PeakToPeak;
+                case "vmax": case "max": return ScopeMeasurementType.Maximum;
+                case "vmin": case "min": return ScopeMeasurementType.Minimum;
+                case "vamp": case "amp": case "amplitude": return ScopeMeasurementType.Amplitude;
+                case "mean": case "vavg": case "avg": return ScopeMeasurementType.Mean;
+                case "rms": case "vrms": return ScopeMeasurementType.Rms;
+                case "freq": case "frequency": return ScopeMeasurementType.Frequency;
+                case "period": case "per": return ScopeMeasurementType.Period;
+                case "rise": case "risetime": return ScopeMeasurementType.RiseTime;
+                case "fall": case "falltime": return ScopeMeasurementType.FallTime;
+                default: throw new ArgumentException($"Unknown --measure type '{m}'.");
+            }
+        }
     }
 
     // ---- per-device settings -------------------------------------------------

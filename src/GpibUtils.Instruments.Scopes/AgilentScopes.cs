@@ -11,7 +11,7 @@ namespace GpibUtils.Instruments.Scopes
     /// <c>:MEASure</c> subsystem. Concrete models (54622A/54845A) differ only in default resource and channel
     /// count. Runs over any <see cref="IInstrumentSession"/> (issues #115/#116).
     /// </summary>
-    public abstract class AgilentScope : IOscilloscope
+    public abstract class AgilentScope : IOscilloscope, IWaveformCapture
     {
         private readonly IInstrumentSession _session;
         private readonly List<string> _history = new List<string>();
@@ -47,9 +47,50 @@ namespace GpibUtils.Instruments.Scopes
         public void SetChannelDisplay(int channel, bool on) =>
             Send(":CHANnel" + Check(channel) + ":DISPlay " + (on ? "ON" : "OFF"));
 
-        /// <summary>Peak-to-peak volts (<c>:MEASure:VPP? CHANnel&lt;n&gt;</c>).</summary>
-        public double MeasureVpp(int channel) =>
-            ParseReading(Query(":MEASure:VPP? CHANnel" + Check(channel)));
+        /// <summary>Peak-to-peak volts — shorthand for <see cref="Measure"/>.</summary>
+        public double MeasureVpp(int channel) => Measure(channel, ScopeMeasurementType.PeakToPeak);
+
+        /// <summary>Takes an automatic measurement (<c>:MEASure:&lt;kw&gt;? CHANnel&lt;n&gt;</c>).</summary>
+        public double Measure(int channel, ScopeMeasurementType type) =>
+            ParseReading(Query(":MEASure:" + Keyword(type) + "? CHANnel" + Check(channel)));
+
+        private static string Keyword(ScopeMeasurementType type)
+        {
+            switch (type)
+            {
+                case ScopeMeasurementType.PeakToPeak: return "VPP";
+                case ScopeMeasurementType.Maximum: return "VMAX";
+                case ScopeMeasurementType.Minimum: return "VMIN";
+                case ScopeMeasurementType.Amplitude: return "VAMPlitude";
+                case ScopeMeasurementType.Mean: return "VAVerage";
+                case ScopeMeasurementType.Rms: return "VRMS";
+                case ScopeMeasurementType.Frequency: return "FREQuency";
+                case ScopeMeasurementType.Period: return "PERiod";
+                case ScopeMeasurementType.RiseTime: return "RISetime";
+                case ScopeMeasurementType.FallTime: return "FALLtime";
+                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        /// <summary>Acquires and returns the channel's waveform (volts) via the SCPI <c>:WAVeform</c> subsystem:
+        /// <c>:DIGitize</c> (acquire + completion gate), then ASCII <c>:WAVeform:DATA?</c>.</summary>
+        public double[] CaptureWaveform(int channel)
+        {
+            Send(":DIGitize CHANnel" + Check(channel));
+            Send(":WAVeform:SOURce CHANnel" + channel);
+            Send(":WAVeform:FORMat ASCii");
+            return ParseWaveform(Query(":WAVeform:DATA?"));
+        }
+
+        internal static double[] ParseWaveform(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return new double[0];
+            var list = new List<double>();
+            foreach (var tok in raw.Split(new[] { ',', ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                if (double.TryParse(tok, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
+                    list.Add(v);
+            return list.ToArray();
+        }
 
         internal static double ParseReading(string raw)
         {
