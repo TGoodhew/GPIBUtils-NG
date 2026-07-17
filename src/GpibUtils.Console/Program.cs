@@ -160,6 +160,40 @@ namespace GpibUtils.Console
                         .WithDescription("Serial-poll and report the status byte (phase-lock / fault bits).");
                 });
 
+                config.AddBranch<CommandSettings>("hp33120a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 33120A function/arbitrary waveform generator (SCPI).");
+                    dev.AddCommand<Hp33120AIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "hp33120a", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Hp33120AInitCommand>("init")
+                        .WithDescription("Device clear + *RST + Vpp units (clean known state).");
+                    dev.AddCommand<Hp33120AApplyCommand>("apply")
+                        .WithDescription("Set waveform/frequency/amplitude/offset (and output).")
+                        .WithExample(new[] { "hp33120a", "apply", "-w", "sine", "-f", "1000", "-a", "2", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("dg1000z", dev =>
+                {
+                    dev.SetDescription("Drive a Rigol DG1000Z function/arbitrary waveform generator (SCPI, dual channel).");
+                    dev.AddCommand<Dg1000ZIdnCommand>("idn")
+                        .WithDescription("Query the instrument identity (*IDN?).")
+                        .WithExample(new[] { "dg1000z", "idn", "--provider", "Simulated" });
+                    dev.AddCommand<Dg1000ZApplyCommand>("apply")
+                        .WithDescription("Set waveform/frequency/amplitude/offset (and output) on a channel.")
+                        .WithExample(new[] { "dg1000z", "apply", "-c", "1", "-w", "square", "-f", "1000", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("hp8116a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 8116A pulse/function generator (legacy mnemonics).");
+                    dev.AddCommand<Hp8116AApplyCommand>("apply")
+                        .WithDescription("Set frequency/amplitude/offset (and output). Waveform-select is bench-TBD (#118).")
+                        .WithExample(new[] { "hp8116a", "apply", "-f", "1000", "-a", "2", "--output", "on", "--provider", "Simulated" });
+                    dev.AddCommand<Hp8116AStatusCommand>("status")
+                        .WithDescription("Serial-poll the status byte and read any error (IERR).");
+                });
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
