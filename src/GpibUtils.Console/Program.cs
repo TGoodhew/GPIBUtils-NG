@@ -552,6 +552,16 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp3335a", "set", "-f", "12.5", "-l", "-10", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("hp3245a", dev =>
+                {
+                    dev.SetDescription("Drive an HP 3245A universal source (DC V/I + waveform, keyword language).");
+                    dev.AddCommand<Hp3245AIdnCommand>("idn")
+                        .WithDescription("Query the model identity (ID?, not *IDN?).");
+                    dev.AddCommand<Hp3245ADcCommand>("dc")
+                        .WithDescription("Set DC output: -v volts / -i amps on channel A or -b for B; --read to read back.")
+                        .WithExample(new[] { "hp3245a", "dc", "-v", "3.5", "--read", "--provider", "Simulated" });
+                });
+
                 config.AddBranch<CommandSettings>("hp3499a", dev =>
                 {
                     dev.SetDescription("Drive an HP 3499A switch/control system (relay channels + card inventory).");
