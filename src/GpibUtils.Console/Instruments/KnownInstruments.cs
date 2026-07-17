@@ -91,6 +91,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("n9320a",   AgilentN9320A.DefaultResource, "Agilent N9320A spectrum analyzer"),
             new KnownInstrument("hp437b",   Hp437B.DefaultResource,    "HP 437B RF power meter"),
             new KnownInstrument("hp436a",   Hp436A.DefaultResource,    "HP 436A power meter"),
+            new KnownInstrument("hp8508a",  Hp8508A.DefaultResource,   "HP 8508A vector voltmeter"),
             new KnownInstrument("keithley2015", Keithley2015.DefaultResource, "Keithley 2015 THD multimeter"),
             new KnownInstrument("hp6625a",  Hp6625A.DefaultResource,   "HP 6625A system DC power supply"),
             new KnownInstrument("hp8714",   Hp8714.DefaultResource,    "HP 8711C-8714C RF network analyzer"),

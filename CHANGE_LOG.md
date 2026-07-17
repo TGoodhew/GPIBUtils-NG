@@ -15,6 +15,13 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 8508A Vector Voltmeter** (issue [#104](https://github.com/TGoodhew/GPIBUtils-NG/issues/104),
+  **re-scoped** from the mislabeled "Fluke 8508A" — the physical instrument is the HP vector voltmeter, a
+  model-number collision) — a driver in `GpibUtils.Instruments.Meters` implementing a **new `IVectorVoltmeter`
+  interface**: a tuned dual-channel RF receiver (100 kHz–2 GHz) measuring channel A/B voltage/power, B/A
+  ratio, B−A phase, transmission, group delay, SWR, reflection coefficient, admittance, impedance. IEEE-488.2
+  mnemonic (`SENSe`/`MEASure?`/`FREQuency:BAND:AUTO`/`AVERage:COUNt`). Built from the 8508A User Guide command
+  set. Tests (+5); `gpibutils hp8508a idn|measure <quantity>`. 🟡 **Verification Needed.**
 - **`ISourceMeasureUnit` + new `GpibUtils.Instruments.SourceMeasure` project** (P1 #84) with the **Keithley
   2400 SourceMeter** ([#134](https://github.com/TGoodhew/GPIBUtils-NG/issues/134), SCPI, addr 24). Sources
   voltage or current with a compliance limit (current limit when sourcing V, voltage limit when sourcing I)
