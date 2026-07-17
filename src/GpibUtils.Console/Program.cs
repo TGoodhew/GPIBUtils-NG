@@ -233,6 +233,10 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp6625a", "set", "5", "-i", "0.5", "-c", "1", "--provider", "Simulated" });
                 });
 
+                // Network analyzers (#127/#128): single-sweep + trace/marker.
+                RegisterNetworkAnalyzer<Hp8714NaSettings>(config, "hp8714", "HP 8711C-8714C RF network analyzer (SCPI).");
+                RegisterNetworkAnalyzer<Hp8720cNaSettings>(config, "hp8720c", "HP 8720C microwave vector network analyzer (mnemonic).");
+
                 config.AddBranch<CommandSettings>("e4418b", dev =>
                 {
                     dev.SetDescription("Drive an HP/Agilent E4418B RF power meter (SCPI, SRQ completion).");
@@ -730,6 +734,19 @@ namespace GpibUtils.Console
                 dev.AddCommand<BatchPowerMeterMeasureCommand<TSettings>>("measure")
                     .WithDescription("Initialize and read power (dBm); --zero to zero/cal first.")
                     .WithExample(new[] { key, "measure", "--zero", "--provider", "Simulated" });
+            });
+        }
+
+        /// <summary>Registers a <c>sweep</c> CLI command for an INetworkAnalyzer driver.</summary>
+        private static void RegisterNetworkAnalyzer<TSettings>(IConfigurator config, string key, string description)
+            where TSettings : NetworkAnalyzerSettings
+        {
+            config.AddBranch<CommandSettings>(key, dev =>
+            {
+                dev.SetDescription(description);
+                dev.AddCommand<NetworkAnalyzerSweepCommand<TSettings>>("sweep")
+                    .WithDescription("Set start/stop/power/S-parameter, take a single sweep; --peak reports the marker.")
+                    .WithExample(new[] { key, "sweep", "--start", "10e6", "--stop", "400e6", "-s", "s21", "--peak", "--provider", "Simulated" });
             });
         }
     }

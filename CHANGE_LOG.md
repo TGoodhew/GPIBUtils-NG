@@ -15,6 +15,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`INetworkAnalyzer` + new `GpibUtils.Instruments.NetworkAnalyzers` project** (P1 #82) with two implementers
+  from the #70 triage: **HP 8711C-8714C** ([#127](https://github.com/TGoodhew/GPIBUtils-NG/issues/127), native
+  SCPI, addr 16) and **HP 8720C** microwave VNA ([#128](https://github.com/TGoodhew/GPIBUtils-NG/issues/128),
+  legacy front-panel mnemonics + IEEE-488.2, addr 16). Scalar-first, vector-extensible interface: frequency
+  sweep, source power, S-parameter select, single-sweep blocking on `*OPC?` (mandatory before any data read),
+  formatted-trace read, peak marker. Tests (+3); generic `gpibutils hp8714|hp8720c sweep` CLI. The scalar
+  **HP 8757D (#129) is deferred** — its command syntax lives only in an unavailable Quick Reference Guide, so
+  building it would mean inventing mnemonics. 🟡 **Verification Needed.**
+
 - **Analyzers / meters / supply batch (6)** (from the #70 triage): **Rigol DSA800**
   ([#102](https://github.com/TGoodhew/GPIBUtils-NG/issues/102)) + **Agilent N9320A**
   ([#136](https://github.com/TGoodhew/GPIBUtils-NG/issues/136)) SCPI spectrum analyzers (shared
