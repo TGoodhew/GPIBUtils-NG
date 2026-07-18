@@ -4,7 +4,7 @@ namespace GpibUtils.Instruments.Meters
 {
     /// <summary>
     /// A measurement function of a digital multimeter (HP 34401A). The enum values map to the SCPI
-    /// function keywords used by <c>CONFigure</c> / <c>SENSe:FUNCtion</c>; see <see cref="Scpi.Root"/>.
+    /// function keywords used by <c>CONFigure</c> / <c>SENSe:FUNCtion</c>; see <see cref="MeasurementFunctionScpi.Root"/>.
     /// </summary>
     public enum MeasurementFunction
     {

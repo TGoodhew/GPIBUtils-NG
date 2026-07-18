@@ -16,7 +16,7 @@ namespace GpibUtils.Instruments.Meters
     /// and the query surface (<c>*IDN?</c> / <c>CONF?</c> / <c>FUNC?</c> / <c>SYST:ERR?</c> / <c>*TST?</c> /
     /// <c>CALC:AVER:*</c>) is modelled.
     ///
-    /// <para>Inject faults for the error paths: queue entries in <see cref="Errors"/> so
+    /// <para>Inject faults for the error paths: queue entries via <see cref="QueueError"/> so
     /// <see cref="Hp34401A.DrainErrors"/> reads them, set <see cref="ReadingOverride"/> to a malformed
     /// string, or set <see cref="SelfTestPasses"/> false.</para>
     /// </summary>

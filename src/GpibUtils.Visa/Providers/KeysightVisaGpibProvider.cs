@@ -7,8 +7,8 @@ namespace GpibUtils.Visa.Providers
     /// STUB — a placeholder for pinning specifically to Keysight's IO Libraries Suite (Keysight VISA)
     /// IVI.NET implementation.
     ///
-    /// In most cases you do not need this: the default <see cref="NiVisaGpibProvider"/> is built on the
-    /// vendor-neutral <see cref="Ivi.Visa.GlobalResourceManager"/>, so if Keysight VISA is your
+    /// In most cases you do not need this: the default <c>NiVisaGpibProvider</c> is built on the
+    /// vendor-neutral <c>Ivi.Visa.GlobalResourceManager</c>, so if Keysight VISA is your
     /// installed/primary system VISA it already drives your instruments through that provider. Implement
     /// this stub only if you must run Keysight VISA side-by-side with another VISA and select it
     /// explicitly (via Keysight's IVI.NET conflict resolution / preferred-implementation settings).

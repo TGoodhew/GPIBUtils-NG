@@ -34,7 +34,7 @@ namespace GpibUtils.Instruments.Switches
     public sealed class Hp3499A
     {
         /// <summary>GPIB address of the 3499A — its documented factory-default GPIB address is 9 (3499A
-        /// User's & Programming Guide: "When shipped from the factory, the GPIB interface is selected and its
+        /// User's &amp; Programming Guide: "When shipped from the factory, the GPIB interface is selected and its
         /// address is set to '9'"); the <c>HP3499Demo</c> source uses the same. Override with <c>--address</c>.
         /// Never trust bus-scan discovery here — the HP-IB extenders make every address look present.</summary>
         public const string DefaultResource = "GPIB0::9::INSTR";
