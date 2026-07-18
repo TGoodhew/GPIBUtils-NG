@@ -61,7 +61,7 @@ namespace GpibUtils.Console.Instruments
             [Description("Source frequency in Hz (default 1000).")]
             public double FrequencyHz { get; set; } = 1000;
 
-            [CommandOption("-a|--amplitude <VOLTS>")]
+            [CommandOption("-V|--amplitude <VOLTS>")]
             [Description("Source amplitude in volts (default 1).")]
             public double AmplitudeVolts { get; set; } = 1;
 

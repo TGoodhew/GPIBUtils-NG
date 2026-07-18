@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Hardcopy</RootNamespace>
+    <AssemblyName>GpibUtils.Hardcopy</AssemblyName>
+    <Description>Hardcopy routing for GPIBUtils-NG: a page-description document (HP-GL / PCL / image) rendered to a raster and sent to any sink — a GPIB plotter, the GPIB ThinkJet, or a normal Windows printer.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Hpgl\GpibUtils.Hpgl.csproj" />
+    <ProjectReference Include="..\GpibUtils.Pcl\GpibUtils.Pcl.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Plotters\GpibUtils.Instruments.Plotters.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Printers\GpibUtils.Instruments.Printers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Hardcopy.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

@@ -52,6 +52,9 @@ namespace GpibUtils.Instruments.Printers
         /// <summary>Form feed (0x0C) — ejects the page.</summary>
         public void FormFeed() => Send(new byte[] { 0x0C });
 
+        /// <summary>Streams a ready-made PCL byte stream verbatim (a native <c>PclDocument</c> passthrough).</summary>
+        public void SendRaw(byte[] pcl) { if (pcl != null && pcl.Length > 0) Send(pcl); }
+
         /// <summary>Sets the raster resolution (<c>ESC*t&lt;dpi&gt;R</c>); the ThinkJet supports 96 and 192.</summary>
         public void SetResolutionDpi(int dpi)
         {

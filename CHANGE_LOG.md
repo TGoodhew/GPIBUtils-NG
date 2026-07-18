@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`GpibUtils.Hardcopy` — output routing + `hardcopy` CLI** (issue
+  [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the layer that unifies the sinks: a
+  `HardcopyDocument` (`HpglDocument` / `PclDocument` / `ImageDocument`) renders to a common raster and routes to
+  a **`PlotterTarget`** (GPIB, native HP-GL vector), a **`ThinkJetTarget`** (GPIB, native PCL or rasterized),
+  or a **`WindowsPrinterTarget`** (any local/network Windows printer via `System.Drawing.Printing`). CLI
+  `hardcopy preview --hpgl|--pcl|--image -o out.png` and `hardcopy send … --to plotter|thinkjet|winprinter[:name]`.
+  Tests (+7, incl. the Windows-printer path exercised without a physical printer).
+
 - **HP 2225 ThinkJet printer + `IPrinter`/`IHardcopyDevice`** (issue
   [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — a new `GpibUtils.Instruments.Printers` project
   surfacing the ThinkJet as an **output device**: `Hp2225A` streams PCL over the shared transport —
@@ -398,6 +406,15 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   (factory-default HP-IB address `GPIB0::14::INSTR`); `Hp8902ASimulatedDevice` for hardware-free testing
   (21 tests); `gpibutils hp8902a init|preset|status|frequency|power|level` CLI branch (#45).
   🟡 **Verification Needed.**
+
+### Fixed
+
+- **CLI startup crash from duplicated short options** (found while adding the `hardcopy` commands) — the base
+  instrument options (`-a`/`--address`, `-t`/`--timeout`, `-p`/`--provider`) collided with several leaf commands
+  that reused the same letters, so `Spectre.Console.Cli` rejected the whole command tree at startup. Renamed the
+  offenders: amplitude `-a`→`-V` (function generators, 8903B), and dropped the short on network-analyzer
+  `--power` and 4275A `--parameter`. The CLI now launches. (Unit tests never exercised the composed command
+  tree, so this was invisible to CI.)
 
 ### Changed
 

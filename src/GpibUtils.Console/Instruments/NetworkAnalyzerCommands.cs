@@ -12,7 +12,7 @@ namespace GpibUtils.Console.Instruments
     {
         [CommandOption("--start <HZ>")] [Description("Sweep start frequency in Hz.")] public double? StartHz { get; set; }
         [CommandOption("--stop <HZ>")] [Description("Sweep stop frequency in Hz.")] public double? StopHz { get; set; }
-        [CommandOption("-p|--power <DBM>")] [Description("Source power in dBm.")] public double? PowerDbm { get; set; }
+        [CommandOption("--power <DBM>")] [Description("Source power in dBm.")] public double? PowerDbm { get; set; }
         [CommandOption("-s|--sparam <PARAM>")] [Description("Parameter: s11 | s21 | s12 | s22.")] public string Param { get; set; }
         [CommandOption("--peak")] [Description("After the sweep, report the peak marker.")] public bool Peak { get; set; }
         internal abstract INetworkAnalyzer Open(out Visa.IInstrumentSession session);
