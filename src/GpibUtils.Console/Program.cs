@@ -1,4 +1,5 @@
 using GpibUtils.Console.Instruments;
+using GpibUtils.Console.Tui;
 using Spectre.Console.Cli;
 
 namespace GpibUtils.Console
@@ -10,10 +11,20 @@ namespace GpibUtils.Console
             // Render Spectre's box-drawing/Unicode correctly on Windows consoles (no-op if redirected).
             try { System.Console.OutputEncoding = System.Text.Encoding.UTF8; } catch { }
 
+            // No verb on an interactive terminal → launch the interactive TUI (issue #172). When stdin/stdout
+            // is redirected (scripts, CI, pipes) keep the classic behaviour so nothing that relies on the
+            // one-shot CLI changes. All argv verbs still work exactly as before; `gpibutils tui` is explicit.
+            if (args.Length == 0 && IsInteractiveTerminal())
+                return new TuiApp().Run();
+
             var app = new CommandApp();
             app.Configure(config =>
             {
                 config.SetApplicationName("gpibutils");
+                config.AddCommand<TuiCommand>("tui")
+                      .WithAlias("interactive")
+                      .WithDescription("Launch the interactive, menu-driven TUI (also the default when run with no verb on a terminal).")
+                      .WithExample(new[] { "tui", "--provider", "Simulated" });
                 config.AddCommand<ProvidersCommand>("providers")
                       .WithDescription("List the registered GPIB providers and their capabilities.");
                 config.AddCommand<DiscoverCommand>("discover")
@@ -797,6 +808,14 @@ namespace GpibUtils.Console
                 });
             });
             return app.Run(args);
+        }
+
+        /// <summary>True when both stdin and stdout are attached to a real console (not redirected/piped),
+        /// so the interactive TUI can run. Guards the no-verb auto-launch from breaking scripts and CI.</summary>
+        private static bool IsInteractiveTerminal()
+        {
+            try { return !System.Console.IsInputRedirected && !System.Console.IsOutputRedirected; }
+            catch { return false; }
         }
 
         /// <summary>Registers an <c>idn</c> + <c>apply</c> CLI branch for an ISignalSource RF generator.</summary>
