@@ -29,6 +29,9 @@ namespace GpibUtils.Wpf.ViewModels
             LoadProviders();
         }
 
+        /// <summary>The Hardcopy tab (render HP-GL/PCL and route to plotter / ThinkJet / Windows printer).</summary>
+        public HardcopyViewModel Hardcopy { get; } = new HardcopyViewModel();
+
         public ObservableCollection<ProviderRow> Providers { get; } = new ObservableCollection<ProviderRow>();
         public ObservableCollection<string> ProviderNames { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> Discovered { get; } = new ObservableCollection<string>();
