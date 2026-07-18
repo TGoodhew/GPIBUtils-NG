@@ -27,6 +27,7 @@
     <ProjectReference Include="..\GpibUtils.Instruments.ModulationDomain\GpibUtils.Instruments.ModulationDomain.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.NoiseFigureMeters\GpibUtils.Instruments.NoiseFigureMeters.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Printers\GpibUtils.Instruments.Printers.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.ElectronicLoads\GpibUtils.Instruments.ElectronicLoads.csproj" />
     <ProjectReference Include="..\GpibUtils.Hardcopy\GpibUtils.Hardcopy.csproj" />
     <!-- NI providers (needs NI-VISA installed). Remove this reference on a non-NI machine. -->
     <ProjectReference Include="..\GpibUtils.Visa.Ni\GpibUtils.Visa.Ni.csproj" />

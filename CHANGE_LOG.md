@@ -15,6 +15,17 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Maynuo M9811 DC electronic load + `IElectronicLoad`** (issue
+  [#164](https://github.com/TGoodhew/GPIBUtils-NG/issues/164)) — a new `GpibUtils.Instruments.ElectronicLoads`
+  project with a **new `IElectronicLoad` interface** (CC/CV/CR/CW mode + setpoint, input on/off, V/I/P readback)
+  for a device class no existing interface fits (a load *sinks* power). The **M9811 speaks Modbus RTU** over
+  serial (RS-232/RS-485/USB), not SCPI/GPIB — so this adds a small internal `ModbusRtu` helper (CRC-16,
+  float32-BE register packing, read/write registers + force coil) validated **byte-for-byte against the
+  manual's own worked frames** (e.g. IFIX 2.3 A → `01 10 0A01 0002 04 40133333 FC23`). Driver +
+  `MaynuoM9811SimulatedDevice` (a Modbus-slave sim) + CLI `maynuo idn|set|read`. Tests (+9). 🟡 **Verification
+  Needed** (the supplied `M9811.pdf` actually documents the M971x family — confirm the M9811's register map,
+  slave address and serial resource at the bench).
+
 - **WPF Hardcopy tab — preview + send-to UI** (issue
   [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the desktop shell gains a **Hardcopy** tab: load
   an HP-GL / PCL / image file (auto-detected by extension), **preview** it rendered to a raster in the pane, and

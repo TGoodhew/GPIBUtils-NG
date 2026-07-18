@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.ElectronicLoads</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.ElectronicLoads</AssemblyName>
+    <Description>Programmable DC electronic loads (Maynuo M9811 / M97xx, …) for GPIBUtils-NG. Speaks Modbus RTU over the shared vendor-neutral transport (RS-232/RS-485/USB serial).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.ElectronicLoads.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
