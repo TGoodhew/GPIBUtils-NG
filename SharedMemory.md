@@ -19,6 +19,7 @@ the target architecture.
 | Target framework | **.NET Framework 4.7.2 (`net472`)** | All projects, including WPF. Matches the legacy source; minimizes VISA.NET friction. |
 | VISA layer | Pluggable **provider model**; NI parts use the **official NI assemblies** | `NationalInstruments.Visa` + `Ivi.Visa` referenced by `HintPath` from the local NI-VISA install — **not** vendored, **not** the Kelary community NuGet (dropped), **not** the official NI NuGet (net6.0-only, unusable on net472). |
 | UI split | **Console = Spectre.Console**, **Windows = WPF** | Core/drivers carry no UI dependency. WinForms sources migrate to WPF. |
+| UI parity | **Every capability reachable in all 3 front-ends (CLI · WPF · TUI)** | No UI-exclusive features. The only accepted asymmetry is *invocation*: the CLI is one-shot/command-line (a live view = a streaming `monitor`/`watch` verb), not menu-navigated. Generalizes the #45 "no interactive-only paths" rule into a symmetric three-way constraint. See #172. |
 | Reference architecture | The **`HP-Attenuator`** repo | Core lib + Ivi.Visa + simulator + CI — the pattern the rest converges on. |
 
 ## Solution layout & status
@@ -88,6 +89,13 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   hierarchical Spectre.Console.Cli tree (`gpibutils <device> <action>`) with self-documenting `--help`
   at **every** level; no interactive-only paths. Each migrated driver adds its own command branch plus
   the shared global options `--provider` / `--address` / `--timeout`.
+- **UI parity across the 3 front-ends (CLI · WPF · TUI)** — nothing may be implemented in one UI that
+  isn't available in all three. The CLI's one-shot, command-line invocation is the **only** accepted
+  asymmetry: an interactive/live screen in WPF or the TUI maps to a *verb* in the CLI (live dashboard ↔
+  a streaming `monitor`/`watch` verb; transcript ↔ scrollback + `--log <file>`), but the underlying
+  capability must exist everywhere. When a new UI would surface something the others lack, add the matching
+  verb/panel too (or file it as linked, co-delivered work) — no front-end left behind. This generalizes the
+  CLI-first "no interactive-only paths" rule above. Tracked on the TUI proposal (#172).
 - **Porting a driver** — no hardcoded GPIB addresses (make the resource configurable); move onto the
   shared transport; add a simulator/mock so it builds & tests without hardware; port/author tests;
   reconcile duplicate implementations into one canonical driver (see the "Related implementations" note
