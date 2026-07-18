@@ -556,6 +556,18 @@ namespace GpibUtils.Console
                         .WithExample(new[] { "hp3335a", "set", "-f", "12.5", "-l", "-10", "--provider", "Simulated" });
                 });
 
+                config.AddBranch<CommandSettings>("maynuo", dev =>
+                {
+                    dev.SetDescription("Drive a Maynuo M9811 programmable DC electronic load (Modbus RTU over serial).");
+                    dev.AddCommand<MaynuoIdnCommand>("idn")
+                        .WithDescription("Read the model / firmware edition.");
+                    dev.AddCommand<MaynuoSetCommand>("set")
+                        .WithDescription("Remote + select mode (cc|cv|cr|cw) and setpoint; --input on|off.")
+                        .WithExample(new[] { "maynuo", "set", "cc", "2.3", "--input", "on", "--provider", "Simulated" });
+                    dev.AddCommand<MaynuoReadCommand>("read")
+                        .WithDescription("Read measured voltage / current / power.");
+                });
+
                 config.AddBranch<CommandSettings>("hardcopy", dev =>
                 {
                     dev.SetDescription("Render (HP-GL/PCL) and route hardcopy to a plotter, the ThinkJet, or a Windows printer.");

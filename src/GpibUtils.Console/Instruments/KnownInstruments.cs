@@ -5,6 +5,7 @@ using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.Audio;
 using GpibUtils.Instruments.Calibrators;
 using GpibUtils.Instruments.Counters;
+using GpibUtils.Instruments.ElectronicLoads;
 using GpibUtils.Instruments.LcrMeters;
 using GpibUtils.Instruments.Meters;
 using GpibUtils.Instruments.ModulationDomain;
@@ -98,6 +99,7 @@ namespace GpibUtils.Console.Instruments
             new KnownInstrument("hp437b",   Hp437B.DefaultResource,    "HP 437B RF power meter"),
             new KnownInstrument("hp436a",   Hp436A.DefaultResource,    "HP 436A power meter"),
             new KnownInstrument("hp8508a",  Hp8508A.DefaultResource,   "HP 8508A vector voltmeter"),
+            new KnownInstrument("maynuo",   MaynuoM9811.DefaultResource, "Maynuo M9811 DC electronic load (Modbus/serial)"),
             new KnownInstrument("hp8901",   Hp8901.DefaultResource,    "HP 8901A/8901B modulation analyzer"),
             new KnownInstrument("hp8970b",  Hp8970B.DefaultResource,   "HP 8970B noise figure meter"),
             new KnownInstrument("keithley2015", Keithley2015.DefaultResource, "Keithley 2015 THD multimeter"),
