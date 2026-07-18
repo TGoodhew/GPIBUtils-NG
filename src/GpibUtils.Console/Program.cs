@@ -170,7 +170,7 @@ namespace GpibUtils.Console
                         .WithDescription("Device clear + *RST + Vpp units (clean known state).");
                     dev.AddCommand<Hp33120AApplyCommand>("apply")
                         .WithDescription("Set waveform/frequency/amplitude/offset (and output).")
-                        .WithExample(new[] { "hp33120a", "apply", "-w", "sine", "-f", "1000", "-a", "2", "--provider", "Simulated" });
+                        .WithExample(new[] { "hp33120a", "apply", "-w", "sine", "-f", "1000", "-V", "2", "--provider", "Simulated" });
                 });
 
                 config.AddBranch<CommandSettings>("dg1000z", dev =>
@@ -189,7 +189,7 @@ namespace GpibUtils.Console
                     dev.SetDescription("Drive an HP 8116A pulse/function generator (legacy mnemonics).");
                     dev.AddCommand<Hp8116AApplyCommand>("apply")
                         .WithDescription("Set frequency/amplitude/offset (and output). Waveform-select is bench-TBD (#118).")
-                        .WithExample(new[] { "hp8116a", "apply", "-f", "1000", "-a", "2", "--output", "on", "--provider", "Simulated" });
+                        .WithExample(new[] { "hp8116a", "apply", "-f", "1000", "-V", "2", "--output", "on", "--provider", "Simulated" });
                     dev.AddCommand<Hp8116AStatusCommand>("status")
                         .WithDescription("Serial-poll the status byte and read any error (IERR).");
                 });
@@ -554,6 +554,17 @@ namespace GpibUtils.Console
                     dev.AddCommand<Hp3335ASetCommand>("set")
                         .WithDescription("Set output frequency (-f MHz) and/or amplitude (-l dBm).")
                         .WithExample(new[] { "hp3335a", "set", "-f", "12.5", "-l", "-10", "--provider", "Simulated" });
+                });
+
+                config.AddBranch<CommandSettings>("hardcopy", dev =>
+                {
+                    dev.SetDescription("Render (HP-GL/PCL) and route hardcopy to a plotter, the ThinkJet, or a Windows printer.");
+                    dev.AddCommand<HardcopyPreviewCommand>("preview")
+                        .WithDescription("Render --hpgl/--pcl/--image to a PNG (-o out.png). No hardware.")
+                        .WithExample(new[] { "hardcopy", "preview", "--hpgl", "plot.hpgl", "-o", "plot.png" });
+                    dev.AddCommand<HardcopySendCommand>("send")
+                        .WithDescription("Send --hpgl/--pcl/--image --to plotter|thinkjet|winprinter[:name].")
+                        .WithExample(new[] { "hardcopy", "send", "--hpgl", "plot.hpgl", "--to", "thinkjet", "--provider", "Simulated" });
                 });
 
                 config.AddBranch<CommandSettings>("hp3245a", dev =>

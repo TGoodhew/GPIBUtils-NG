@@ -57,7 +57,7 @@ namespace GpibUtils.Console.Instruments
     {
         public sealed class Settings : Hp4275ASettings
         {
-            [CommandOption("-p|--parameter <PARAM>")]
+            [CommandOption("--parameter <PARAM>")]
             [Description("Primary parameter: l | c | r | z (default c).")]
             public string Parameter { get; set; } = "c";
 
