@@ -116,6 +116,15 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 
 ## Current status / resume point
 
+- **Maynuo M9811 electronic load landed (2026-07-18, #164)** — new **`IElectronicLoad`** interface (CC/CV/CR/CW
+  + setpoint, input on/off, V/I/P) in a new `GpibUtils.Instruments.ElectronicLoads` project. **First Modbus-RTU
+  driver in the suite:** the M9811 is serial (RS-232/RS-485/USB), not GPIB/SCPI. Internal `ModbusRtu` helper
+  (CRC-16 poly 0xA001, float32-BE register packing, fn 0x03/0x10/0x05) validated **byte-for-byte against the
+  manual's worked frames**; `MaynuoM9811SimulatedDevice` is a Modbus-slave sim. CLI `maynuo idn|set|read`,
+  default resource `ASRL1::INSTR`. **Caveats (bench):** the file `M9811.pdf` actually documents the **M971x**
+  family (confirm the M9811's register map + slave address); needs a serial-capable provider on real hardware
+  (the sim session trims trailing CR/LF, so avoid frames whose CRC ends 0x0D/0x0A in simulation only).
+
 - **OUTPUT-DEVICES / HARDCOPY SUBSYSTEM landed (2026-07-18, #166).** Render HP-GL **and** PCL to screen, and
   route the same content to a GPIB plotter, the GPIB ThinkJet, or a normal Windows printer — from both the CLI
   and the WPF UI. Four projects, four PRs:
