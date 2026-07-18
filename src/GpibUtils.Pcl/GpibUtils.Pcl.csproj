@@ -1,0 +1,27 @@
+<!--
+  GpibUtils.Pcl - HP PCL (ThinkJet-subset) parser + raster renderer (.NET Framework 4.7.2).
+
+  Interprets the PCL text + raster-graphics stream an HP 2225 ThinkJet (and compatible
+  HP-IB printers) consumes, and renders it to a bitmap/PNG for on-screen preview and for
+  driving a normal Windows printer. The inverse of the Hp2225A driver's PCL generator.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Pcl</RootNamespace>
+    <AssemblyName>GpibUtils.Pcl</AssemblyName>
+    <Description>HP PCL (ThinkJet-subset) parser + raster renderer (to PNG via System.Drawing) for GPIBUtils-NG printer preview and hardcopy output.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Pcl.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

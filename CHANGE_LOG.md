@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **`GpibUtils.Pcl` — HP PCL (ThinkJet-subset) parser + raster renderer** (issue
+  [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the counterpart to `GpibUtils.Hpgl` for the
+  printer side: interprets the PCL text + raster-graphics stream an HP 2225 ThinkJet consumes and renders it to
+  a `Bitmap`/PNG for on-screen preview and for driving a normal Windows printer. Handles reset, pitch
+  (`ESC&k#S`), line spacing (`ESC&l#D`), CR/LF/FF, and the raster group (`ESC*t#R`/`ESC*r#A`/`ESC*b#M`/
+  `ESC*b#W`/`ESC*rB`) including combined sequences and run-length (mode 1) rows; text on the PCL grid via a
+  monospace font. First piece of the output-devices / hardcopy work. Tests (+8).
+
 - **HP 8757D Scalar Network Analyzer** (issue [#129](https://github.com/TGoodhew/GPIBUtils-NG/issues/129)) —
   a driver in `GpibUtils.Instruments.NetworkAnalyzers` implementing `INetworkAnalyzer` (P1 #82), completing the
   network-analyzer family. **Previously blocked** on unavailable command syntax; **unblocked** when the user
