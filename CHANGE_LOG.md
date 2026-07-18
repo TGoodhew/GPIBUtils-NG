@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **HP 2225 ThinkJet printer + `IPrinter`/`IHardcopyDevice`** (issue
+  [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — a new `GpibUtils.Instruments.Printers` project
+  surfacing the ThinkJet as an **output device**: `Hp2225A` streams PCL over the shared transport —
+  `PrintText` (CR+LF-normalized), `SetResolutionDpi`, and `PrintRaster(Bitmap)` (1-bpp, dark-pixel = ink) — the
+  raster path being the bridge that prints anything the HP-GL plotters draw (`HpglRenderer.RenderToBitmap`).
+  Default HP-IB address 1. Tests (+6) include a **round-trip** (the emitted PCL rendered back by
+  `GpibUtils.Pcl` reproduces the pixels). 🟡 **Verification Needed** (bench address / raster on real hardware).
+
 - **`GpibUtils.Pcl` — HP PCL (ThinkJet-subset) parser + raster renderer** (issue
   [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the counterpart to `GpibUtils.Hpgl` for the
   printer side: interprets the PCL text + raster-graphics stream an HP 2225 ThinkJet consumes and renders it to

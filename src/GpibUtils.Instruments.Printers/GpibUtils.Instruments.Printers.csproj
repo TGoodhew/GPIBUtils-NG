@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>GpibUtils.Instruments.Printers</RootNamespace>
+    <AssemblyName>GpibUtils.Instruments.Printers</AssemblyName>
+    <Description>HP-IB printers (HP 2225 ThinkJet, …) as hardcopy output devices for GPIBUtils-NG. Streams PCL over the shared vendor-neutral transport; renders/round-trips via GpibUtils.Pcl.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>GpibUtils.Instruments.Printers.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
