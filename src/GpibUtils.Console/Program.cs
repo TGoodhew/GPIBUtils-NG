@@ -462,6 +462,9 @@ namespace GpibUtils.Console
                     dev.AddCommand<Hp34401AStatsCommand>("stats")
                         .WithDescription("Configure a function, take a burst, and report min/max/avg/sd.")
                         .WithExample(new[] { "hp34401a", "stats", "dcv", "-n", "100", "--provider", "Simulated" });
+                    dev.AddCommand<Hp34401AMonitorCommand>("monitor")
+                        .WithDescription("Continuously read a function with running min/max/avg/sd until Ctrl-C (or -n).")
+                        .WithExample(new[] { "hp34401a", "monitor", "dcv", "-i", "250", "--provider", "Simulated" });
                     dev.AddCommand<Hp34401ASelfTestCommand>("selftest")
                         .WithDescription("Run the internal self-test (*TST?).");
                     dev.AddCommand<Hp34401AErrorsCommand>("errors")

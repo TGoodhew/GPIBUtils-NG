@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GpibUtils.Wpf\GpibUtils.Wpf.csproj" />
     <ProjectReference Include="..\..\src\GpibUtils.Visa\GpibUtils.Visa.csproj" />
+    <ProjectReference Include="..\..\src\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
   </ItemGroup>
 
 </Project>

@@ -169,6 +169,67 @@ namespace GpibUtils.Console.Instruments
             });
     }
 
+    /// <summary>Continuously read a function, printing each value with the running statistics, until the
+    /// count is reached or Ctrl-C. The command-line counterpart of the TUI DMM dashboard and the WPF DMM
+    /// tab's live monitor — the same capability in all three front-ends (UI parity), invoked as a verb.</summary>
+    public sealed class Hp34401AMonitorCommand : Command<Hp34401AMonitorCommand.Settings>
+    {
+        public sealed class Settings : Hp34401ASettings
+        {
+            [CommandArgument(0, "<function>")]
+            [Description("Measurement function: dcv, acv, dci, aci, res, fres, freq, per, cont, diode.")]
+            public string Function { get; set; }
+
+            [CommandOption("--range <RANGE>")]
+            [Description("Range (numeric or MIN/MAX/DEF); default = autorange.")]
+            public string Range { get; set; }
+
+            [CommandOption("--nplc <NPLC>")]
+            [Description("Integration time in power-line cycles (rangeable functions only).")]
+            public double? Nplc { get; set; }
+
+            [CommandOption("-i|--interval <MS>")]
+            [Description("Delay between readings in milliseconds (default 500).")]
+            public int IntervalMs { get; set; } = 500;
+
+            [CommandOption("-n|--count <N>")]
+            [Description("Stop after N readings (default 0 = run until Ctrl-C).")]
+            public int Count { get; set; }
+        }
+
+        public override int Execute(CommandContext context, Settings settings) => Runner.Guard(() =>
+        {
+            var fn = DmmFunctionParser.Parse(settings.Function);
+            var driver = settings.OpenDriver(out var session);
+            using (session)
+            {
+                driver.Configure(fn, settings.Range);
+                if (settings.Nplc.HasValue) driver.SetNplc(fn, settings.Nplc.Value);
+
+                var running = new RunningStatistics();
+                var stop = false;
+                ConsoleCancelEventHandler onCancel = (s, e) => { e.Cancel = true; stop = true; };
+                System.Console.CancelKeyPress += onCancel;
+                AnsiConsole.MarkupLine("[grey]Monitoring — press Ctrl-C to stop.[/]");
+                try
+                {
+                    int i = 0;
+                    while (!stop && (settings.Count <= 0 || i < settings.Count))
+                    {
+                        double v = driver.ReadValue();
+                        running.Add(v);
+                        i++;
+                        AnsiConsole.MarkupLineInterpolated($"[grey]{i,5}[/]  [green]{v:G7}[/]  [grey]min={running.Min:G6} max={running.Max:G6} avg={running.Average:G6} sd={running.StdDev:G6} n={running.Count}[/]");
+                        if (!stop && (settings.Count <= 0 || i < settings.Count) && settings.IntervalMs > 0)
+                            System.Threading.Thread.Sleep(settings.IntervalMs);
+                    }
+                }
+                finally { System.Console.CancelKeyPress -= onCancel; }
+            }
+            return 0;
+        });
+    }
+
     /// <summary>Run the internal self-test (*TST?).</summary>
     public sealed class Hp34401ASelfTestCommand : Command<Hp34401ASelfTestCommand.Settings>
     {

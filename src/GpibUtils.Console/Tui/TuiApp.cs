@@ -244,16 +244,26 @@ namespace GpibUtils.Console.Tui
                 AnsiConsole.Write(grid);
                 AnsiConsole.WriteLine();
 
+                const string dmmPanel = "Open DMM control panel (read / burst / live monitor)";
                 const string openConsole = "Open query console (this instrument)";
                 const string idnNow = "Send *IDN? now";
+
+                var choices = new List<string>();
+                bool hasDmmPanel = string.Equals(instrument.Key, "hp34401a", StringComparison.OrdinalIgnoreCase);
+                if (hasDmmPanel) choices.Add(dmmPanel);
+                choices.Add(openConsole);
+                choices.Add(idnNow);
+                choices.Add(BackLabel);
+
                 var action = AnsiConsole.Prompt(new SelectionPrompt<string>()
                     .Title("Action")
                     .HighlightStyle(new Style(foreground: Color.Teal))
-                    .AddChoices(openConsole, idnNow, BackLabel));
+                    .AddChoices(choices));
 
                 if (action == BackLabel) return;
-                if (action == openConsole) { QueryScreen(instrument.DefaultResource); return; }
-                if (action == idnNow) SendIdn(instrument.DefaultResource);
+                if (action == dmmPanel) { new DmmPanel(_session, instrument.DefaultResource).Run(); }
+                else if (action == openConsole) { QueryScreen(instrument.DefaultResource); return; }
+                else if (action == idnNow) SendIdn(instrument.DefaultResource);
             }
         }
 
