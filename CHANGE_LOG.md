@@ -15,6 +15,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **WPF Hardcopy tab — preview + send-to UI** (issue
+  [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the desktop shell gains a **Hardcopy** tab: load
+  an HP-GL / PCL / image file (auto-detected by extension), **preview** it rendered to a raster in the pane, and
+  **send** it to a GPIB plotter, the GPIB ThinkJet, or a Windows printer — the same `GpibUtils.Hardcopy` routing
+  the CLI uses. `HardcopyViewModel` keeps a hardware-free testable core (type resolution, document load, preview
+  PNG); sessions open through the shared `GpibProviders` registry (Simulated needs no hardware). Tests (+7).
+  (Rendering approach follows gpib-mcp's `HpglViewer`.)
+
 - **`GpibUtils.Hardcopy` — output routing + `hardcopy` CLI** (issue
   [#166](https://github.com/TGoodhew/GPIBUtils-NG/issues/166)) — the layer that unifies the sinks: a
   `HardcopyDocument` (`HpglDocument` / `PclDocument` / `ImageDocument`) renders to a common raster and routes to
