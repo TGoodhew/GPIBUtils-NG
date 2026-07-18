@@ -116,6 +116,28 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 
 ## Current status / resume point
 
+- **OUTPUT-DEVICES / HARDCOPY SUBSYSTEM landed (2026-07-18, #166).** Render HP-GL **and** PCL to screen, and
+  route the same content to a GPIB plotter, the GPIB ThinkJet, or a normal Windows printer — from both the CLI
+  and the WPF UI. Four projects, four PRs:
+  - **`GpibUtils.Pcl`** (#167) — ThinkJet-subset PCL parser + raster renderer (`RenderToBitmap`/`RenderToPng`),
+    the printer-side counterpart to `GpibUtils.Hpgl`. Handles reset/pitch/line-spacing/CR-LF-FF + the raster
+    group (`*t/*r/*b`, combined sequences, run-length).
+  - **`GpibUtils.Instruments.Printers`** (#168) — `IHardcopyDevice`/`IPrinter` + **`Hp2225A`** ThinkJet (HP-IB
+    addr 1): `PrintText`, `SetResolutionDpi`, `PrintRaster(Bitmap)` (1-bpp, dark=ink), `SendRaw`. Round-trip
+    tested against `GpibUtils.Pcl`.
+  - **`GpibUtils.Hardcopy`** (#169) — routing: `HardcopyDocument` (Hpgl/Pcl/Image) → `Render()` raster →
+    `PlotterTarget` (native HP-GL) / `ThinkJetTarget` (native PCL or rasterized) / `WindowsPrinterTarget`
+    (`System.Drawing.Printing`). CLI `hardcopy preview|send`. **The bridge:** `HpglRenderer.RenderToBitmap` →
+    `PrintRaster`/Windows-print makes all sinks interchangeable.
+  - **WPF Hardcopy tab** (#170) — load/preview/send UI; `HardcopyViewModel` testable core.
+  - **The 3 owned plotters (7090A/7475A/7550A) were already output devices** via `HpPlotter`/`IPlotter` (HP-GL
+    stream + PNG preview). The 7090A's analog-recorder side is the only unsurfaced aspect (optional).
+  - **Also fixed a pre-existing CLI startup crash** (#169): base short opts `-a`/`-t`/`-p` collided with leaf
+    commands (amplitude `-a`, power/parameter `-p`) → Spectre rejected the whole tree; CI never caught it
+    (tests use command classes, not the composed `CommandApp`). Renamed offenders; CLI launches now.
+  - **PCL was built new** — gpib-mcp has only the HP-GL renderer (already ported to `GpibUtils.Hpgl`) + an
+    `HpglViewer` WinForms tool; no PCL/ThinkJet code existed anywhere to reuse. The WPF tab follows HpglViewer.
+
 - **DRIVER BACK-LOG COMPLETE (2026-07-18).** Every buildable instrument in the #70 triage + pre-#70 backlog
   is migrated — **41 drivers landed this arc**, all sim-green with tests, all **Needs Verification** and
   closed into verification epic **#97** / board **#46** per the verify-in-epic policy.
