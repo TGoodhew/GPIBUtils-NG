@@ -145,7 +145,14 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   - **Dropped as not-owned:** Fluke 8508A DMM (#104 re-scoped to the HP 8508A VVM instead), Datron 4708 /
     `IMultifunctionCalibrator` (#98/#90 — user downloaded the manual for research only).
   - **NO blocked items remain.** HP 8757D #129 was unblocked 2026-07-18 (user supplied its User's Guide) and
-    built. All P1 design refactors (#93/#94/#95) are done. **Only open issues: trackers #44/#46/#70/#97.**
+    built. All P1 design refactors (#93/#94/#95) are done.
+  - **#70 CLOSED 2026-07-18 (full reconciliation).** All 571 Manuals-folder PDFs (up from ~424) triaged in 8
+    parallel passes; the auditable table is committed at **`docs/manuals-triage.md`** (PR #165) — #70's missing
+    deliverable #1. Every programmable instrument is covered. Two previously-untracked programmable devices
+    surfaced and are filed (confirm ownership before building): **#163 Keithley 2000** (GPIB DMM = migrated 2015
+    minus THD) and **#164 Maynuo M9811** (programmable DC electronic load → proposes a new `IElectronicLoad`).
+    Borderline/not-filed: HP 7090A (plotter-class), Keysight U1253B (proprietary IR, not VISA), Symmetricom GPSDO
+    / HP 310A (unconfirmed). **Open issues now: trackers #44/#46/#97 + new device backlog #163/#164.**
   - **Next real work is bench verification** of the whole Needs-Verification set (epic #97 / board #46), which
     requires hardware in Renton. No further no-hardware driver work is outstanding.
 
