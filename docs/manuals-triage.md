@@ -28,13 +28,15 @@ programmable instruments have several manuals (operating / service / programming
   VEE / VISA software, and a long tail of consumer manuals (appliances, cameras, a Ford F-150, …) that happen
   to live in the same folder.
 - **Newly-discovered programmable instruments (NOT previously tracked):**
-  | Instrument | Kind | Action |
-  |---|---|---|
-  | **Keithley 2000** | 6.5-digit GPIB DMM (sibling of the migrated 2015, minus THD) | **Issue filed** — confirm ownership before building |
-  | **Maynuo M9811** | Programmable DC electronic load (M97xx series, SCPI-like) | **Issue filed** — new instrument class (needs an `IElectronicLoad` interface); confirm ownership |
+  | Instrument | Kind | Action | Ownership |
+  |---|---|---|---|
+  | **Maynuo M9811** | Programmable DC electronic load (M97xx series, SCPI-like) | Issue #164 — new `IElectronicLoad` interface | **Owned** — build |
+  | ~~Keithley 2000~~ | 6.5-digit GPIB DMM (migrated 2015 minus THD) | #163 closed | **Not owned** (only the 2015-THD) |
+  | **HP 2225 ThinkJet** | HP-IB printer (text + PCL raster) — an **output device** | Issue #166 — new `IPrinter` output-device surface | **Owned** — build |
+- **Correction (2026-07-18):** the **HP 7090A** was initially flagged NEW, but it is **already covered** by the
+  shipped `HpPlotter` driver (`HpPlotterModel.Hp7090A`) alongside the 7475A/7550A the user owns. Only its
+  analog-input digitize/recorder side is unsurfaced (optional).
 - **Borderline / not filed:**
-  - **HP 7090A Measurement Plotting System** — HP-IB, but plotter/recorder-class; belongs with the backlogged
-    HP-GL plotter track, not the instrument-driver scope.
   - **Keysight U1253B** — handheld DMM, but only over a proprietary IR-USB serial link, not GPIB/VISA.
   - **Symmetricom GPS 149** GPSDO (hobby-grade RS-232 help-shell) and **HP 310A** (image-only scan, presumed
     vintage analog wave analyzer) — could not confirm a standard bus; left `unknown`.
@@ -203,8 +205,8 @@ programmable / out of scope), `NEW` (programmable, not previously tracked), `unk
 | 651B_MIL_MANUAL.pdf | HP 651B Test Oscillator | no | n-a | Analog signal source |
 | 651B_OSM.pdf | HP 651B Test Oscillator | no | n-a | Analog oscillator |
 | 6625A.pdf | HP 6625A System DC Power Supply | yes | covered | 6625A migrated |
-| 7090A-OM.pdf | HP 7090A Measurement Plotting System | yes | NEW | HP-IB plotting system; plotter/recorder-class (see plotters) |
-| 7090A-SM.pdf | HP 7090A Measurement Plotting System | yes | NEW | Service manual; same |
+| 7090A-OM.pdf | HP 7090A Measurement Plotting System | yes | covered | Already driven by HpPlotter (HpPlotterModel.Hp7090A); its analog-input digitize/recorder side is an optional feature gap |
+| 7090A-SM.pdf | HP 7090A Measurement Plotting System | yes | covered | HpPlotter (service manual) |
 | 720A-OSM.pdf | Fluke 720A Kelvin-Varley Divider | no | n-a | Passive manual divider |
 | 720A____imeng0200_0.pdf | Fluke 720A Kelvin-Varley Divider | no | n-a | Passive divider; duplicate |
 | 732A____imeng0000.pdf | Fluke 732A DC Reference Standard | no | n-a | Voltage reference, no bus |
