@@ -15,6 +15,22 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ### Added
 
+- **Cross-instrument verification harness — verify a DUT with a *selectable* reference instrument**
+  (verification issues [#46](https://github.com/TGoodhew/GPIBUtils-NG/issues/46) /
+  [#172](https://github.com/TGoodhew/GPIBUtils-NG/issues/172)) — generalizes the plan-driven Fluke-5440 runner
+  into a reusable framework in `GpibUtils.Verification`. A **reference-measurement layer** (`IRfPowerReference`,
+  `IFrequencyReference`, `IDcVoltageReference`) wraps existing drivers as interchangeable references — an **HP
+  8902A measuring receiver** *or* an **E4418B / 438A / 437B / 436A power meter** can read a source's RF power;
+  an **HP 53131A** *or* a **5342A / 5343A / 5351A** *or* the **8902A** can read its frequency; a **34401A** *or*
+  **DM3058** can read a DC source's volts. Two generic runners — `SignalSourceVerifier` (drives any
+  `ISignalSource`, grades power in dB and frequency in ppm) and `DcSourceVerifier` (a calibrator *or* a power
+  supply via `IVoltageSourceDut`, graded in ppm) — plus a `VerificationCatalog` that maps each DUT category to
+  the reference instruments that can verify it. New **interactive Spectre.Console harness** (`verify harness`):
+  pick the device under test, then the reference(s) — offered as a menu whenever more than one instrument can
+  do the job — and run a PASS/FAIL plan. A one-shot **`verify source`** command gives the same signal-source
+  capability non-interactively (UI parity). Fully drivable hardware-free against the **Simulated** provider;
+  tests (+27). See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md). No driver changes.
+
 - **Maynuo M9811 DC electronic load + `IElectronicLoad`** (issue
   [#164](https://github.com/TGoodhew/GPIBUtils-NG/issues/164)) — a new `GpibUtils.Instruments.ElectronicLoads`
   project with a **new `IElectronicLoad` interface** (CC/CV/CR/CW mode + setpoint, input on/off, V/I/P readback)

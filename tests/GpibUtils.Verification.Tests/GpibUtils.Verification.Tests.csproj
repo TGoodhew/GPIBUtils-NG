@@ -16,6 +16,9 @@
     <ProjectReference Include="..\..\src\GpibUtils.Verification\GpibUtils.Verification.csproj" />
     <ProjectReference Include="..\..\src\GpibUtils.Instruments.Calibrators\GpibUtils.Instruments.Calibrators.csproj" />
     <ProjectReference Include="..\..\src\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
+    <ProjectReference Include="..\..\src\GpibUtils.Instruments.SignalSources\GpibUtils.Instruments.SignalSources.csproj" />
+    <ProjectReference Include="..\..\src\GpibUtils.Instruments.Counters\GpibUtils.Instruments.Counters.csproj" />
+    <ProjectReference Include="..\..\src\GpibUtils.Instruments.PowerSupplies\GpibUtils.Instruments.PowerSupplies.csproj" />
     <ProjectReference Include="..\..\src\GpibUtils.Visa\GpibUtils.Visa.csproj" />
   </ItemGroup>
 

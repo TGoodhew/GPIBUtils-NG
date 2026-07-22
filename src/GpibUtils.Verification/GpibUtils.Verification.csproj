@@ -10,6 +10,9 @@
   <ItemGroup>
     <ProjectReference Include="..\GpibUtils.Instruments.Calibrators\GpibUtils.Instruments.Calibrators.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.SignalSources\GpibUtils.Instruments.SignalSources.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.Counters\GpibUtils.Instruments.Counters.csproj" />
+    <ProjectReference Include="..\GpibUtils.Instruments.PowerSupplies\GpibUtils.Instruments.PowerSupplies.csproj" />
   </ItemGroup>
 
   <ItemGroup>

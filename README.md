@@ -51,7 +51,7 @@ gpibutils idn GPIB0::14::INSTR
 | Shared | `GpibUtils.Common` | Cross-cutting helpers (`ToEngineeringFormat`, etc.) |
 | Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category (SignalSources, Meters, Counters, Analyzers, PowerSupplies, Switches, Plotters, Calibrators, Oscilloscopes) |
 | Rendering | `GpibUtils.Hpgl` | Shared HP-GL / PCL parser + renderer (plotters and screen-capture) |
-| Automation | `GpibUtils.Verification` | Plan-driven, non-interactive verification runner (from 5440Verify) |
+| Automation | `GpibUtils.Verification` | Cross-instrument verification harness: verify a DUT with a **selectable** reference instrument (e.g. an 8902A *or* a power meter to check a signal generator). Plan-driven runners + `verify harness` / `verify source`. See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md) |
 | Integration | `GpibUtils.Mcp` | MCP server exposing the suite to LLM clients + ~200-model instrument DB |
 | Front-end (console) | `GpibUtils.Console` | **Spectre.Console** UI (`Spectre.Console.Cli` command surface) on the shared core |
 | Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop shell on the shared core — browse providers, discover instruments, run a command (works hardware-free via the Simulated provider) |
