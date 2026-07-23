@@ -32,6 +32,9 @@ namespace GpibUtils.Wpf.ViewModels
         /// <summary>The Hardcopy tab (render HP-GL/PCL and route to plotter / ThinkJet / Windows printer).</summary>
         public HardcopyViewModel Hardcopy { get; } = new HardcopyViewModel();
 
+        /// <summary>The DMM tab (HP 34401A read / burst / live monitor — peer of the CLI + TUI DMM surfaces).</summary>
+        public DmmViewModel Dmm { get; } = new DmmViewModel();
+
         public ObservableCollection<ProviderRow> Providers { get; } = new ObservableCollection<ProviderRow>();
         public ObservableCollection<string> ProviderNames { get; } = new ObservableCollection<string>();
         public ObservableCollection<string> Discovered { get; } = new ObservableCollection<string>();

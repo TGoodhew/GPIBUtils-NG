@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <UseWPF>true</UseWPF>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Referencing the gpibutils Exe as a library for its public TUI types is intentional. -->
+    <NoWarn>$(NoWarn);NU1702</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,9 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\GpibUtils.Wpf\GpibUtils.Wpf.csproj" />
+    <ProjectReference Include="..\..\src\GpibUtils.Console\GpibUtils.Console.csproj" />
     <ProjectReference Include="..\..\src\GpibUtils.Visa\GpibUtils.Visa.csproj" />
-    <ProjectReference Include="..\..\src\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
   </ItemGroup>
 
 </Project>

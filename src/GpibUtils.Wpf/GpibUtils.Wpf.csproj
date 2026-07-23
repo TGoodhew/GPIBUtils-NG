@@ -21,6 +21,8 @@
     <ProjectReference Include="..\GpibUtils.Pcl\GpibUtils.Pcl.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Plotters\GpibUtils.Instruments.Plotters.csproj" />
     <ProjectReference Include="..\GpibUtils.Instruments.Printers\GpibUtils.Instruments.Printers.csproj" />
+    <!-- DMM tab: drive the 34401A (read / burst / live monitor) over the shared core. -->
+    <ProjectReference Include="..\GpibUtils.Instruments.Meters\GpibUtils.Instruments.Meters.csproj" />
   </ItemGroup>
 
   <ItemGroup>
