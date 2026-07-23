@@ -76,7 +76,7 @@ namespace GpibUtils.Verification.References
     /// RF-power reference backed by a broadband power meter (<see cref="IPowerMeter"/>: HP E4418B, 438A,
     /// 437B, 436A). Zeroes/calibrates the sensor once, then reads absolute power in dBm at each point. When
     /// the backing meter can be tuned to the carrier for cal-factor accuracy (e.g. the E4418B), pass a
-    /// <paramref name="setFrequencyMHz"/> hook so <see cref="Prepare"/> applies it.
+    /// <c>setFrequencyMHz</c> hook so <see cref="Prepare"/> applies it.
     /// </summary>
     public sealed class PowerMeterReference : IReferenceMeasurement
     {

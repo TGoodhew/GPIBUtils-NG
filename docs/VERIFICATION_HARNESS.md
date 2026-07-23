@@ -38,8 +38,22 @@ VerificationCatalog ────┘                        └──────
   and the catalog.
 - **`GpibUtils.Console`** holds the Spectre.Console front-end.
 
-Every reference is an adapter over an existing driver — **no driver changed**, and the whole thing runs
-hardware-free against the `Simulated` provider.
+Every reference is an adapter over an existing driver — **no driver changed**.
+
+> ### ⚠️ The harness needs real instruments today
+>
+> A verification run is **not** yet drivable end-to-end against the `Simulated` provider: it errors or
+> stalls. `SimulatedGpibProvider.Open` auto-creates a **generic** `SimulatedInstrument` for any
+> unregistered address, and the specific `*SimulatedDevice` models are only ever instantiated inside unit
+> tests — no front-end seeds them. A generic instrument never raises the status bits the reference drivers'
+> completion handshakes wait on, so those drivers correctly time out.
+>
+> This is **not** specific to the harness — the whole CLI's Simulated mode is generic. The harness just
+> surfaces it sharply, because its references (correctly) wait on SRQ/OPC completion.
+>
+> The unit tests are hardware-free and green; they use fakes rather than the provider. The `--provider
+> Simulated` examples below therefore illustrate **command shape**, not a working demo. Making the harness
+> a genuine no-hardware demo bench is fully designed in [`SIM_BENCH_PLAN.md`](SIM_BENCH_PLAN.md).
 
 ## Interactive harness
 

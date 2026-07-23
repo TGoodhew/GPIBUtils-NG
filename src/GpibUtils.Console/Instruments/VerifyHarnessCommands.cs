@@ -20,9 +20,14 @@ namespace GpibUtils.Console.Instruments
     /// Interactive Spectre.Console verification harness. Walks the user through picking a device under test,
     /// then — for each quantity that verifies it — which reference instrument to measure with (offered as a
     /// menu whenever more than one instrument can do the job: e.g. an 8902A, an E4418B, a 438A/437B/436A for
-    /// RF power). Then it runs the plan and prints a PASS/FAIL table. Fully drivable hardware-free against
-    /// the <c>Simulated</c> provider. The one-shot <c>verify source</c> command exposes the same
-    /// signal-source capability non-interactively for scripting (UI parity).
+    /// RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
+    /// command exposes the same signal-source capability non-interactively for scripting (UI parity).
+    /// <para>
+    /// Note: this needs <b>real instruments</b> today. Against the <c>Simulated</c> provider the run
+    /// errors or stalls, because the simulator auto-creates a *generic* instrument for any unregistered
+    /// address and it never raises the status bits the reference drivers wait on. Making the harness a
+    /// genuine no-hardware demo is designed in <c>docs/SIM_BENCH_PLAN.md</c>.
+    /// </para>
     /// </summary>
     public sealed class VerifyHarnessCommand : Command<VerifyHarnessCommand.Settings>
     {

@@ -30,9 +30,14 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   do the job — and run a PASS/FAIL plan. A one-shot **`verify source`** command gives the same signal-source
   capability non-interactively (UI parity). The selectable-reference menus also include the **HP 8560E / 8591E
   spectrum analyzers** (peak-marker power *and* frequency) and the **HP 3458A** and **Keithley 2015** DMMs as
-  DC-voltage references — so most checks offer several instruments to pick from. Fully drivable hardware-free
-  against the **Simulated** provider; tests (+32). See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md).
-  No driver changes.
+  DC-voltage references — so most checks offer several instruments to pick from. Tests (+32). See
+  [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md). No driver changes. 🟡 **Verification Needed** —
+  the harness needs **real instruments** today: against the **Simulated** provider a run errors or stalls,
+  because the simulator auto-creates a *generic* instrument for any unregistered address, which never raises
+  the status bits the reference drivers' completion handshakes wait on (the specific `*SimulatedDevice` models
+  are only ever instantiated inside unit tests). Not a regression — the whole CLI's Simulated mode is generic;
+  the harness just surfaces it. Making it a genuine no-hardware demo is fully designed in
+  [`docs/SIM_BENCH_PLAN.md`](docs/SIM_BENCH_PLAN.md).
 
 - **Maynuo M9811 DC electronic load + `IElectronicLoad`** (issue
   [#164](https://github.com/TGoodhew/GPIBUtils-NG/issues/164)) — a new `GpibUtils.Instruments.ElectronicLoads`
