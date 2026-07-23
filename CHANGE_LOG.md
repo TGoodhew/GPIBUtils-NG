@@ -28,8 +28,11 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
   the reference instruments that can verify it. New **interactive Spectre.Console harness** (`verify harness`):
   pick the device under test, then the reference(s) — offered as a menu whenever more than one instrument can
   do the job — and run a PASS/FAIL plan. A one-shot **`verify source`** command gives the same signal-source
-  capability non-interactively (UI parity). Fully drivable hardware-free against the **Simulated** provider;
-  tests (+27). See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md). No driver changes.
+  capability non-interactively (UI parity). The selectable-reference menus also include the **HP 8560E / 8591E
+  spectrum analyzers** (peak-marker power *and* frequency) and the **HP 3458A** and **Keithley 2015** DMMs as
+  DC-voltage references — so most checks offer several instruments to pick from. Fully drivable hardware-free
+  against the **Simulated** provider; tests (+32). See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md).
+  No driver changes.
 
 - **Maynuo M9811 DC electronic load + `IElectronicLoad`** (issue
   [#164](https://github.com/TGoodhew/GPIBUtils-NG/issues/164)) — a new `GpibUtils.Instruments.ElectronicLoads`

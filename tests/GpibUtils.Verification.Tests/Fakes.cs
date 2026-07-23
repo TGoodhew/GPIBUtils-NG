@@ -1,10 +1,35 @@
 using System.Collections.Generic;
+using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.SignalSources;
 using GpibUtils.Verification;
 using GpibUtils.Verification.References;
 
 namespace GpibUtils.Verification.Tests
 {
+    /// <summary>A spectrum analyzer that records tuning and returns a fixed peak amplitude/frequency.</summary>
+    internal sealed class FakeSpectrumAnalyzer : ISpectrumAnalyzer
+    {
+        private readonly double _peakDbm;
+        private readonly double _peakHz;
+
+        public FakeSpectrumAnalyzer(double peakDbm, double peakHz) { _peakDbm = peakDbm; _peakHz = peakHz; }
+
+        public string ResourceName => "FAKE::SA";
+        public double LastCenterHz { get; private set; }
+        public double LastSpanHz { get; private set; }
+        public int Sweeps { get; private set; }
+
+        public string Identify() => "FAKE,SA,0,1";
+        public void Initialize() { }
+        public void Preset() { }
+        public void SetCenterFrequencyHz(double hertz) => LastCenterHz = hertz;
+        public void SetSpanHz(double hertz) => LastSpanHz = hertz;
+        public void SingleSweep() => Sweeps++;
+        public IReadOnlyList<double> ReadTrace() => new[] { _peakDbm };
+        public double MarkerToPeakAmplitude() => _peakDbm;
+        public double MarkerFrequencyHz() => _peakHz;
+    }
+
     /// <summary>A signal source that records what it was driven to, for deterministic verifier logic tests.</summary>
     internal sealed class FakeSignalSource : ISignalSource
     {

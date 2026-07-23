@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.Calibrators;
 using GpibUtils.Instruments.Counters;
 using GpibUtils.Instruments.Meters;
@@ -102,6 +103,10 @@ namespace GpibUtils.Verification.Catalog
                     s => new PowerMeterReference(new Hp437B(s), s, "HP 437B power meter")),
                 new ReferenceChoice("hp436a", "HP 436A power meter", Hp436A.DefaultResource, ReferenceQuantity.RfPowerDbm,
                     s => new PowerMeterReference(new Hp436A(s), s, "HP 436A power meter")),
+                new ReferenceChoice("hp8560e", "HP 8560E spectrum analyzer", Hp8560E.DefaultResource, ReferenceQuantity.RfPowerDbm,
+                    s => new SpectrumAnalyzerPowerReference(new Hp8560E(s), s, "HP 8560E spectrum analyzer")),
+                new ReferenceChoice("hp8591e", "HP 8591E spectrum analyzer", Hp8591E.DefaultResource, ReferenceQuantity.RfPowerDbm,
+                    s => new SpectrumAnalyzerPowerReference(new Hp8591E(s), s, "HP 8591E spectrum analyzer")),
             };
 
         /// <summary>Instruments that can measure a source's frequency (Hz).</summary>
@@ -118,6 +123,10 @@ namespace GpibUtils.Verification.Catalog
                     s => new LegacyCounterReference(new Hp5343A(s), s, "HP 5343A microwave counter")),
                 new ReferenceChoice("hp8902a", "HP 8902A measuring receiver", Hp8902A.DefaultResource, ReferenceQuantity.FrequencyHz,
                     s => new MeasuringReceiverFrequencyReference(new Hp8902A(s), s, "HP 8902A measuring receiver")),
+                new ReferenceChoice("hp8560e", "HP 8560E spectrum analyzer", Hp8560E.DefaultResource, ReferenceQuantity.FrequencyHz,
+                    s => new SpectrumAnalyzerFrequencyReference(new Hp8560E(s), s, "HP 8560E spectrum analyzer")),
+                new ReferenceChoice("hp8591e", "HP 8591E spectrum analyzer", Hp8591E.DefaultResource, ReferenceQuantity.FrequencyHz,
+                    s => new SpectrumAnalyzerFrequencyReference(new Hp8591E(s), s, "HP 8591E spectrum analyzer")),
             };
 
         // ---- DC-source verification -------------------------------------------------------------------
@@ -144,6 +153,10 @@ namespace GpibUtils.Verification.Catalog
                     s => new DmmVoltageReference(new Hp34401A(s), s, "HP 34401A DMM")),
                 new ReferenceChoice("dm3058", "Rigol DM3058 digital multimeter", RigolDm3058.DefaultResource, ReferenceQuantity.DcVolts,
                     s => new DmmVoltageReference(new RigolDm3058(s), s, "Rigol DM3058 DMM")),
+                new ReferenceChoice("hp3458a", "HP 3458A 8.5-digit DMM", Hp3458A.DefaultResource, ReferenceQuantity.DcVolts,
+                    s => new Hp3458AVoltageReference(new Hp3458A(s), s, "HP 3458A DMM")),
+                new ReferenceChoice("keithley2015", "Keithley 2015 THD multimeter", Keithley2015.DefaultResource, ReferenceQuantity.DcVolts,
+                    s => new DmmVoltageReference(new Keithley2015(s), s, "Keithley 2015 DMM")),
             };
 
         private static InstrumentChoice<ISignalSource> Src(string key, string desc, string res, Func<IInstrumentSession, ISignalSource> open) =>

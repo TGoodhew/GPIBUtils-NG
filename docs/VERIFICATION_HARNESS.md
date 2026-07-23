@@ -14,9 +14,12 @@ you choose.
 
 | DUT category | Quantity | Reference instruments you can choose between |
 |---|---|---|
-| Signal generator / CW source (`ISignalSource`) | RF power (dBm) | HP 8902A · HP E4418B · HP 438A · HP 437B · HP 436A |
-| Signal generator / CW source | Frequency (Hz) | HP 53131A · HP 5351A · HP 5342A · HP 5343A · HP 8902A |
-| DC calibrator / power supply (`IVoltageSourceDut`) | DC volts (V) | HP 34401A · Rigol DM3058 |
+| Signal generator / CW source (`ISignalSource`) | RF power (dBm) | HP 8902A · HP E4418B · HP 438A · HP 437B · HP 436A · HP 8560E · HP 8591E |
+| Signal generator / CW source | Frequency (Hz) | HP 53131A · HP 5351A · HP 5342A · HP 5343A · HP 8902A · HP 8560E · HP 8591E |
+| DC calibrator / power supply (`IVoltageSourceDut`) | DC volts (V) | HP 34401A · Rigol DM3058 · HP 3458A · Keithley 2015 |
+
+(The 8560E/8591E spectrum analyzers read the peak marker — a lower-accuracy but bench-available
+alternative to a power meter/receiver or a counter.)
 
 The lists live in one place — `GpibUtils.Verification.Catalog.VerificationCatalog` — so adding a reference is
 one entry, and both the interactive and one-shot front-ends pick it up.
