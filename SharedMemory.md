@@ -124,6 +124,38 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
 
 ## Current status / resume point
 
+- **ALL OPEN PRs INTEGRATED — `main` is the complete pre-bench state (2026-07-23).** Four PRs merged in one
+  pass so nothing is left out when hardware verification starts; anything that surfaces at the bench becomes a
+  tracked bug issue. `main` = **768 tests green, 0 warnings**, 27 test assemblies, **no open PRs**.
+  - **#178 / issue #177 — NI assembly resolution is now version-agnostic.** `GpibUtils.Visa.Ni` had pinned a
+    version-named folder (`NI VISA.NET 26.3`); this bench has `26.0`, so it **silently built the "NI-VISA
+    unavailable" stub even with NI-VISA installed** — the real provider was never compiled, and only
+    `-p:RequireNi=true` surfaced it. Now referenced **by simple name, no `HintPath`, no version**, with layered
+    discovery: explicit `IviVisaNetDir`/`NiVisaNetDir` → **the GAC** (NI registers both assemblies there with
+    `policy.*` publisher policies that forward-redirect) → **disk**, by unversioned glob of `NI VISA.NET *` /
+    `VISA.NET Shared Components *`, appended to `AssemblySearchPaths`. Proven upgrade-immune against an
+    invented `NI VISA.NET 99.9`. **Never pin a version-named folder here again.** *(Gotcha for editors: a
+    literal `;` cannot appear inside an MSBuild condition — escaped or not — hence the `_NiVisaSearchDir`
+    item group instead of string concatenation.)*
+  - **#175 — cloud CI / dev environment:** hardened `ci.yml` (least-privilege, concurrency, NuGet cache, `.trx`
+    artifacts), remote-only SessionStart hook (a local no-op), and **`GPIBUtils-NG.NoWpf.slnf`** (the
+    Linux-buildable 52-project subset — what Claude Code on the web uses).
+  - **#174 — cross-instrument verification harness:** `verify harness` (interactive) + `verify source`
+    (one-shot), reference adapters over existing drivers, `VerificationCatalog`. Fixed its CS1734 warning and
+    **corrected over-claiming docs**: the harness is *not* drivable against the Simulated provider — filed as
+    **#179** with the full design already in `docs/SIM_BENCH_PLAN.md`.
+  - **#173 / issue #172 — interactive Spectre TUI** + DMM parity across CLI · WPF · TUI.
+  - Merge-time care worth repeating: **#174 and #173 both touch `Program.cs`**. Git auto-merged it, but the
+    composed `CommandApp` was smoke-tested by hand (`gpibutils --help`, `verify --help`, `tui --help`) because
+    **unit tests instantiate command classes, not the composed tree** — the exact blind spot that once shipped
+    a CLI-wide Spectre option collision.
+  - **First time ever: the real NI provider is compiled AND loaded** — `gpibutils providers` reports
+    `NI-VISA available: yes, default`. No CI run has ever done this; **#176** proposes an on-demand Azure
+    Windows runner (public-repo-safe: ephemeral runner, protected environment, OIDC, deallocate on `always()`)
+    to close that gap. #178 is its prerequisite.
+  - **Next: bench verification.** Open issues are trackers **#44 / #46 / #97**, backlog **#163 / #164**, plus
+    **#176** (Azure NI CI) and **#179** (simulated bench for the harness).
+
 - **Maynuo M9811 electronic load landed (2026-07-18, #164)** — new **`IElectronicLoad`** interface (CC/CV/CR/CW
   + setpoint, input on/off, V/I/P) in a new `GpibUtils.Instruments.ElectronicLoads` project. **First Modbus-RTU
   driver in the suite:** the M9811 is serial (RS-232/RS-485/USB), not GPIB/SCPI. Internal `ModbusRtu` helper
