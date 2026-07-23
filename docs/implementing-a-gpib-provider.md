@@ -107,9 +107,27 @@ so they can be referenced (or dropped) independently:
 
 - **`GpibUtils.Visa.Ni`** holds the NI providers and references the **official NI/IVI VISA.NET
   assemblies** — `Ivi.Visa.dll` and `NationalInstruments.Visa.dll` — installed by **NI-VISA**. On .NET
-  Framework these are *not* distributed via NuGet, so the project references them by `HintPath` into the
-  local IVI Foundation install; the build fails with clear guidance if they're missing, and a machine
-  without NI simply removes the project reference. The DLLs are never committed.
+  Framework these are *not* distributed via NuGet, so they are resolved from the local install. The DLLs
+  are never committed, and a machine without NI-VISA still builds (see below).
+
+  **Resolution is deliberately version-agnostic.** NI-VISA registers both assemblies in the GAC (with
+  `policy.*` publisher-policy assemblies that forward-redirect older references), *and* drops them on
+  disk under version-named folders such as `NI VISA.NET 26.0`. The project therefore declares them by
+  **simple name with no `HintPath` and no version**, and layers its discovery:
+
+  | Layer | Mechanism |
+  |---|---|
+  | 1 | Explicit override — `IviVisaNetDir` / `NiVisaNetDir` (odd installs, CI images). Wins outright. |
+  | 2 | The **GAC** — the normal case, and immune to NI upgrades. |
+  | 3 | **Disk**, discovered by unversioned glob of the `NI VISA.NET *` and `VISA.NET Shared Components *` folders (64- and 32-bit), appended to `AssemblySearchPaths`. |
+
+  Never pin a version-named folder here. Doing so means the next NI release silently reverts the build
+  to the "NI-VISA unavailable" stub on a machine that *has* NI-VISA installed — a quiet failure that
+  only `-p:RequireNi=true` surfaces. That is exactly what happened with a pinned `NI VISA.NET 26.3`.
+
+  When nothing is found the project builds an **"NI-VISA unavailable" stub** so the whole solution and
+  CI compile with zero NI setup; pass **`-p:RequireNi=true`** to hard-fail instead. The build prints
+  which layer satisfied it.
 - The core registry **reflection-loads** the NI providers when `GpibUtils.Visa.Ni` is deployed, so
   referencing that project is all it takes to get `NI-VISA` as the default — with no NI dependency
   leaking into the core.
