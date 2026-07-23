@@ -23,10 +23,10 @@ namespace GpibUtils.Console.Instruments
     /// RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
     /// command exposes the same signal-source capability non-interactively for scripting (UI parity).
     /// <para>
-    /// Note: this needs <b>real instruments</b> today. Against the <c>Simulated</c> provider the run
-    /// errors or stalls, because the simulator auto-creates a *generic* instrument for any unregistered
-    /// address and it never raises the status bits the reference drivers wait on. Making the harness a
-    /// genuine no-hardware demo is designed in <c>docs/SIM_BENCH_PLAN.md</c>.
+    /// Runs hardware-free against the <c>Simulated</c> provider: <see cref="SimulatedHarnessBench"/> seeds
+    /// the matching simulator model at each reference's address and feeds it the DUT's commanded
+    /// set-points. That coupling is <b>exact</b>, so every graded point passes by construction — it
+    /// exercises the harness, it does not judge an instrument. The run says so in a banner.
     /// </para>
     /// </summary>
     public sealed class VerifyHarnessCommand : Command<VerifyHarnessCommand.Settings>

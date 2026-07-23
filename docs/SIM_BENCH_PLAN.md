@@ -1,7 +1,22 @@
 # Simulated-bench coupling for the verification harness — design + handoff
 
-**Status:** designed, fully researched, **not yet implemented**. Written 2026-07-23 so the work can be picked
-up on another machine / Claude Code install with nothing lost.
+> **Status: IMPLEMENTED (2026-07-23, issue #179).** Landed as
+> `src/GpibUtils.Console/Instruments/SimulatedHarnessBench.cs` + the `SourceHarness` wiring, essentially as
+> designed below. Retained as the design record and property map. Two amendments found during
+> implementation, both now in the code:
+>
+> 1. The 8902A model registers **no** set-point hooks (it resolves at read time), which the seeder must not
+>    mistake for "role unsupported" — hence `SimReferenceModel.SelfSyncedQuantities`.
+> 2. Driving the 8902A's `Reading` is not enough: the model renders it as watts with `"0.######"`, which
+>    rounds anything below roughly **-30 dBm** to zero and yields `NaN` dBm. The coupling writes
+>    `ReadingOverride` at round-trip precision instead. §4's map said `Reading`; it should say
+>    `ReadingOverride`.
+>
+> Also: `TrySeed` returns a coupling even when *nothing* could be seeded, so the "no simulated model"
+> warnings still reach the user instead of surfacing as a bare driver error.
+
+**Status when written:** designed, fully researched, **not yet implemented**. Written 2026-07-23 so the work
+could be picked up on another machine / Claude Code install with nothing lost.
 
 **Branch:** `claude/instrument-verification-harness-z7phx1` (PR #174), local alias `verify-174`.
 

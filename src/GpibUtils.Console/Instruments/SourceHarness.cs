@@ -90,14 +90,23 @@ namespace GpibUtils.Console.Instruments
             };
 
             var ss = new SessionSettings { TimeoutMilliseconds = timeoutMs };
-            var dutSession = provider.Open(store.Resolve(dutAddr, dut.Key, dut.DefaultResource), ss);
+            string dutResource = store.Resolve(dutAddr, dut.Key, dut.DefaultResource);
+            string refResource = store.Resolve(refAddr, refChoice.Key, refChoice.DefaultResource);
+
+            // Seed before opening — see the note in RunSignalSource.
+            var coupling = SimulatedHarnessBench.TrySeed(provider,
+                new[] { new SimReferenceRequest(refResource, refChoice) });
+
+            var dutSession = provider.Open(dutResource, ss);
             IReferenceMeasurement voltRef = null;
             try
             {
                 var source = dut.Open(dutSession);
-                voltRef = refChoice.Open(provider.Open(store.Resolve(refAddr, refChoice.Key, refChoice.DefaultResource), ss));
+                if (coupling != null) source = coupling.Couple(source);
+                voltRef = refChoice.Open(provider.Open(refResource, ss));
                 var verifier = new DcSourceVerifier(source, voltRef, options);
                 AnsiConsole.MarkupLineInterpolated($"DUT: [green]{dut.Description}[/]   Reference: [green]{voltRef.DisplayName}[/]");
+                WriteSimulatedBenchBanner(coupling);
 
                 IReadOnlyList<VerificationResult> results = null;
                 AnsiConsole.Status().Start("Running verification…", _ =>
@@ -123,22 +132,34 @@ namespace GpibUtils.Console.Instruments
         {
             var store = InstrumentAddressStore.Load();
             var ss = new SessionSettings { TimeoutMilliseconds = timeoutMs };
-            IInstrumentSession Open(string addr, string key, string def) => provider.Open(store.Resolve(addr, key, def), ss);
 
             string dutResource = store.Resolve(dutAddr, dut.Key, dut.DefaultResource);
+            string powerResource = powerChoice != null ? store.Resolve(powerAddr, powerChoice.Key, powerChoice.DefaultResource) : null;
+            string freqResource = freqChoice != null ? store.Resolve(freqAddr, freqChoice.Key, freqChoice.DefaultResource) : null;
+
+            // Under the Simulated provider, seed the reference models BEFORE opening anything — the
+            // provider auto-creates a generic instrument at first open, and a generic one never raises the
+            // status bits the reference drivers' completion handshakes wait on.
+            var seedRequests = new List<SimReferenceRequest>();
+            if (powerChoice != null) seedRequests.Add(new SimReferenceRequest(powerResource, powerChoice));
+            if (freqChoice != null) seedRequests.Add(new SimReferenceRequest(freqResource, freqChoice));
+            var coupling = SimulatedHarnessBench.TrySeed(provider, seedRequests);
+
             var dutSession = provider.Open(dutResource, ss);
             IReferenceMeasurement powerRef = null, freqRef = null;
             try
             {
                 var source = dut.Open(dutSession);
-                if (powerChoice != null) powerRef = powerChoice.Open(Open(powerAddr, powerChoice.Key, powerChoice.DefaultResource));
-                if (freqChoice != null) freqRef = freqChoice.Open(Open(freqAddr, freqChoice.Key, freqChoice.DefaultResource));
+                if (coupling != null) source = coupling.Couple(source);
+                if (powerChoice != null) powerRef = powerChoice.Open(provider.Open(powerResource, ss));
+                if (freqChoice != null) freqRef = freqChoice.Open(provider.Open(freqResource, ss));
 
                 var verifier = new SignalSourceVerifier(source, powerRef, freqRef, options);
 
                 AnsiConsole.MarkupLineInterpolated($"DUT: [green]{dut.Description}[/] @ {dutResource}");
                 if (powerRef != null) AnsiConsole.MarkupLineInterpolated($"Power reference:     [green]{powerRef.DisplayName}[/]");
                 if (freqRef != null) AnsiConsole.MarkupLineInterpolated($"Frequency reference: [green]{freqRef.DisplayName}[/]");
+                WriteSimulatedBenchBanner(coupling);
 
                 IReadOnlyList<SignalSourceResult> results = null;
                 AnsiConsole.Status().Start("Running verification…", _ =>
@@ -163,6 +184,29 @@ namespace GpibUtils.Console.Instruments
         }
 
         // ---- helpers ----------------------------------------------------------------------------------
+
+        /// <summary>
+        /// States plainly what a simulated run is worth. The coupling feeds each reference the DUT's
+        /// commanded set-point exactly, so every graded point passes regardless of tolerance — useful for
+        /// exercising the harness, useless for judging an instrument. Also surfaces any references that had
+        /// no simulated model and so fell through to a generic instrument.
+        /// </summary>
+        private static void WriteSimulatedBenchBanner(SimulatedBenchCoupling coupling)
+        {
+            if (coupling == null) return;
+            if (coupling.AnySeeded)
+                AnsiConsole.MarkupLine(
+                    "[yellow]Simulated bench[/] — the references are seeded with their device models and read back the " +
+                    "DUT's commanded set-point [yellow]exactly[/], so every graded point PASSes by construction. " +
+                    "Use this to exercise the harness, not to judge an instrument.");
+            else
+                AnsiConsole.MarkupLine(
+                    "[red]Simulated bench unavailable[/] — none of the selected references has a simulated model, so " +
+                    "they fall through to a generic instrument that never answers. This run will fail; pick a " +
+                    "reference listed below as supported, or use real hardware.");
+            foreach (var warning in coupling.Warnings)
+                AnsiConsole.MarkupLineInterpolated($"[yellow]  warning:[/] {warning}");
+        }
 
         public static List<SignalSourcePoint> ParseSourcePoints(string raw, double? tolDb, double? tolPpm)
         {
