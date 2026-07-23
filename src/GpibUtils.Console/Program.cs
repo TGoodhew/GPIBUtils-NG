@@ -67,6 +67,12 @@ namespace GpibUtils.Console
                     v.AddCommand<Verify5440Command>("5440")
                         .WithDescription("Verify a Fluke 5440 through a list of points, read back on a 34401A (exit 1 on any FAIL).")
                         .WithExample(new[] { "verify", "5440", "--points", "0,1,-1,10,-10", "--tolerance-ppm", "50", "--provider", "Simulated" });
+                    v.AddCommand<VerifyHarnessCommand>("harness")
+                        .WithDescription("Interactive harness: pick a device under test, then the reference instrument(s) that verify it.")
+                        .WithExample(new[] { "verify", "harness", "--provider", "Simulated" });
+                    v.AddCommand<VerifySourceCommand>("source")
+                        .WithDescription("Verify a signal source against a selectable power and/or frequency reference (exit 1 on any FAIL).")
+                        .WithExample(new[] { "verify", "source", "--dut", "hp8340b", "--power-ref", "hp8902a", "--points", "1000@0,2000@-10", "--power-tol-db", "1", "--provider", "Simulated" });
                 });
 
                 // Attenuation-measurement app (issue #34): orchestrate source+LO+attenuator+receiver.
