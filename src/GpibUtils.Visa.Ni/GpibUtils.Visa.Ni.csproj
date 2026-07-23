@@ -5,20 +5,99 @@
     <RootNamespace>GpibUtils.Visa.Ni</RootNamespace>
     <AssemblyName>GpibUtils.Visa.Ni</AssemblyName>
     <Description>National Instruments provider for GPIBUtils-NG: NI-VISA (and optional native NI-488.2) implementations of IGpibProvider, built against the official NI/IVI VISA.NET assemblies installed with NI-VISA. Remove this project's reference if you do not use NI.</Description>
+  </PropertyGroup>
 
-    <!--
-      Official NI/IVI VISA.NET assemblies are installed by NI-VISA (they are NOT on NuGet for .NET
-      Framework). These paths point at the local install; adjust them for your machine or NI-VISA
-      version. When they are present the real NI-VISA provider is built (NI_VISA defined); when absent
-      (e.g. CI, or a machine without NI-VISA) the project still builds an "NI-VISA unavailable" stub so
-      the whole solution compiles with no NI setup. Pass -p:RequireNi=true to hard-fail instead.
-    -->
-    <IviVisaNetDir>$(ProgramW6432)\IVI Foundation\VISA\Microsoft.NET\Framework64\v4.0.30319\VISA.NET Shared Components 8.0.2</IviVisaNetDir>
-    <NiVisaNetDir>$(ProgramW6432)\IVI Foundation\VISA\Microsoft.NET\Framework64\v4.0.30319\NI VISA.NET 26.3</NiVisaNetDir>
-    <NiGpibDir>$(MSBuildProgramFiles32)\National Instruments\MeasurementStudioVS2010\DotNET\Assemblies\Current</NiGpibDir>
+  <!--
+    ===========================================================================
+    NI / IVI VISA.NET assembly resolution — deliberately version-agnostic.
+    ===========================================================================
 
-    <!-- Real NI provider is compiled only when both VISA.NET assemblies are found on disk. -->
-    <NiVisaPresent Condition="Exists('$(IviVisaNetDir)\Ivi.Visa.dll') And Exists('$(NiVisaNetDir)\NationalInstruments.Visa.dll')">true</NiVisaPresent>
+    The official VISA.NET assemblies are NOT on NuGet for .NET Framework, so they must be resolved
+    from the local NI-VISA install. NI-VISA puts them in TWO places:
+
+      1. The GAC — `NationalInstruments.Visa` and `Ivi.Visa`, together with a long chain of
+         `policy.*` publisher-policy assemblies that forward-redirect references built against
+         older versions onto whatever is currently installed.
+      2. On disk, under version-NAMED folders, e.g.
+         `...\IVI Foundation\VISA\Microsoft.NET\Framework64\v4.0.30319\NI VISA.NET 26.0`.
+
+    Naming one of those disk folders (this project used to pin "NI VISA.NET 26.3") means every NI
+    release silently reverts the build to the "NI-VISA unavailable" stub on a machine that has
+    NI-VISA installed — a quiet failure that only `-p:RequireNi=true` surfaces. So we never name a
+    version anywhere. Resolution is layered:
+
+      Layer 1  Explicit override — set IviVisaNetDir / NiVisaNetDir (e.g. on a CI image, or an
+               install in a non-default location). Wins over everything.
+      Layer 2  The GAC. References are declared by SIMPLE NAME, so MSBuild's assembly resolution
+               finds them there with no path and no version. Publisher policy handles the runtime
+               binding. This is the normal case and is immune to NI upgrades.
+      Layer 3  Disk. If NI-VISA is installed without GAC registration, every matching versioned
+               folder is discovered by unversioned glob and appended to AssemblySearchPaths, so
+               resolution still succeeds by simple name.
+
+    Copy-local is deliberately left unspecified: MSBuild sets it false for GAC-resolved references
+    (the runtime loads the installed assembly, which is what you want — NI-VISA has to be installed
+    for the provider to function at all) and true for disk-resolved ones.
+
+    Pass -p:RequireNi=true to hard-fail instead of silently building the stub.
+  -->
+  <PropertyGroup>
+    <!-- Layer 1 inputs (may be supplied by the caller); Layer 2/3 roots. -->
+    <NiVisaGacDir Condition="'$(NiVisaGacDir)' == ''">$(WinDir)\Microsoft.NET\assembly\GAC_MSIL</NiVisaGacDir>
+    <IviVisaNetRoot Condition="'$(IviVisaNetRoot)' == ''">$(ProgramW6432)\IVI Foundation\VISA\Microsoft.NET</IviVisaNetRoot>
+    <IviVisaNetRoot32 Condition="'$(IviVisaNetRoot32)' == ''">$(MSBuildProgramFiles32)\IVI Foundation\VISA\Microsoft.NET</IviVisaNetRoot32>
+
+    <_IviVisaFx64Dir>$(IviVisaNetRoot)\Framework64\v4.0.30319</_IviVisaFx64Dir>
+    <_IviVisaFx32Dir>$(IviVisaNetRoot32)\Framework32\v4.0.30319</_IviVisaFx32Dir>
+    <_IviVisaVendorDir>$(IviVisaNetRoot)\VendorAssemblies\ni</_IviVisaVendorDir>
+  </PropertyGroup>
+
+  <!-- Layer 2: GAC presence. Both assemblies must be registered. -->
+  <PropertyGroup>
+    <_NiVisaInGac Condition="Exists('$(NiVisaGacDir)\NationalInstruments.Visa') And Exists('$(NiVisaGacDir)\Ivi.Visa')">true</_NiVisaInGac>
+  </PropertyGroup>
+
+  <!--
+    Layer 3: discover every versioned folder on disk. GetDirectories returns a ';'-joined list,
+    which is exactly the format AssemblySearchPaths wants — no sorting or version parsing needed,
+    because resolution is by simple name and publisher policy forward-redirects at runtime.
+  -->
+  <PropertyGroup>
+    <_NiVisaDiskDirs64 Condition="Exists('$(_IviVisaFx64Dir)')">$([System.IO.Directory]::GetDirectories('$(_IviVisaFx64Dir)', 'NI VISA.NET *'))</_NiVisaDiskDirs64>
+    <_NiVisaDiskDirs32 Condition="Exists('$(_IviVisaFx32Dir)')">$([System.IO.Directory]::GetDirectories('$(_IviVisaFx32Dir)', 'NI VISA.NET *'))</_NiVisaDiskDirs32>
+
+    <_IviVisaDiskDirs64 Condition="Exists('$(_IviVisaFx64Dir)')">$([System.IO.Directory]::GetDirectories('$(_IviVisaFx64Dir)', 'VISA.NET Shared Components *'))</_IviVisaDiskDirs64>
+    <_IviVisaDiskDirs32 Condition="Exists('$(_IviVisaFx32Dir)')">$([System.IO.Directory]::GetDirectories('$(_IviVisaFx32Dir)', 'VISA.NET Shared Components *'))</_IviVisaDiskDirs32>
+
+    <!-- NI also ships a vendor-assembly tree keyed by shared-components major (…\VendorAssemblies\ni\8.0\…). -->
+    <_NiVendorDirs Condition="Exists('$(_IviVisaVendorDir)')">$([System.IO.Directory]::GetDirectories('$(_IviVisaVendorDir)', '*', System.IO.SearchOption.AllDirectories))</_NiVendorDirs>
+  </PropertyGroup>
+
+  <!--
+    Collect the candidates as items rather than concatenating strings: Include splits a ';'-joined
+    list for us and drops empties, so no stray separators leak into conditions (a literal ';' cannot
+    appear inside an MSBuild condition, escaped or not). Layer-1 overrides are listed first so they
+    take precedence in the search order.
+  -->
+  <ItemGroup>
+    <_NiVisaSearchDir Include="$(NiVisaNetDir)" Condition="'$(NiVisaNetDir)' != ''" />
+    <_NiVisaSearchDir Include="$(IviVisaNetDir)" Condition="'$(IviVisaNetDir)' != ''" />
+    <_NiVisaSearchDir Include="$(_NiVisaDiskDirs64)" Condition="'$(_NiVisaDiskDirs64)' != ''" />
+    <_NiVisaSearchDir Include="$(_NiVisaDiskDirs32)" Condition="'$(_NiVisaDiskDirs32)' != ''" />
+    <_NiVisaSearchDir Include="$(_IviVisaDiskDirs64)" Condition="'$(_IviVisaDiskDirs64)' != ''" />
+    <_NiVisaSearchDir Include="$(_IviVisaDiskDirs32)" Condition="'$(_IviVisaDiskDirs32)' != ''" />
+    <_NiVisaSearchDir Include="$(_NiVendorDirs)" Condition="'$(_NiVendorDirs)' != ''" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Present if the GAC has them, or both halves were discovered on disk / supplied explicitly. -->
+    <NiVisaPresent Condition="'$(_NiVisaInGac)' == 'true'">true</NiVisaPresent>
+    <NiVisaPresent Condition="'$(NiVisaPresent)' != 'true' And ('$(_NiVisaDiskDirs64)' != '' Or '$(_NiVisaDiskDirs32)' != '') And ('$(_IviVisaDiskDirs64)' != '' Or '$(_IviVisaDiskDirs32)' != '')">true</NiVisaPresent>
+    <NiVisaPresent Condition="'$(NiVisaPresent)' != 'true' And '$(NiVisaNetDir)' != '' And '$(IviVisaNetDir)' != ''">true</NiVisaPresent>
+
+    <!-- How we found it — reported by the ReportNiVisa target below. -->
+    <_NiVisaResolvedVia Condition="'$(_NiVisaInGac)' == 'true'">the GAC</_NiVisaResolvedVia>
+    <_NiVisaResolvedVia Condition="'$(_NiVisaResolvedVia)' == '' And '$(NiVisaPresent)' == 'true'">disk (@(_NiVisaSearchDir, ', '))</_NiVisaResolvedVia>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NiVisaPresent)' == 'true'">
@@ -29,31 +108,40 @@
     <ProjectReference Include="..\GpibUtils.Visa\GpibUtils.Visa.csproj" />
   </ItemGroup>
 
-  <!-- Official IVI VISA.NET shared components + NI VISA.NET (resolved from the local install). -->
+  <!--
+    Referenced by simple name only — no HintPath, no version. Resolution comes from the GAC or
+    from the search paths appended in AddNiVisaSearchPaths below.
+  -->
   <ItemGroup Condition="'$(NiVisaPresent)' == 'true'">
-    <Reference Include="Ivi.Visa">
-      <HintPath>$(IviVisaNetDir)\Ivi.Visa.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
-    <Reference Include="NationalInstruments.Visa">
-      <HintPath>$(NiVisaNetDir)\NationalInstruments.Visa.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
+    <Reference Include="Ivi.Visa" />
+    <Reference Include="NationalInstruments.Visa" />
   </ItemGroup>
 
-  <!-- Native NI-488.2 board addressing: opt-in (dotnet build -p:DefineConstants=NI4882). -->
+  <!-- Native NI-488.2 board addressing: opt-in (dotnet build -p:DefineConstants=NI4882). Also GAC-resolved. -->
   <ItemGroup Condition="$(DefineConstants.Contains('NI4882'))">
-    <Reference Include="NationalInstruments.NI4882">
-      <HintPath>$(NiGpibDir)\NationalInstruments.NI4882.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
+    <Reference Include="NationalInstruments.NI4882" />
   </ItemGroup>
+
+  <!--
+    AssemblySearchPaths gets its default value in Microsoft.Common.CurrentVersion.targets, which is
+    imported after this file, and that default is conditioned on the property being empty. So it can
+    only be appended to from inside a target that runs after the import — not from a PropertyGroup here.
+  -->
+  <Target Name="AddNiVisaSearchPaths"
+          BeforeTargets="ResolveAssemblyReferences"
+          Condition="'$(NiVisaPresent)' == 'true' And '@(_NiVisaSearchDir)' != ''">
+    <PropertyGroup>
+      <AssemblySearchPaths>$(AssemblySearchPaths);@(_NiVisaSearchDir)</AssemblySearchPaths>
+    </PropertyGroup>
+  </Target>
 
   <Target Name="ReportNiVisa" BeforeTargets="CoreCompile">
+    <Message Condition="'$(NiVisaPresent)' == 'true'" Importance="normal"
+             Text="GpibUtils.Visa.Ni: building the real NI-VISA provider — NI-VISA detected via $(_NiVisaResolvedVia). (MSBuild picks the actual assembly path; it may come from the GAC, a registered assembly folder, or a search path.)" />
     <Message Condition="'$(NiVisaPresent)' != 'true'" Importance="high"
-             Text="GpibUtils.Visa.Ni: NI/IVI VISA.NET assemblies not found — building the 'NI-VISA unavailable' stub. Install NI-VISA (or fix IviVisaNetDir/NiVisaNetDir) and rebuild to enable the real provider." />
+             Text="GpibUtils.Visa.Ni: NI/IVI VISA.NET assemblies not found — building the 'NI-VISA unavailable' stub. Install NI-VISA, or set IviVisaNetDir/NiVisaNetDir, and rebuild to enable the real provider." />
     <Error Condition="'$(RequireNi)' == 'true' And '$(NiVisaPresent)' != 'true'"
-           Text="RequireNi=true but the official NI/IVI VISA.NET assemblies were not found (IviVisaNetDir='$(IviVisaNetDir)', NiVisaNetDir='$(NiVisaNetDir)'). Install NI-VISA or fix those paths. See docs/implementing-a-gpib-provider.md." />
+           Text="RequireNi=true but the official NI/IVI VISA.NET assemblies were not found. Looked in the GAC ('$(NiVisaGacDir)'), and on disk under '$(_IviVisaFx64Dir)' and '$(_IviVisaFx32Dir)'. Install NI-VISA, or set IviVisaNetDir/NiVisaNetDir to the folders holding Ivi.Visa.dll and NationalInstruments.Visa.dll. See docs/implementing-a-gpib-provider.md." />
   </Target>
 
 </Project>

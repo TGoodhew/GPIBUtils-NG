@@ -17,7 +17,7 @@ the target architecture.
 |---|---|---|
 | Language | **C#** | Primary language enforced via `.gitattributes` (bulk data vendored). |
 | Target framework | **.NET Framework 4.7.2 (`net472`)** | All projects, including WPF. Matches the legacy source; minimizes VISA.NET friction. |
-| VISA layer | Pluggable **provider model**; NI parts use the **official NI assemblies** | `NationalInstruments.Visa` + `Ivi.Visa` referenced by `HintPath` from the local NI-VISA install — **not** vendored, **not** the Kelary community NuGet (dropped), **not** the official NI NuGet (net6.0-only, unusable on net472). |
+| VISA layer | Pluggable **provider model**; NI parts use the **official NI assemblies** | `NationalInstruments.Visa` + `Ivi.Visa` resolved from the local NI-VISA install **by simple name, never a version-pinned path** (GAC → unversioned disk glob → explicit override; see #177) — **not** vendored, **not** the Kelary community NuGet (dropped), **not** the official NI NuGet (net6.0-only, unusable on net472). |
 | UI split | **Console = Spectre.Console**, **Windows = WPF** | Core/drivers carry no UI dependency. WinForms sources migrate to WPF. |
 | UI parity | **Every capability reachable in all 3 front-ends (CLI · WPF · TUI)** | No UI-exclusive features. The only accepted asymmetry is *invocation*: the CLI is one-shot/command-line (a live view = a streaming `monitor`/`watch` verb), not menu-navigated. Generalizes the #45 "no interactive-only paths" rule into a symmetric three-way constraint. See #172. |
 | Reference architecture | The **`HP-Attenuator`** repo | Core lib + Ivi.Visa + simulator + CI — the pattern the rest converges on. |
@@ -27,7 +27,7 @@ the target architecture.
 | Project | Purpose | Status |
 |---|---|---|
 | `src/GpibUtils.Visa` | Vendor-neutral core: `IGpibProvider` / `IInstrumentSession`, capabilities, `GpibProviders` registry, extension stubs (Keysight/Prologix/AR488), in-memory simulator. **No vendor dependency.** | ✅ done |
-| `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (HintPath). Auto-registered by reflection when deployed. | ✅ done |
+| `src/GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers on the official NI assemblies (version-agnostic resolution, #177). Auto-registered by reflection when deployed. | ✅ done |
 | `src/GpibUtils.Common` | Shared helpers — `ToEngineeringFormat` (consolidated + hardened). | ✅ done |
 | `src/GpibUtils.Console` | Runnable Spectre.Console.Cli app `gpibutils` (`providers`/`discover`/`query`/`idn` + `config address` + 17 device branches). | ✅ done (base + config + 17 devices) |
 | `tests/*` (Visa, Common, Switches, SignalSources, Meters, Counters, PowerSupplies, Scopes, Wpf) | xUnit. | ✅ 286 tests green |
