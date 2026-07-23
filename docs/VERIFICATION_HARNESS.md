@@ -40,20 +40,39 @@ VerificationCatalog ────┘                        └──────
 
 Every reference is an adapter over an existing driver — **no driver changed**.
 
-> ### ⚠️ The harness needs real instruments today
->
-> A verification run is **not** yet drivable end-to-end against the `Simulated` provider: it errors or
-> stalls. `SimulatedGpibProvider.Open` auto-creates a **generic** `SimulatedInstrument` for any
-> unregistered address, and the specific `*SimulatedDevice` models are only ever instantiated inside unit
-> tests — no front-end seeds them. A generic instrument never raises the status bits the reference drivers'
-> completion handshakes wait on, so those drivers correctly time out.
->
-> This is **not** specific to the harness — the whole CLI's Simulated mode is generic. The harness just
-> surfaces it sharply, because its references (correctly) wait on SRQ/OPC completion.
->
-> The unit tests are hardware-free and green; they use fakes rather than the provider. The `--provider
-> Simulated` examples below therefore illustrate **command shape**, not a working demo. Making the harness
-> a genuine no-hardware demo bench is fully designed in [`SIM_BENCH_PLAN.md`](SIM_BENCH_PLAN.md).
+## The simulated bench (`--provider Simulated`)
+
+The harness runs end to end with **no hardware**. Ordinarily `--provider Simulated` would be useless here:
+`SimulatedGpibProvider.Open` auto-creates a *generic* instrument for any unregistered address, and a generic
+instrument never raises the status bits the reference drivers' completion handshakes wait on — so they
+(correctly) time out.
+
+`SimulatedHarnessBench` closes that gap. Before any reference is opened, it registers the matching
+`*SimulatedDevice` model at each reference's **resolved** resource, and couples them to a shared bench state.
+The DUT is wrapped in a decorator that records every commanded set-point, so when the verifier tunes the
+source the references read back what it asked for.
+
+> **What a simulated run is worth.** The coupling is **exact** — measured == commanded — so every graded
+> point PASSes by construction, at any tolerance. It exercises the harness, the reference adapters and the
+> plan/grading path. It tells you **nothing** about an instrument. The run prints a banner saying so.
+
+**References with a simulated model:** `e4418b`, `hp438a`, `hp8902a`, `hp8560e`, `hp8591e`, `hp53131a`,
+`hp5342a`, `hp5351a`, `hp34401a`, `hp3458a`, `dm3058`.
+
+**Without one** — `hp437b`, `hp436a`, `hp5343a`, `keithley2015` — the run warns up front and then fails on
+the first read, rather than hanging unexplained. The DUT's own address is deliberately left generic: it only
+absorbs writes.
+
+Two details are load-bearing, both discovered against the simulator source:
+
+- The **8560E/8591E** marker amplitude cannot be seeded directly — the simulator recomputes it from the peak
+  of `Trace` when the driver sends `MKPK HI`, so the level is seeded into the trace.
+- The **8902A** answers every read from one `Reading` property whose units depend on the selected mode
+  (watts for power, Hz for frequency). It is therefore resolved at *read* time, which is what lets a single
+  receiver fill the power **and** frequency roles in the same run. Its reading is emitted at round-trip
+  precision; the model's own `"0.######"` watt formatting would round anything below ~-30 dBm to zero.
+
+Design notes and the full property map: [`SIM_BENCH_PLAN.md`](SIM_BENCH_PLAN.md).
 
 ## Interactive harness
 

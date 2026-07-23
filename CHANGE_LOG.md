@@ -13,6 +13,33 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ## [Unreleased]
 
+### Added
+
+- **Simulated bench — the verification harness now runs with no hardware** (issue
+  [#179](https://github.com/TGoodhew/GPIBUtils-NG/issues/179)) — `verify harness` and `verify source` are
+  drivable end to end against `--provider Simulated`. Previously they errored or stalled 20–30 s per
+  reference: `SimulatedGpibProvider.Open` auto-creates a *generic* instrument for any unregistered address,
+  and the specific `*SimulatedDevice` models were only ever built inside unit tests, so nothing raised the
+  status bits the reference drivers' completion handshakes wait on.
+
+  New `SimulatedHarnessBench` (Console) seeds the matching model at each reference's **resolved** resource
+  *before* it is opened — the ordering matters, or auto-create registers a generic one first — and couples
+  them to a shared `SimulatedBench`. The DUT is wrapped in a decorator that records each commanded
+  set-point, so the references read back what the verifier asked for. Deduped by resource, so **one 8902A
+  can fill the power and frequency roles in a single run**. Models: `e4418b`, `hp438a`, `hp8902a`,
+  `hp8560e`, `hp8591e`, `hp53131a`, `hp5342a`, `hp5351a`, `hp34401a`, `hp3458a`, `dm3058`; references
+  without one (`hp437b`, `hp436a`, `hp5343a`, `keithley2015`) now **warn up front** instead of failing
+  unexplained. Tests (+13).
+
+  **The coupling is exact — measured == commanded — so every graded point PASSes by construction at any
+  tolerance.** It exercises the harness; it cannot judge an instrument. The run prints a banner saying so.
+
+  Two simulator behaviours are load-bearing: the 8560E/8591E marker amplitude must be seeded via `Trace`
+  (the model recomputes it from the trace peak on `MKPK HI`), and the 8902A answers every read from one
+  `Reading` whose units depend on the selected mode — resolved at *read* time, which is what allows the
+  dual-role case. That reading is emitted at round-trip precision: the model's own `"0.######"` watt format
+  rounds anything below roughly **-30 dBm** to zero and produced `NaN` dBm (verified fixed down to -90 dBm).
+
 ### Fixed
 
 - **`GpibUtils.Visa.Ni` silently built the stub on machines that have NI-VISA** (issue
