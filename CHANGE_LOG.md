@@ -13,6 +13,29 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ## [Unreleased]
 
+### Fixed
+
+- **`GpibUtils.Visa.Ni` silently built the stub on machines that have NI-VISA** (issue
+  [#177](https://github.com/TGoodhew/GPIBUtils-NG/issues/177)) — the project pinned a **version-named** NI
+  folder (`NI VISA.NET 26.3`). Any other installed version (this bench has `26.0`) made `NiVisaPresent`
+  false, so the real provider — everything under `#if NI_VISA` — was **never compiled**, and a plain
+  `dotnet build` reported success. Only `-p:RequireNi=true` surfaced it, and every NI release renames that
+  folder, so it recurred on each upgrade.
+
+  Resolution is now **version-agnostic**: the assemblies are referenced by **simple name with no
+  `HintPath`**, and discovery is layered — explicit `IviVisaNetDir`/`NiVisaNetDir` override → the **GAC**
+  (where NI-VISA registers them, with `policy.*` publisher policies that forward-redirect older references)
+  → **disk**, found by unversioned glob of `NI VISA.NET *` / `VISA.NET Shared Components *` (64- and 32-bit)
+  plus the vendor-assembly tree, appended to `AssemblySearchPaths`. Copy-local is left to MSBuild so it is
+  correct per layer. The stub fallback and `-p:RequireNi=true` behave as before, but the build now reports
+  which layer satisfied it and the `RequireNi` error lists every location searched.
+
+  Verified against an **invented future version** (`NI VISA.NET 99.9` + `VISA.NET Shared Components 42.0.1`,
+  GAC and real paths disabled) to prove upgrade-immunity, plus the stub, hard-fail and disk-only paths.
+  Full solution with `-p:RequireNi=true`: 0 warnings, 702 tests green, and `gpibutils providers` reports
+  `NI-VISA` available — the first time the real NI provider has been compiled *and* loaded in this project.
+  Build-system only; no driver or provider source changed, so no bench gate.
+
 ### Added
 
 - **Maynuo M9811 DC electronic load + `IElectronicLoad`** (issue
