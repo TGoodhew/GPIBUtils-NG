@@ -42,13 +42,22 @@ namespace GpibUtils.Verification
         public int Samples { get; set; }
         public double? TolerancePpm { get; set; }
 
-        /// <summary>"PASS" / "FAIL", or null when no tolerance applied (report-only).</summary>
+        /// <summary>"PASS" / "FAIL" / "ERROR", or null when no tolerance applied (report-only). "ERROR"
+        /// marks a point that could not be measured (see <see cref="Error"/>).</summary>
         public string Verdict { get; set; }
+
+        /// <summary>Non-null when this point threw mid-run (I/O error, driver timeout, unreachable DMM): the
+        /// exception message. The measured fields are then NaN and <see cref="Verdict"/> is "ERROR".</summary>
+        public string Error { get; set; }
 
         public string Notes { get; set; }
 
         public bool Passed => Verdict == "PASS";
         public bool Failed => Verdict == "FAIL";
+
+        /// <summary>The point could not be measured; counts as neither Passed nor Failed but must not be
+        /// mistaken for a clean run — a run with any errored point exits non-zero.</summary>
+        public bool Errored => Verdict == "ERROR";
     }
 
     /// <summary>Run-wide configuration for a 5440 verification.</summary>

@@ -102,6 +102,31 @@ namespace GpibUtils.Verification.Tests
         }
 
         [Fact]
+        public void Point_that_throws_is_recorded_as_error_and_the_run_continues()
+        {
+            var src = new FakeSignalSource();
+            // The 10 dBm point's reference read throws; the 0 dBm points read fine.
+            var pref = new ThrowingReference(ReferenceQuantity.RfPowerDbm, "dBm", 0.0, level => level == 10);
+            var v = new SignalSourceVerifier(src, pref, null,
+                new SignalSourceOptions { SettlingMs = 0, DefaultPowerToleranceDb = 1.0 });
+
+            var results = v.Run(new[] { P(1000, 0), P(1000, 10), P(1000, 0) });
+
+            Assert.Equal(3, results.Count);                    // nothing dropped
+            Assert.True(results[1].Errored);
+            Assert.NotNull(results[1].Error);
+            Assert.False(results[1].Passed);
+            Assert.False(results[1].Failed);
+            Assert.False(results[1].PowerMeasured);
+            Assert.False(results[0].Errored);                  // completed points survive the mid-run throw
+            Assert.False(results[2].Errored);
+            Assert.Equal("PASS", results[0].PowerVerdict);
+            Assert.Equal("PASS", results[2].PowerVerdict);
+            Assert.False(src.RfIsOn);                          // RF still turned off on exit
+            Assert.Equal(1, src.RfOffCount);
+        }
+
+        [Fact]
         public void Turns_rf_off_on_exit()
         {
             var src = new FakeSignalSource();

@@ -67,7 +67,7 @@ namespace GpibUtils.Instruments.Meters
             var first = (raw ?? string.Empty).Split(',')[0].Trim();
             if (!double.TryParse(first, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                 throw new FormatException($"Unrecognized 8508A {what} reply: '{raw}'.");
-            return v;
+            return ScpiReading.Guard(v, first, "8508A " + what);
         }
 
         internal static IReadOnlyList<double> ParseArray(string raw, string what)
@@ -77,7 +77,8 @@ namespace GpibUtils.Instruments.Meters
                 .Select(t => t.Trim())
                 .Where(t => t.Length > 0)
                 .Select(t => double.TryParse(t, NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
-                    ? v : throw new FormatException($"Unrecognized 8508A {what} field: '{t}'."))
+                    ? ScpiReading.Guard(v, t, "8508A " + what)
+                    : throw new FormatException($"Unrecognized 8508A {what} field: '{t}'."))
                 .ToList();
             if (values.Count == 0) throw new FormatException($"No parseable values in 8508A {what} reply: '{raw}'.");
             return values;

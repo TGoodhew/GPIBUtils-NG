@@ -145,6 +145,63 @@ namespace GpibUtils.Verification.Tests
             }
         }
 
+        [Fact]
+        public void Point_that_throws_is_recorded_as_error_and_the_run_continues()
+        {
+            var provider = new SimulatedGpibProvider();
+            var cal = new Fluke5440ASimulatedDevice();
+            var dmm = new Hp34401ASimulatedDevice();
+            provider.Add(CalResource, cal.Instrument);
+            provider.Add(DmmResource, dmm.Instrument);
+
+            // The DMM read throws while the 5440 is on the 10 V point; other points read back cleanly.
+            dmm.Instrument.Responder = command =>
+            {
+                var u = (command ?? string.Empty).Trim().ToUpperInvariant();
+                if (u == "READ?" || u == "FETCH?" || u == "FETC?")
+                {
+                    if (Math.Abs(cal.OutputVolts - 10) < 1e-9)
+                        throw new InvalidOperationException("simulated DMM read failure");
+                    return cal.OutputVolts.ToString("G12", CultureInfo.InvariantCulture);
+                }
+                return null;
+            };
+
+            using (var calSession = provider.Open(CalResource))
+            using (var dmmSession = provider.Open(DmmResource))
+            {
+                var verifier = new Fluke5440Verifier(new Fluke5440A(calSession), new Hp34401A(dmmSession),
+                    new VerificationOptions { SettlingMs = 0, Samples = 1, StandbyOnExit = true });
+
+                var results = verifier.Run(new[] { P(1), P(10), P(-10) });
+
+                Assert.Equal(3, results.Count);                 // nothing dropped
+                Assert.Equal("ERROR", results[1].Verdict);
+                Assert.True(results[1].Errored);
+                Assert.NotNull(results[1].Error);
+                Assert.True(double.IsNaN(results[1].MeasuredVolts));
+                Assert.NotEqual("ERROR", results[0].Verdict);   // completed points survive the mid-run throw
+                Assert.NotEqual("ERROR", results[2].Verdict);
+                Assert.False(cal.IsOperating);                  // 5440 still parked on exit
+                Assert.Contains("STBY", cal.Commands);
+            }
+        }
+
+        [Fact]
+        public void Csv_marks_an_errored_point_without_writing_nan()
+        {
+            var rows = new List<VerificationResult>
+            {
+                new VerificationResult { Index = 1, NominalVolts = 10, Range = "10", MeasuredVolts = double.NaN,
+                    AbsErrorVolts = double.NaN, PpmOfReading = double.NaN, StdDevVolts = double.NaN, Samples = 0,
+                    Verdict = "ERROR", Error = "simulated DMM read failure" }
+            };
+            var csv = VerificationPlan.ToCsv(rows, "2026-07-24T00:00:00Z");
+            Assert.Contains("ERROR", csv);
+            Assert.Contains("simulated DMM read failure", csv);
+            Assert.DoesNotContain("NaN", csv);                  // measured columns are blank, not "NaN"
+        }
+
         // ---- plan parsing / CSV --------------------------------------------
 
         [Fact]

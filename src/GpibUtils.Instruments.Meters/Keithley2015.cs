@@ -167,6 +167,8 @@ namespace GpibUtils.Instruments.Meters
             }
         }
 
+        /// <summary>Parses a Keithley 2015 reading (first field). The SCPI ±9.9E37 over-range / NaN sentinel
+        /// is rejected (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParseReading(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) throw new FormatException("Empty Keithley 2015 reading.");
@@ -174,7 +176,7 @@ namespace GpibUtils.Instruments.Meters
             var first = raw.Split(',')[0].Trim();
             if (!double.TryParse(first, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                 throw new FormatException($"Unrecognized Keithley 2015 reading: '{raw}'.");
-            return v;
+            return ScpiReading.Guard(v, first, "Keithley 2015");
         }
 
         internal static double[] ParseReadingList(string raw)
@@ -184,7 +186,7 @@ namespace GpibUtils.Instruments.Meters
             var list = new List<double>();
             foreach (var p in parts)
                 if (double.TryParse(p.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
-                    list.Add(v);
+                    list.Add(ScpiReading.Guard(v, p.Trim(), "Keithley 2015"));
             if (list.Count == 0) throw new FormatException($"No parseable values in Keithley 2015 reading: '{raw}'.");
             return list.ToArray();
         }

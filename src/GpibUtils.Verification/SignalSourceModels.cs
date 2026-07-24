@@ -71,9 +71,17 @@ namespace GpibUtils.Verification
         /// <summary>"PASS"/"FAIL", or null when no frequency tolerance applied (report-only or not measured).</summary>
         public string FrequencyVerdict { get; set; }
 
+        /// <summary>Non-null when this point threw mid-run (I/O error, driver timeout, unreachable reference):
+        /// the exception message. No quantity was measured and both verdicts are null.</summary>
+        public string Error { get; set; }
+
+        /// <summary>The point could not be measured; counts as neither Passed nor Failed but must not be
+        /// mistaken for a clean run — a run with any errored point exits non-zero.</summary>
+        public bool Errored => Error != null;
+
         /// <summary>True only if no measured quantity failed and at least one graded quantity passed.</summary>
         public bool Passed =>
-            PowerVerdict != "FAIL" && FrequencyVerdict != "FAIL" &&
+            !Errored && PowerVerdict != "FAIL" && FrequencyVerdict != "FAIL" &&
             (PowerVerdict == "PASS" || FrequencyVerdict == "PASS");
 
         /// <summary>True if any graded quantity failed its tolerance.</summary>

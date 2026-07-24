@@ -58,6 +58,11 @@ namespace GpibUtils.Verification
         /// Runs the whole plan and returns a result per point. <paramref name="sleep"/> is the settle delay
         /// hook (ms); pass <c>Thread.Sleep</c> at the bench or a no-op in tests. The 5440 is returned to
         /// Standby afterwards when <see cref="VerificationOptions.StandbyOnExit"/> is set.
+        ///
+        /// <para>Mid-run failure contract: if a point throws (I/O error, driver timeout, unreachable DMM) it
+        /// is recorded as an ERROR result (measured fields NaN, <see cref="VerificationResult.Error"/> set)
+        /// and the run continues, so every completed point is preserved. The 5440 is still parked on the way
+        /// out. If <see cref="Configure"/> itself throws, the run aborts (nothing was measured yet).</para>
         /// </summary>
         public IReadOnlyList<VerificationResult> Run(IReadOnlyList<VerificationPoint> plan, Action<int> sleep = null)
         {
@@ -69,7 +74,17 @@ namespace GpibUtils.Verification
             {
                 Configure();
                 for (int i = 0; i < plan.Count; i++)
-                    results.Add(MeasurePoint(i + 1, plan[i], sleep));
+                {
+                    try
+                    {
+                        results.Add(MeasurePoint(i + 1, plan[i], sleep));
+                    }
+                    catch (Exception ex)
+                    {
+                        Log?.Invoke($"point {i + 1} failed: {ex.Message}");
+                        results.Add(ErrorResult(i + 1, plan[i], ex));
+                    }
+                }
             }
             finally
             {
@@ -80,6 +95,23 @@ namespace GpibUtils.Verification
             }
             return results;
         }
+
+        private VerificationResult ErrorResult(int index, VerificationPoint point, Exception ex) =>
+            new VerificationResult
+            {
+                Index = index,
+                NominalVolts = point.NominalVolts,
+                Range = point.Range ?? _options.GlobalRange ?? "AUTO",
+                MeasuredVolts = double.NaN,
+                AbsErrorVolts = double.NaN,
+                PpmOfReading = double.NaN,
+                StdDevVolts = double.NaN,
+                Samples = 0,
+                TolerancePpm = point.TolerancePpm ?? _options.DefaultTolerancePpm,
+                Verdict = "ERROR",
+                Error = ex.Message,
+                Notes = point.Notes
+            };
 
         private VerificationResult MeasurePoint(int index, VerificationPoint point, Action<int> sleep)
         {

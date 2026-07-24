@@ -111,19 +111,28 @@ namespace GpibUtils.Instruments.LcrMeters
         /// Parses a 4275A "Format A" reading into (primary, secondary). Format A is a fixed-field
         /// mode/frequency/status/function/value string for Display A, comma, then Display B. The exact field
         /// layout needs bench confirmation (#109); this extracts the first two numeric values, which are the
-        /// Display A and Display B readings.
+        /// Display A and Display B readings. An over-range / NaN sentinel (±9.9E37) in either value is rejected
+        /// (<see cref="InvalidOperationException"/>); a token that will not fit a double throws
+        /// <see cref="FormatException"/> echoing the raw response and the offending token (not the framework's
+        /// bare overflow message).
         /// </summary>
         internal static LcrReading ParseReading(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
                 throw new FormatException("Empty 4275A Format-A response.");
-            var numbers = Regex.Matches(raw, @"[-+]?\d+(\.\d+)?([eE][-+]?\d+)?")
-                .Cast<Match>()
-                .Select(m => double.Parse(m.Value, NumberStyles.Float, CultureInfo.InvariantCulture))
-                .ToList();
+            var numbers = new List<double>();
+            foreach (Match m in Regex.Matches(raw, @"[-+]?\d+(\.\d+)?([eE][-+]?\d+)?"))
+            {
+                if (!double.TryParse(m.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
+                    throw new FormatException($"Unparseable value '{m.Value}' in 4275A response: '{raw}'.");
+                numbers.Add(v);
+                if (numbers.Count == 2) break;   // only the first two fields (Display A, Display B) are read
+            }
             if (numbers.Count < 2)
                 throw new FormatException($"Could not parse two values from 4275A response: '{raw}'.");
-            return new LcrReading(numbers[0], numbers[1]);
+            return new LcrReading(
+                ScpiReading.Guard(numbers[0], raw.Trim(), "4275A Display A"),
+                ScpiReading.Guard(numbers[1], raw.Trim(), "4275A Display B"));
         }
 
         /// <summary>

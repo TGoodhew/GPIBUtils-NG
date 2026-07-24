@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using GpibUtils.Common;
 using GpibUtils.Instruments.Calibrators;
@@ -113,22 +114,24 @@ namespace GpibUtils.Console.Instruments
                 var table = new Table().Border(TableBorder.Rounded)
                     .AddColumn("#").AddColumn("Nominal V").AddColumn("Measured V").AddColumn("Err V")
                     .AddColumn("ppm").AddColumn("σ").AddColumn("Verdict");
-                int pass = 0, fail = 0;
+                int pass = 0, fail = 0, err = 0;
                 foreach (var r in results)
                 {
-                    if (r.Passed) pass++; else if (r.Failed) fail++;
-                    string verdict = r.Passed ? "[green]PASS[/]" : r.Failed ? "[red]FAIL[/]" : "[grey]-[/]";
+                    if (r.Errored) err++; else if (r.Passed) pass++; else if (r.Failed) fail++;
+                    string verdict = r.Errored ? "[yellow]ERROR[/]" : r.Passed ? "[green]PASS[/]" : r.Failed ? "[red]FAIL[/]" : "[grey]-[/]";
                     table.AddRow(
                         r.Index.ToString(),
                         r.NominalVolts.ToString("G7", CultureInfo.InvariantCulture),
-                        r.MeasuredVolts.ToString("G9", CultureInfo.InvariantCulture),
-                        r.AbsErrorVolts.ToString("G4", CultureInfo.InvariantCulture),
+                        r.Errored ? "-" : r.MeasuredVolts.ToString("G9", CultureInfo.InvariantCulture),
+                        r.Errored ? "-" : r.AbsErrorVolts.ToString("G4", CultureInfo.InvariantCulture),
                         double.IsNaN(r.PpmOfReading) ? "-" : r.PpmOfReading.ToString("F2", CultureInfo.InvariantCulture),
-                        r.StdDevVolts.ToString("G3", CultureInfo.InvariantCulture),
+                        r.Errored ? "-" : r.StdDevVolts.ToString("G3", CultureInfo.InvariantCulture),
                         verdict);
                 }
                 AnsiConsole.Write(table);
-                AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]");
+                foreach (var r in results.Where(x => x.Errored))
+                    AnsiConsole.MarkupLineInterpolated($"[yellow]point {r.Index} error:[/] {r.Error}");
+                AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]   [yellow]ERROR {err}[/]");
 
                 if (!string.IsNullOrWhiteSpace(settings.Csv))
                 {
@@ -136,7 +139,7 @@ namespace GpibUtils.Console.Instruments
                     AnsiConsole.MarkupLineInterpolated($"[grey]wrote CSV: {settings.Csv}[/]");
                 }
 
-                return fail > 0 ? 1 : 0;
+                return (fail + err) > 0 ? 1 : 0;
             }
         });
     }

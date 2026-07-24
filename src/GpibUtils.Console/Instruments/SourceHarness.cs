@@ -267,7 +267,7 @@ namespace GpibUtils.Console.Instruments
             if (power) table.AddColumn("Meas dBm").AddColumn("Δ dB").AddColumn("P");
             if (freq) table.AddColumn("Meas Hz").AddColumn("Δ ppm").AddColumn("F");
 
-            int fail = 0;
+            int fail = 0, err = 0;
             foreach (var r in results)
             {
                 var row = new List<string>
@@ -280,21 +280,23 @@ namespace GpibUtils.Console.Instruments
                 {
                     row.Add(r.PowerMeasured ? r.MeasuredPowerDbm.ToString("F3", Inv) : "-");
                     row.Add(r.PowerMeasured ? r.PowerErrorDb.ToString("F3", Inv) : "-");
-                    row.Add(Verdict(r.PowerVerdict));
+                    row.Add(Verdict(r.PowerVerdict, r.Errored));
                 }
                 if (freq)
                 {
                     row.Add(r.FrequencyMeasured ? r.MeasuredFrequencyHz.ToString("G10", Inv) : "-");
                     row.Add(r.FrequencyMeasured && !double.IsNaN(r.FrequencyErrorPpm) ? r.FrequencyErrorPpm.ToString("F3", Inv) : "-");
-                    row.Add(Verdict(r.FrequencyVerdict));
+                    row.Add(Verdict(r.FrequencyVerdict, r.Errored));
                 }
-                if (r.Failed) fail++;
+                if (r.Errored) err++; else if (r.Failed) fail++;
                 table.AddRow(row.ToArray());
             }
             AnsiConsole.Write(table);
             int pass = results.Count(x => x.Passed);
-            AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]");
-            return fail;
+            foreach (var r in results.Where(x => x.Errored))
+                AnsiConsole.MarkupLineInterpolated($"[yellow]point {r.Index} error:[/] {r.Error}");
+            AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]   [yellow]ERROR {err}[/]");
+            return fail + err;
         }
 
         private static int RenderDcResults(IReadOnlyList<VerificationResult> results)
@@ -302,25 +304,28 @@ namespace GpibUtils.Console.Instruments
             var table = new Table().Border(TableBorder.Rounded)
                 .AddColumn("#").AddColumn("Nominal V").AddColumn("Measured V").AddColumn("Err V")
                 .AddColumn("ppm").AddColumn("σ").AddColumn("Verdict");
-            int fail = 0, pass = 0;
+            int fail = 0, pass = 0, err = 0;
             foreach (var r in results)
             {
-                if (r.Passed) pass++; else if (r.Failed) fail++;
+                if (r.Errored) err++; else if (r.Passed) pass++; else if (r.Failed) fail++;
                 table.AddRow(
                     r.Index.ToString(CultureInfo.InvariantCulture),
                     r.NominalVolts.ToString("G7", Inv),
-                    r.MeasuredVolts.ToString("G9", Inv),
-                    r.AbsErrorVolts.ToString("G4", Inv),
+                    r.Errored ? "-" : r.MeasuredVolts.ToString("G9", Inv),
+                    r.Errored ? "-" : r.AbsErrorVolts.ToString("G4", Inv),
                     double.IsNaN(r.PpmOfReading) ? "-" : r.PpmOfReading.ToString("F2", Inv),
-                    r.StdDevVolts.ToString("G3", Inv),
+                    r.Errored ? "-" : r.StdDevVolts.ToString("G3", Inv),
                     Verdict(r.Verdict));
             }
             AnsiConsole.Write(table);
-            AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]");
-            return fail;
+            foreach (var r in results.Where(x => x.Errored))
+                AnsiConsole.MarkupLineInterpolated($"[yellow]point {r.Index} error:[/] {r.Error}");
+            AnsiConsole.MarkupLineInterpolated($"Points: {results.Count}   [green]PASS {pass}[/]   [red]FAIL {fail}[/]   [yellow]ERROR {err}[/]");
+            return fail + err;
         }
 
-        private static string Verdict(string v) =>
+        private static string Verdict(string v, bool errored = false) =>
+            errored || v == "ERROR" ? "[yellow]ERROR[/]" :
             v == "PASS" ? "[green]PASS[/]" : v == "FAIL" ? "[red]FAIL[/]" : "[grey]-[/]";
 
         private static string SourceResultsCsv(IReadOnlyList<SignalSourceResult> results)
@@ -339,8 +344,8 @@ namespace GpibUtils.Console.Instruments
                   .Append(r.FrequencyMeasured ? r.MeasuredFrequencyHz.ToString("G10", Inv) : "").Append(',')
                   .Append(r.FrequencyMeasured && !double.IsNaN(r.FrequencyErrorPpm) ? r.FrequencyErrorPpm.ToString("G6", Inv) : "").Append(',')
                   .Append(r.FrequencyTolerancePpm?.ToString("G6", Inv) ?? "").Append(',')
-                  .Append(r.FrequencyVerdict ?? "").Append(',')
-                  .Append((r.Notes ?? "").Replace(",", " "));
+                  .Append(r.Errored ? "ERROR" : (r.FrequencyVerdict ?? "")).Append(',')
+                  .Append(((r.Errored ? "ERROR: " + r.Error + " " : "") + (r.Notes ?? "")).Replace(",", " "));
                 sb.AppendLine();
             }
             return sb.ToString();

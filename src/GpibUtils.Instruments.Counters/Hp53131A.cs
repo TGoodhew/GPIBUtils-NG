@@ -146,14 +146,15 @@ namespace GpibUtils.Instruments.Counters
             }
         };
 
-        /// <summary>Parses a 53131A frequency reading (scientific notation, Hz) to a double.</summary>
+        /// <summary>Parses a 53131A frequency reading (scientific notation, Hz) to a double. The SCPI ±9.9E37
+        /// over-range / NaN sentinel is rejected (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParseFrequency(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
                 throw new FormatException("Empty 53131A frequency reading.");
             if (!double.TryParse(raw.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var hz))
                 throw new FormatException($"Unrecognized 53131A frequency reading: '{raw}'.");
-            return hz;
+            return ScpiReading.Guard(hz, raw.Trim(), "53131A");
         }
     }
 }

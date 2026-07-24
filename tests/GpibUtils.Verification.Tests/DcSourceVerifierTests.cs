@@ -44,6 +44,28 @@ namespace GpibUtils.Verification.Tests
         }
 
         [Fact]
+        public void Point_that_throws_is_recorded_as_error_and_the_run_continues()
+        {
+            var dut = new FakeVoltageSourceDut();
+            // The 10 V point's reference read throws; the 5 V points read fine.
+            var vref = new ThrowingReference(ReferenceQuantity.DcVolts, "V", 5.0, level => level == 10);
+            var results = new DcSourceVerifier(dut, vref, new DcSourceOptions { SettlingMs = 0, DefaultTolerancePpm = 50 })
+                .Run(new[] { V(5), V(10), V(5) });
+
+            Assert.Equal(3, results.Count);                    // nothing dropped
+            Assert.Equal("ERROR", results[1].Verdict);
+            Assert.True(results[1].Errored);
+            Assert.NotNull(results[1].Error);
+            Assert.False(results[1].Passed);
+            Assert.False(results[1].Failed);
+            Assert.True(double.IsNaN(results[1].MeasuredVolts));
+            Assert.NotEqual("ERROR", results[0].Verdict);      // completed points survive the mid-run throw
+            Assert.NotEqual("ERROR", results[2].Verdict);
+            Assert.False(dut.OutputEnabled);                   // output disabled on exit despite the error
+            Assert.True(dut.DisableCount >= 1);
+        }
+
+        [Fact]
         public void No_tolerance_is_report_only()
         {
             var vref = new FakeReference(ReferenceQuantity.DcVolts, "V", 5.0);

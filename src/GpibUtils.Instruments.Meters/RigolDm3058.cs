@@ -143,13 +143,15 @@ namespace GpibUtils.Instruments.Meters
             }
         }
 
+        /// <summary>Parses a DM3058 reading. The SCPI ±9.9E37 over-range / NaN sentinel is rejected
+        /// (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParseReading(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
                 throw new FormatException("Empty DM3058 reading.");
             if (!double.TryParse(raw.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                 throw new FormatException($"Unrecognized DM3058 reading: '{raw}'.");
-            return v;
+            return ScpiReading.Guard(v, raw.Trim(), "DM3058");
         }
     }
 }
