@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.SignalSources;
@@ -85,6 +86,30 @@ namespace GpibUtils.Verification.Tests
 
         public void Prepare(ReferencePoint point) { PrepareCalls++; LastPoint = point; }
         public double Measure() => _values != null ? _values.Dequeue() : _fixed;
+        public void Dispose() { }
+    }
+
+    /// <summary>A reference whose <see cref="Measure"/> throws for the point whose nominal level matches a
+    /// predicate (and reads a fixed value otherwise), to exercise the verifiers' mid-run error path.</summary>
+    internal sealed class ThrowingReference : IReferenceMeasurement
+    {
+        private readonly double _value;
+        private readonly Func<double, bool> _throwWhenLevel;
+        private double _level;
+
+        public ThrowingReference(ReferenceQuantity quantity, string unit, double value, Func<double, bool> throwWhenLevel)
+        {
+            Quantity = quantity; Unit = unit; _value = value; _throwWhenLevel = throwWhenLevel;
+            DisplayName = "throwing reference";
+        }
+
+        public string DisplayName { get; }
+        public ReferenceQuantity Quantity { get; }
+        public string Unit { get; }
+
+        public void Prepare(ReferencePoint point) { _level = point.NominalLevel; }
+        public double Measure() =>
+            _throwWhenLevel(_level) ? throw new InvalidOperationException("simulated read failure") : _value;
         public void Dispose() { }
     }
 }

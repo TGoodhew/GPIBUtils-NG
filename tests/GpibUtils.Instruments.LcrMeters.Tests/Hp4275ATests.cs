@@ -107,6 +107,23 @@ namespace GpibUtils.Instruments.LcrMeters.Tests
             Assert.Equal(5.0e-3, reading.Secondary, 6);
         }
 
+        [Theory]
+        [InlineData("A9.9E+37,B5.0000E-03")]   // Display A over-range
+        [InlineData("A1.2340E-09,B9.9E37")]    // Display B over-range
+        public void Parse_reading_rejects_the_over_range_sentinel(string raw)
+            => Assert.Throws<InvalidOperationException>(() => Hp4275A.ParseReading(raw));
+
+        [Fact]
+        public void Parse_reading_echoes_the_raw_response_on_an_out_of_range_field()
+        {
+            // A field with an unbounded exponent must surface the raw response (#226) rather than a bare
+            // framework overflow message. On net472 the token fails to parse (FormatException); on newer
+            // runtimes it parses to infinity and is caught by the sentinel guard (InvalidOperationException)
+            // — either way the raw text is echoed.
+            var ex = Assert.ThrowsAny<Exception>(() => Hp4275A.ParseReading("A1E999,B5.0000E-03"));
+            Assert.Contains("A1E999", ex.Message);
+        }
+
         [Fact]
         public void Status_model_uses_data_ready_enable_and_execute_arm()
         {

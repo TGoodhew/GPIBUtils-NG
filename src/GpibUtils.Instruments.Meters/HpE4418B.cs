@@ -110,13 +110,15 @@ namespace GpibUtils.Instruments.Meters
             }
         };
 
+        /// <summary>Parses an E4418B power reading. The SCPI ±9.9E37 over-range / NaN sentinel is rejected
+        /// (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParsePower(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
                 throw new FormatException("Empty E4418B power reading.");
             if (!double.TryParse(raw.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                 throw new FormatException($"Unrecognized E4418B power reading: '{raw}'.");
-            return v;
+            return ScpiReading.Guard(v, raw.Trim(), "E4418B");
         }
     }
 }

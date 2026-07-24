@@ -54,6 +54,11 @@ namespace GpibUtils.Verification
         /// Runs the whole plan and returns a result per point. <paramref name="sleep"/> is the settle-delay
         /// hook (ms); pass <c>Thread.Sleep</c> at the bench or a no-op in tests. The source's RF output is
         /// turned off afterwards when <see cref="SignalSourceOptions.RfOffOnExit"/> is set.
+        ///
+        /// <para>Mid-run failure contract: if a point throws (I/O error, driver timeout, unreachable
+        /// reference) it is recorded as an ERROR result (<see cref="SignalSourceResult.Error"/> set, nothing
+        /// measured) and the run continues, so every completed point is preserved. The source's RF is still
+        /// turned off on the way out.</para>
         /// </summary>
         public IReadOnlyList<SignalSourceResult> Run(IReadOnlyList<SignalSourcePoint> plan, Action<int> sleep = null)
         {
@@ -64,7 +69,17 @@ namespace GpibUtils.Verification
             try
             {
                 for (int i = 0; i < plan.Count; i++)
-                    results.Add(MeasurePoint(i + 1, plan[i], sleep));
+                {
+                    try
+                    {
+                        results.Add(MeasurePoint(i + 1, plan[i], sleep));
+                    }
+                    catch (Exception ex)
+                    {
+                        Log?.Invoke($"point {i + 1} failed: {ex.Message}");
+                        results.Add(ErrorResult(i + 1, plan[i], ex));
+                    }
+                }
             }
             finally
             {
@@ -75,6 +90,17 @@ namespace GpibUtils.Verification
             }
             return results;
         }
+
+        private static SignalSourceResult ErrorResult(int index, SignalSourcePoint point, Exception ex) =>
+            new SignalSourceResult
+            {
+                Index = index,
+                FrequencyMHz = point.FrequencyMHz,
+                PowerDbm = point.PowerDbm,
+                Samples = 0,
+                Notes = point.Notes,
+                Error = ex.Message
+            };
 
         private SignalSourceResult MeasurePoint(int index, SignalSourcePoint point, Action<int> sleep)
         {

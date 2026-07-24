@@ -72,7 +72,8 @@ namespace GpibUtils.Instruments.Counters
         /// <summary>Reads the reference-source status string (<c>REF?</c>), e.g. INT / EXT.</summary>
         public string ReferenceSource() => Query("REF?");
 
-        /// <summary>Parses a 5351A frequency reading (scientific notation, Hz) to a double.</summary>
+        /// <summary>Parses a 5351A frequency reading (scientific notation, Hz) to a double. The SCPI ±9.9E37
+        /// over-range / NaN sentinel is rejected (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParseFrequency(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -84,7 +85,7 @@ namespace GpibUtils.Instruments.Counters
                 if (!m.Success || !double.TryParse(m.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out hz))
                     throw new FormatException($"Unrecognized 5351A frequency reading: '{raw}'.");
             }
-            return hz;
+            return ScpiReading.Guard(hz, s, "5351A");
         }
     }
 }

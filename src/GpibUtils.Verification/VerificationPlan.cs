@@ -89,15 +89,15 @@ namespace GpibUtils.Verification
                 sb.Append(r.Index).Append(',')
                   .Append(G(r.NominalVolts, 7)).Append(',')
                   .Append(r.Range ?? "").Append(',')
-                  .Append(G(r.MeasuredVolts, 9)).Append(',')
-                  .Append(G(r.AbsErrorVolts, 6)).Append(',')
+                  .Append(double.IsNaN(r.MeasuredVolts) ? "" : G(r.MeasuredVolts, 9)).Append(',')
+                  .Append(double.IsNaN(r.AbsErrorVolts) ? "" : G(r.AbsErrorVolts, 6)).Append(',')
                   .Append(double.IsNaN(r.PpmOfReading) ? "" : G(r.PpmOfReading, 6)).Append(',')
-                  .Append(G(r.StdDevVolts, 6)).Append(',')
+                  .Append(double.IsNaN(r.StdDevVolts) ? "" : G(r.StdDevVolts, 6)).Append(',')
                   .Append(r.Samples).Append(',')
                   .Append(r.TolerancePpm.HasValue ? r.TolerancePpm.Value.ToString("G6", CultureInfo.InvariantCulture) : "").Append(',')
                   .Append(r.Verdict ?? "").Append(',')
                   .Append(ts).Append(',')
-                  .Append((r.Notes ?? "").Replace(",", " "));
+                  .Append(((r.Errored ? "ERROR: " + r.Error + " " : "") + (r.Notes ?? "")).Replace(",", " "));
                 sb.AppendLine();
             }
             return sb.ToString();

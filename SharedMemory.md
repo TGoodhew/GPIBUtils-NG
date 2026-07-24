@@ -101,6 +101,21 @@ remove any project reference. Pass `-p:RequireNi=true` to hard-fail when NI is e
   reconcile duplicate implementations into one canonical driver (see the "Related implementations" note
   in each issue).
 - **Don't re-copy** `ToEngineeringFormat` — use `GpibUtils.Common`.
+- **Measurement parsers reject the SCPI over-range / NaN sentinel.** A parsed reading that is non-finite
+  (NaN / ±∞) or at/beyond **±9.9E37** (the IEEE-488.2 / SCPI "not a number" over-range value) is *not* a
+  real measurement — never return it as a finite reading (a logged `9.9e37` is indistinguishable from a
+  genuine large value in a CSV/TUI, and a FAIL then reads as "measured 9.9e37" not "instrument over-range").
+  Use the shared `GpibUtils.Visa.ScpiReading` helper: `ScpiReading.Parse(raw, "<model>")` for a whole field,
+  or `ScpiReading.Guard(value, raw, "<model>")` after you've extracted the number yourself. It throws
+  `InvalidOperationException` (device over-range) vs `FormatException` (unparseable), mirroring the existing
+  `Hp438A`/`Hp437B` pattern, and always echoes the raw text. Parse with `double.TryParse`, never throwing
+  `double.Parse`, so a corrupt/over-range field surfaces the raw response instead of a bare framework message.
+  (#226)
+- **Plan verifiers never drop completed points on a mid-run throw.** `Fluke5440Verifier` / `DcSourceVerifier`
+  / `SignalSourceVerifier` catch a per-point exception, record it as an **ERROR** result (measured fields NaN,
+  `Error`/`Errored` set, `Verdict == "ERROR"` where applicable) and continue; the instrument is still parked
+  in the `finally`. ERROR counts as neither Passed nor Failed but a run with any errored point exits non-zero.
+  (#224)
 - **Bench uses HP-IB bus extenders (HP 37204A or similar)** — this has two hard consequences:
   1. **Bus-scan discovery is untrustworthy.** An extender ACKs the address handshake for its whole remote
      segment, so a VISA scan (`Rm.Find`) reports *every* GPIB address 0–30 as present — all phantom. Never

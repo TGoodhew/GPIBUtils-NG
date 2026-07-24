@@ -295,7 +295,8 @@ namespace GpibUtils.Instruments.Meters
 
         // ---- parsing ------------------------------------------------------------
 
-        /// <summary>Parses one 34401A reading (e.g. <c>+1.04530000E-03</c>) to a double.</summary>
+        /// <summary>Parses one 34401A reading (e.g. <c>+1.04530000E-03</c>) to a double. The SCPI ±9.9E37
+        /// over-range / NaN sentinel is rejected (<see cref="InvalidOperationException"/>), not returned.</summary>
         internal static double ParseReading(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -303,7 +304,7 @@ namespace GpibUtils.Instruments.Meters
             var s = raw.Trim();
             if (!double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                 throw new FormatException($"Unrecognized 34401A reading: '{raw}'.");
-            return v;
+            return ScpiReading.Guard(v, s, "34401A");
         }
 
         /// <summary>Parses a comma-separated 34401A reading list (a <c>READ?</c> / <c>FETCh?</c> burst).</summary>
