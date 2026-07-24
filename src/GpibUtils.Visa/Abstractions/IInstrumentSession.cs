@@ -39,10 +39,13 @@ namespace GpibUtils.Visa
         /// <summary>Writes a command string followed by <see cref="WriteTermination"/>.</summary>
         void Write(string command);
 
-        /// <summary>Reads raw bytes. <paramref name="maxBytes"/>=0 reads to termination/EOI.</summary>
+        /// <summary>Reads raw bytes. <paramref name="maxBytes"/>=0 reads to termination/EOI. Byte-transparent:
+        /// every byte (including &gt;= 0x80 binary payloads — screen captures, Modbus frames) is returned
+        /// unaltered; implementations must not route the default read through a text decoder.</summary>
         byte[] ReadBytes(long maxBytes = 0);
 
-        /// <summary>Reads a response and decodes it as text (to termination/EOI).</summary>
+        /// <summary>Reads a response and decodes it as text (to termination/EOI) using Latin-1, so it is the
+        /// byte-transparent counterpart of <see cref="ReadBytes"/> — each byte maps 1:1 to a char.</summary>
         string ReadString();
 
         /// <summary>Convenience: <see cref="Write(string)"/> then <see cref="ReadString"/>.</summary>

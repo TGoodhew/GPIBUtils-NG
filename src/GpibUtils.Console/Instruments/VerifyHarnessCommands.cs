@@ -19,8 +19,8 @@ namespace GpibUtils.Console.Instruments
     /// <summary>
     /// Interactive Spectre.Console verification harness. Walks the user through picking a device under test,
     /// then — for each quantity that verifies it — which reference instrument to measure with (offered as a
-    /// menu whenever more than one instrument can do the job: e.g. an 8902A, an E4418B, a 438A/437B/436A for
-    /// RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
+    /// menu whenever more than one instrument can do the job: e.g. an 8902A, an E4418B, a 438A/437B/436A or an
+    /// 8560E/8591E for RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
     /// command exposes the same signal-source capability non-interactively for scripting (UI parity).
     /// <para>
     /// Runs hardware-free against the <c>Simulated</c> provider: <see cref="SimulatedHarnessBench"/> seeds
@@ -80,15 +80,15 @@ namespace GpibUtils.Console.Instruments
             public string Dut { get; set; }
 
             [CommandOption("--points <LIST>")]
-            [Description("Points as freqMHz@powerDbm, comma/space-separated, e.g. 100@0,500@0,1000@-10.")]
+            [Description("Points as freqMHz@powerDbm, comma/semicolon-separated, e.g. 100@0,500@0,1000@-10.")]
             public string Points { get; set; }
 
             [CommandOption("--power-ref <KEY>")]
-            [Description("RF-power reference key (hp8902a, e4418b, hp438a, hp437b, hp436a). Omit to skip power.")]
+            [Description("RF-power reference key (hp8902a, e4418b, hp438a, hp437b, hp436a, hp8560e, hp8591e). Omit to skip power.")]
             public string PowerRef { get; set; }
 
             [CommandOption("--freq-ref <KEY>")]
-            [Description("Frequency reference key (hp53131a, hp5351a, hp5342a, hp5343a, hp8902a). Omit to skip frequency.")]
+            [Description("Frequency reference key (hp53131a, hp5351a, hp5342a, hp5343a, hp8902a, hp8560e, hp8591e). Omit to skip frequency.")]
             public string FreqRef { get; set; }
 
             [CommandOption("--dut-addr <RESOURCE>")] [Description("DUT resource (default: configured / manual).")]
@@ -131,12 +131,20 @@ namespace GpibUtils.Console.Instruments
             if (!string.IsNullOrWhiteSpace(settings.PowerRef))
             {
                 powerChoice = VerificationCatalog.RfPowerReferences.FirstOrDefault(r => Eq(r.Key, settings.PowerRef));
-                if (powerChoice == null) { AnsiConsole.MarkupLine("[red]Unknown --power-ref.[/]"); return 2; }
+                if (powerChoice == null)
+                {
+                    AnsiConsole.MarkupLineInterpolated($"[red]Unknown --power-ref.[/] Known: {string.Join(", ", VerificationCatalog.RfPowerReferences.Select(r => r.Key))}");
+                    return 2;
+                }
             }
             if (!string.IsNullOrWhiteSpace(settings.FreqRef))
             {
                 freqChoice = VerificationCatalog.FrequencyReferences.FirstOrDefault(r => Eq(r.Key, settings.FreqRef));
-                if (freqChoice == null) { AnsiConsole.MarkupLine("[red]Unknown --freq-ref.[/]"); return 2; }
+                if (freqChoice == null)
+                {
+                    AnsiConsole.MarkupLineInterpolated($"[red]Unknown --freq-ref.[/] Known: {string.Join(", ", VerificationCatalog.FrequencyReferences.Select(r => r.Key))}");
+                    return 2;
+                }
             }
 
             var plan = SourceHarness.ParseSourcePoints(settings.Points, settings.PowerTolDb, settings.FreqTolPpm);

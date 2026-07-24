@@ -93,9 +93,16 @@ on `::`, opens the port, and talks to primary address `9`.
 ## Conventions
 
 - **Encoding:** strings map to bytes as Latin-1 (ISO-8859-1, 1:1) so binary blocks survive a
-  round-trip. `Write(string)`/`ReadString()` use this; use `WriteBytes`/`ReadBytes` for raw binary.
+  round-trip. This is a **requirement** on every provider, in **both** directions:
+  `Write(string)`/`WriteBytes` and `ReadString()`/`ReadBytes(0)` must all be byte-transparent — never
+  route the default read through a strict/ASCII text decoder (that throws on the first byte `>= 0x80`,
+  breaking screen captures and Modbus frames). On NI, the untermed read loops `RawIO.Read` and decodes
+  Latin-1 rather than calling `RawIO.ReadString()`; if you must read a large binary block you may also
+  pass an explicit `maxBytes` to `ReadBytes`.
 - **Errors:** wrap backend failures in `GpibException` and fill in `DescribeError` so callers get a
-  decoded `GpibStatus` rather than a vendor stack trace.
+  decoded `GpibStatus` rather than a vendor stack trace. The status is folded into
+  `GpibException.Message` (and, when undecoded, the inner vendor message), so every path that prints the
+  message surfaces the real cause — you do not need each caller to read `.Status` explicitly.
 - **Availability over exceptions:** a stub or a provider whose driver is absent should return
   `IsAvailable == false` with a clear `UnavailableReason`, not throw from the constructor.
 

@@ -60,6 +60,25 @@ namespace GpibUtils.Wpf.Tests
         }
 
         [Fact]
+        public void Loading_an_image_does_not_lock_the_source_file()
+        {
+            // Regression for the Image.FromFile leak (#227): after LoadDocument the source file must be
+            // releasable — the old code held an exclusive lock via an undisposed Image until finalization.
+            var hpgl = TempFile(".plt", System.Text.Encoding.ASCII.GetBytes(SampleHpgl));
+            var pngBytes = new HardcopyViewModel { InputPath = hpgl }.RenderPreviewPng();
+            File.Delete(hpgl);
+            var png = TempFile(".png", pngBytes);
+            try
+            {
+                var doc = new HardcopyViewModel { InputPath = png }.LoadDocument();
+                Assert.IsType<ImageDocument>(doc);
+                File.Delete(png);                      // would throw IOException 'in use' if the file stayed locked
+                Assert.False(File.Exists(png));
+            }
+            finally { if (File.Exists(png)) File.Delete(png); }
+        }
+
+        [Fact]
         public void Renders_preview_png_for_hpgl()
         {
             var hpgl = TempFile(".plt", System.Text.Encoding.ASCII.GetBytes(SampleHpgl));
