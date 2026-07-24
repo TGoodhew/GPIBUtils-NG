@@ -19,8 +19,8 @@ namespace GpibUtils.Console.Instruments
     /// <summary>
     /// Interactive Spectre.Console verification harness. Walks the user through picking a device under test,
     /// then — for each quantity that verifies it — which reference instrument to measure with (offered as a
-    /// menu whenever more than one instrument can do the job: e.g. an 8902A, an E4418B, a 438A/437B/436A or an
-    /// 8560E/8591E for RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
+    /// menu whenever more than one instrument can do the job: e.g. an 8902A, an E4418B, a 438A/437B/436A, an
+    /// 8560E/8591E or an E4406A for RF power). Then it runs the plan and prints a PASS/FAIL table. The one-shot <c>verify source</c>
     /// command exposes the same signal-source capability non-interactively for scripting (UI parity).
     /// <para>
     /// Runs hardware-free against the <c>Simulated</c> provider: <see cref="SimulatedHarnessBench"/> seeds
@@ -84,7 +84,7 @@ namespace GpibUtils.Console.Instruments
             public string Points { get; set; }
 
             [CommandOption("--power-ref <KEY>")]
-            [Description("RF-power reference key (hp8902a, e4418b, hp438a, hp437b, hp436a, hp8560e, hp8591e). Omit to skip power.")]
+            [Description("RF-power reference key (hp8902a, e4418b, hp438a, hp437b, hp436a, hp8560e, hp8591e, e4406a). Omit to skip power.")]
             public string PowerRef { get; set; }
 
             [CommandOption("--freq-ref <KEY>")]

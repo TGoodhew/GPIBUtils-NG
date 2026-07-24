@@ -63,8 +63,8 @@ namespace GpibUtils.Verification.Catalog
     /// The single source of truth for "what can verify what": which instruments are devices under test in
     /// each category, and which reference instruments can measure each quantity needed to verify them. The
     /// interactive harness and the one-shot CLI both read these lists, so when several instruments can do a
-    /// job (e.g. an 8902A, an E4418B, a 438A, a 437B, a 436A, an 8560E or an 8591E can all read a source's RF
-    /// power) the user is offered the choice.
+    /// job (e.g. an 8902A, an E4418B, a 438A, a 437B, a 436A, an 8560E, an 8591E or an E4406A can all read a
+    /// source's RF power) the user is offered the choice.
     /// </summary>
     public static class VerificationCatalog
     {
@@ -107,6 +107,8 @@ namespace GpibUtils.Verification.Catalog
                     s => new SpectrumAnalyzerPowerReference(new Hp8560E(s), s, "HP 8560E spectrum analyzer")),
                 new ReferenceChoice("hp8591e", "HP 8591E spectrum analyzer", Hp8591E.DefaultResource, ReferenceQuantity.RfPowerDbm,
                     s => new SpectrumAnalyzerPowerReference(new Hp8591E(s), s, "HP 8591E spectrum analyzer")),
+                new ReferenceChoice("e4406a", "Agilent E4406A VSA transmitter tester", AgilentE4406A.DefaultResource, ReferenceQuantity.RfPowerDbm,
+                    s => new TransmitterTesterPowerReference(new AgilentE4406A(s), s, "Agilent E4406A VSA transmitter tester")),
             };
 
         /// <summary>Instruments that can measure a source's frequency (Hz).</summary>
