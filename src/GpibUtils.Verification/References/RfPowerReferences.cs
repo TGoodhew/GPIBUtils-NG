@@ -1,4 +1,5 @@
 using System;
+using GpibUtils.Instruments.Analyzers;
 using GpibUtils.Instruments.Meters;
 using GpibUtils.Visa;
 
@@ -106,6 +107,47 @@ namespace GpibUtils.Verification.References
         }
 
         public double Measure() => _meter.MeasurePowerDbm();
+
+        public void Dispose() => _owned?.Dispose();
+    }
+
+    /// <summary>
+    /// RF-power reference backed by an Agilent E4406A VSA transmitter tester: at each point it runs a
+    /// Basic-mode Channel Power measurement at the carrier and reads the total power (dBm). A valid
+    /// alternative to a power meter / 8902A when the E4406A is the analyzer on the bench (e.g. verifying an
+    /// E4438C's output level). The channel span defaults to 5 MHz so a CW carrier sits well inside the
+    /// sweep; the instrument's own channel integration bandwidth is left untouched unless one is given.
+    /// </summary>
+    public sealed class TransmitterTesterPowerReference : IReferenceMeasurement
+    {
+        private readonly AgilentE4406A _analyzer;
+        private readonly IDisposable _owned;
+        private readonly double _spanHz;
+        private readonly double _integrationBandwidthHz;
+        private double _centerHz;
+
+        public TransmitterTesterPowerReference(AgilentE4406A analyzer, IDisposable ownedSession = null,
+            string displayName = null, double spanHz = 5e6, double integrationBandwidthHz = 0)
+        {
+            _analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
+            _owned = ownedSession;
+            _spanHz = spanHz;
+            _integrationBandwidthHz = integrationBandwidthHz;
+            DisplayName = displayName ?? "Agilent E4406A VSA transmitter tester";
+        }
+
+        public string DisplayName { get; }
+        public ReferenceQuantity Quantity => ReferenceQuantity.RfPowerDbm;
+        public string Unit => "dBm";
+
+        public void Prepare(ReferencePoint point)
+        {
+            if (point == null) throw new ArgumentNullException(nameof(point));
+            _centerHz = point.FrequencyMHz * 1e6;
+        }
+
+        public double Measure() =>
+            _analyzer.MeasureChannelPower(_centerHz, _spanHz, _integrationBandwidthHz).TotalPowerDbm;
 
         public void Dispose() => _owned?.Dispose();
     }
