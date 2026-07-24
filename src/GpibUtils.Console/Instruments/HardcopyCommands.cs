@@ -25,7 +25,10 @@ namespace GpibUtils.Console.Instruments
             if (n != 1) throw new ArgumentException("Specify exactly one of --hpgl, --pcl or --image.");
             if (HpglFile != null) return new HpglDocument(File.ReadAllText(HpglFile));
             if (PclFile != null) return new PclDocument(File.ReadAllBytes(PclFile));
-            return new ImageDocument(new Bitmap(Image.FromFile(ImageFile)));
+            // Image.FromFile keeps an exclusive file lock + GDI handle for the Image's lifetime; new Bitmap(Image)
+            // makes an independent copy, so dispose the source immediately rather than leaking the lock/handle.
+            using (var img = Image.FromFile(ImageFile))
+                return new ImageDocument(new Bitmap(img));
         }
     }
 

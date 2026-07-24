@@ -101,5 +101,23 @@ namespace GpibUtils.Verification.Tests
             var list = keys.ToList();
             Assert.Equal(list.Count, list.Distinct().Count());
         }
+
+        // Guards the reference-key sets the verify-harness --power-ref / --freq-ref help advertises (#229):
+        // the two spectrum analyzers must stay registered, or the help drifts back out of sync with reality.
+        [Fact]
+        public void Rf_power_references_include_the_spectrum_analyzers()
+        {
+            var keys = VerificationCatalog.RfPowerReferences.Select(r => r.Key).ToList();
+            Assert.Contains("hp8560e", keys);
+            Assert.Contains("hp8591e", keys);
+        }
+
+        [Fact]
+        public void Frequency_references_include_the_spectrum_analyzers()
+        {
+            var keys = VerificationCatalog.FrequencyReferences.Select(r => r.Key).ToList();
+            Assert.Contains("hp8560e", keys);
+            Assert.Contains("hp8591e", keys);
+        }
     }
 }

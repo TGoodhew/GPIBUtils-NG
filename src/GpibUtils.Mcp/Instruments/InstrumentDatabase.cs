@@ -105,8 +105,15 @@ namespace GpibUtils.Mcp.Instruments
                 string pattern = d.Identity != null ? d.Identity.MatchRegex : null;
                 if (string.IsNullOrWhiteSpace(pattern)) continue;
                 bool matched;
+                // Only a malformed pattern is expected here (ArgumentException). Report it like the rest of
+                // the loader rather than silently turning a regex typo into "does not match" with no diagnostic.
                 try { matched = Regex.IsMatch(response, pattern, RegexOptions.IgnoreCase); }
-                catch (Exception) { matched = false; }
+                catch (ArgumentException ex)
+                {
+                    Log.Warn("Invalid identity MatchRegex '" + pattern + "' in instrument definition '" +
+                             d.Model + "': " + ex.Message);
+                    matched = false;
+                }
                 if (matched) yield return d;
             }
         }

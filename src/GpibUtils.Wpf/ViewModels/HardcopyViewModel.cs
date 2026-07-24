@@ -80,7 +80,12 @@ namespace GpibUtils.Wpf.ViewModels
             {
                 case "HP-GL": return new HpglDocument(File.ReadAllText(InputPath));
                 case "PCL": return new PclDocument(File.ReadAllBytes(InputPath));
-                default: return new ImageDocument(new Bitmap(System.Drawing.Image.FromFile(InputPath)));
+                default:
+                    // Image.FromFile holds an exclusive file lock + GDI handle for the Image's lifetime; new
+                    // Bitmap(Image) copies independently, so dispose the source at once instead of leaking the
+                    // lock (which would block the user from moving/deleting the file in the long-lived WPF app).
+                    using (var img = System.Drawing.Image.FromFile(InputPath))
+                        return new ImageDocument(new Bitmap(img));
             }
         }
 

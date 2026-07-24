@@ -16,6 +16,9 @@ namespace GpibUtils.Visa.Ni
         /// <summary>1:1 byte-to-char encoding (Latin-1) for lossless string/byte conversion.</summary>
         private static readonly Encoding Latin1 = Encoding.GetEncoding("ISO-8859-1");
 
+        /// <summary>Chunk size for the untermed byte-transparent read loop (bytes per RawIO.Read call).</summary>
+        private const int ReadChunkBytes = 4096;
+
         private readonly MessageBasedSession _session;
         private char? _readTermination;
 
@@ -94,15 +97,32 @@ namespace GpibUtils.Visa.Ni
             try
             {
                 if (maxBytes > 0) return _session.RawIO.Read(maxBytes);
-                return Latin1.GetBytes(_session.RawIO.ReadString());
+
+                // Read to termination/EOI byte-transparently. RawIO.ReadString() decodes with a strict
+                // us-ascii fallback and throws DecoderFallbackException on the first byte >= 0x80 (screen
+                // captures, Modbus-RTU frames, any binary payload). Loop RawIO.Read instead — it is byte-exact
+                // — accumulating chunks until the device signals END / a termination char rather than a full
+                // buffer (MaximumCountReached), then return the raw bytes untouched.
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    ReadStatus status;
+                    do
+                    {
+                        byte[] chunk = _session.RawIO.Read(ReadChunkBytes, out status);
+                        if (chunk != null && chunk.Length > 0) ms.Write(chunk, 0, chunk.Length);
+                    }
+                    while (status == ReadStatus.MaximumCountReached);
+                    return ms.ToArray();
+                }
             }
             catch (Exception ex) { throw Wrap("read", ex); }
         }
 
         public string ReadString()
         {
-            try { return _session.RawIO.ReadString(); }
-            catch (Exception ex) { throw Wrap("read", ex); }
+            // Latin-1 over the byte-exact ReadBytes so every byte round-trips losslessly (see ReadBytes);
+            // RawIO.ReadString() would throw on any byte >= 0x80.
+            return Latin1.GetString(ReadBytes(0));
         }
 
         public string Query(string command)

@@ -63,8 +63,8 @@ namespace GpibUtils.Verification.Catalog
     /// The single source of truth for "what can verify what": which instruments are devices under test in
     /// each category, and which reference instruments can measure each quantity needed to verify them. The
     /// interactive harness and the one-shot CLI both read these lists, so when several instruments can do a
-    /// job (e.g. an 8902A, an E4418B, a 438A, a 437B or a 436A can all read a source's RF power) the user
-    /// is offered the choice.
+    /// job (e.g. an 8902A, an E4418B, a 438A, a 437B, a 436A, an 8560E or an 8591E can all read a source's RF
+    /// power) the user is offered the choice.
     /// </summary>
     public static class VerificationCatalog
     {
