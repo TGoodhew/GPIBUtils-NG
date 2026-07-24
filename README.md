@@ -9,10 +9,15 @@ instrument is tracked here as its own **migration issue** (one issue per instrum
 The goal is a single solution with reusable drivers, a shared VISA transport, a common app/CLI
 shell, and an MCP server surface — replacing ~18 one-off repos.
 
-> **Status:** foundation in progress (#1). The shared VISA transport, common helpers and the
-> Spectre.Console CLI have landed and build hardware-free; instrument drivers are next. See
-> [`CHANGE_LOG.md`](CHANGE_LOG.md) for what's landed and [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md)
-> for the real-hardware verification board.
+> **Status: migration complete; bench verification is what remains.** Every driver found in the surveyed
+> repos — and every programmable instrument turned up by the manuals triage — has been ported: **68 drivers**
+> across 20 instrument categories, plus the HP-GL/PCL renderers, the MCP server, the SRQ completion engine,
+> the attenuation-measurement application and the cross-instrument verification harness. `main` builds and
+> passes **781 tests** hardware-free.
+>
+> Because development happens away from the bench, drivers merge on simulator/unit-test green and then wait
+> for real-hardware confirmation. See [`CHANGE_LOG.md`](CHANGE_LOG.md) for what's landed and
+> [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md) for the verification board.
 
 ## Why consolidate
 
@@ -29,18 +34,29 @@ needs no hardware, so this works anywhere:
 
 ```
 dotnet build GPIBUtils-NG.sln
+```
 
-# List providers and their capabilities
-gpibutils providers
+The built executable is **`gpibutils.exe`** (the assembly is named `gpibutils`, not `GpibUtils.Console`).
+It is **not** placed on `PATH`, so invoke it by path — from the repo root:
+
+```powershell
+& "src\GpibUtils.Console\bin\Release\net472\gpibutils.exe" providers
 
 # Talk to a simulated instrument (no hardware)
-gpibutils idn   GPIB0::5::INSTR --provider Simulated
-gpibutils query GPIB0::14::INSTR "MEAS:VOLT?" --provider Simulated --engineering V
+& "src\GpibUtils.Console\bin\Release\net472\gpibutils.exe" idn GPIB0::5::INSTR --provider Simulated
+& "src\GpibUtils.Console\bin\Release\net472\gpibutils.exe" query GPIB0::14::INSTR "MEAS:VOLT?" --provider Simulated --engineering V
+
+# Interactive TUI (menu- and dashboard-driven; also the default with no verb on a terminal)
+& "src\GpibUtils.Console\bin\Release\net472\gpibutils.exe" tui --provider Simulated
 
 # Against real hardware (NI-VISA is the default provider)
-gpibutils discover
-gpibutils idn GPIB0::14::INSTR
+& "src\GpibUtils.Console\bin\Release\net472\gpibutils.exe" idn GPIB0::14::INSTR
 ```
+
+> **Don't use `discover` to find instruments on a bench behind HP-IB bus extenders.** An extender ACKs the
+> address handshake for its whole remote segment, so a VISA scan reports *every* address 0–30 as present —
+> all phantom. Drive by explicit resource string (`--address`), or persist the real addresses once with
+> `config address set <device> <resource>`. Both front-ends warn when a scan returns ≥ 15 resources.
 
 ## Target architecture
 
@@ -48,15 +64,19 @@ gpibutils idn GPIB0::14::INSTR
 |---|---|---|
 | Transport (core) | `GpibUtils.Visa` | Vendor-neutral pluggable transport: `IGpibProvider` / `IInstrumentSession`, capability reporting, SRQ/serial-poll, the provider registry, extension stubs (Keysight/Prologix/AR488), and an in-memory simulator. **No vendor dependency — builds anywhere.** |
 | Transport (NI) | `GpibUtils.Visa.Ni` | NI-VISA (default) + native NI-488.2 providers, built against the **official NI/IVI VISA.NET assemblies** from the local NI-VISA install (referenced by path, never vendored; auto-registered by reflection). Where NI-VISA isn't installed it builds an *"NI-VISA unavailable"* stub, so the whole solution still compiles with zero NI setup (and on CI). |
-| Shared | `GpibUtils.Common` | Cross-cutting helpers (`ToEngineeringFormat`, etc.) |
-| Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category (SignalSources, Meters, Counters, Analyzers, PowerSupplies, Switches, Plotters, Calibrators, Oscilloscopes) |
-| Rendering | `GpibUtils.Hpgl` | Shared HP-GL / PCL parser + renderer (plotters and screen-capture) |
-| Automation | `GpibUtils.Verification` | Cross-instrument verification harness: verify a DUT with a **selectable** reference instrument (e.g. an 8902A *or* a power meter to check a signal generator). Plan-driven runners + `verify harness` / `verify source`. See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md) |
-| Integration | `GpibUtils.Mcp` | MCP server exposing the suite to LLM clients + ~200-model instrument DB |
-| Front-end (console) | `GpibUtils.Console` | **Spectre.Console** UI (`Spectre.Console.Cli` command surface) on the shared core |
-| Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop shell on the shared core — browse providers, discover instruments, run a command (works hardware-free via the Simulated provider) |
+| Shared | `GpibUtils.Common` | Cross-cutting helpers — `ToEngineeringFormat`, and `InstrumentAddressStore` (per-instrument addresses persisted to JSON; precedence `--address` > configured > driver default) |
+| Drivers | `GpibUtils.Instruments.*` | One driver class per instrument model, grouped by category: SignalSources, Meters, Counters, Analyzers, Scopes, PowerSupplies, Switches, Plotters, Printers, Calibrators, Audio, LcrMeters, ElectronicLoads, ModulationDomain, NetworkAnalyzers, NoiseFigureMeters, SourceMeasure |
+| Rendering | `GpibUtils.Hpgl` · `GpibUtils.Pcl` | HP-GL/2 parser + renderer (plotters, analyzer screen-capture) and the ThinkJet-subset PCL parser + raster renderer |
+| Output routing | `GpibUtils.Hardcopy` | Routes one document (HP-GL / PCL / image) to a GPIB plotter, the GPIB ThinkJet, or a Windows printer |
+| Measurement app | `GpibUtils.Measurement` | Attenuation-vs-frequency orchestration — `MeasurementEngine` + the 11793A LO/IF planner; drives source + LO + step attenuators + receiver |
+| Automation | `GpibUtils.Verification` | Cross-instrument verification harness: verify a DUT with a **selectable** reference instrument (e.g. an 8902A *or* a power meter to check a signal generator). Plan-driven runners + `verify harness` / `verify source`, drivable hardware-free via the simulated bench. See [`docs/VERIFICATION_HARNESS.md`](docs/VERIFICATION_HARNESS.md) |
+| Integration | `GpibUtils.Mcp` | MCP server exposing the suite to LLM clients + a **55-model** instrument DB |
+| Front-end (console) | `GpibUtils.Console` | **Spectre.Console** — both a one-shot CLI (`Spectre.Console.Cli`) and an interactive **TUI** (`gpibutils tui`) |
+| Front-end (Windows) | `GpibUtils.Wpf` | **WPF** MVVM desktop shell on the shared core — browse providers, run a command, DMM panel, hardcopy preview/send (works hardware-free via the Simulated provider) |
 
-The **core/driver libraries carry no UI dependencies** — the console (Spectre.Console) and Windows (WPF) front-ends are the only UI projects, and both call the same drivers/services. WinForms sources (ESG-SignalCreator, SALink) migrate to WPF.
+The **core/driver libraries carry no UI dependencies** — the console (Spectre.Console CLI + TUI) and Windows (WPF) front-ends are the only UI projects, and all call the same drivers/services. WinForms sources (ESG-SignalCreator, SALink) migrate to WPF.
+
+**UI parity is a hard rule.** Nothing may exist in one front-end that isn't available in all three (CLI · WPF · TUI). The only accepted asymmetry is *invocation*: the CLI is one-shot, so an interactive/live screen maps to a verb (a live dashboard ↔ a streaming `monitor`/`watch`; a transcript ↔ scrollback plus `--log`). The underlying capability must exist everywhere.
 
 **Reference implementation:** the [HP-Attenuator](https://github.com/TGoodhew/HP-Attenuator) repo
 already follows the intended pattern (vendor-neutral `Ivi.Visa`, a `Core` library, a hardware
@@ -77,12 +97,15 @@ hardware verification are deliberately decoupled:
   the shared transport, add a simulator/mock and tests, and wire its CLI branch (#45).
 - A PR **merges to `main` on simulator/unit-test green — hardware verification is _not_ a merge gate.**
   This lets the next driver build on it immediately while away from the bench.
-- On merge the issue is **not closed**. It gets the **`verification-needed`** label and a bench
-  checklist, and the merge commit is tagged **`verify/<issue#>-<instrument>`** so its exact state can be
-  checked out at the bench later. The full board is [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md)
-  (mirrored by the pinned tracking issue [#46](https://github.com/TGoodhew/GPIBUtils-NG/issues/46)).
-- Back at the bench, run the checklist against real hardware, record the result, and **only then close
-  the issue** (or open a follow-up on a discrepancy).
+- On merge the issue **is closed** (policy changed 2026-07-17), so the open issue list only shows work still
+  to *build*. It gets the **`Needs Verification`** label and a bench checklist, a row on the board, and the
+  merge commit is tagged **`verify/<issue#>-<instrument>`** so its exact state can be checked out at the
+  bench later. The full board is [`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md) (mirrored
+  by the pinned tracking issue [#46](https://github.com/TGoodhew/GPIBUtils-NG/issues/46), which stays open).
+- Back at the bench, run the checklist against real hardware and record the result on the board. On a ✅ pass
+  mark it verified; on a ⚠️ discrepancy **reopen** the issue or file a follow-up.
+- **Software-only work has no bench gate** — pure infrastructure (the SRQ engine, the renderers, the MCP
+  server, address config) is fully verified by its unit tests and is simply closed on merge.
 
 Changes are logged in [`CHANGE_LOG.md`](CHANGE_LOG.md).
 
@@ -103,7 +126,14 @@ Labels: `migration` (all), plus `driver` / `application` / `utility` / `mcp-serv
 
 ## Migration backlog
 
-**42 instrument/driver items** were found across the surveyed repos (plus the **#1** foundation issue).
+**42 instrument/driver items** were found across the surveyed repos (plus the **#1** foundation issue). The
+table below is the **original survey**, kept for provenance — every item in it has since been migrated.
+
+A second discovery pass ([#70](https://github.com/TGoodhew/GPIBUtils-NG/issues/70)) then triaged all **571
+PDFs** in the manuals library and migrated a driver for every programmable instrument that wasn't already
+backlogged, taking the total to **68 drivers**. That auditable triage is committed at
+[`docs/manuals-triage.md`](docs/manuals-triage.md); the live status of every driver is on
+[`docs/HARDWARE_VERIFICATION.md`](docs/HARDWARE_VERIFICATION.md).
 
 
 ### Meters (DMM / power / measuring receiver)
@@ -188,7 +218,7 @@ Labels: `migration` (all), plus `driver` / `application` / `utility` / `mcp-serv
 
 | # | Instrument / component | Source repo | Type | Target module |
 |---|---|---|---|---|
-| [#27](https://github.com/TGoodhew/GPIBUtils-NG/issues/27) | Rigol DS1054Z Oscilloscope | [GPIBUtils](https://github.com/TGoodhew/GPIBUtils) | application | `GpibUtils.Instruments.Oscilloscopes (RigolDS1054Z)` |
+| [#27](https://github.com/TGoodhew/GPIBUtils-NG/issues/27) | Rigol DS1054Z Oscilloscope | [GPIBUtils](https://github.com/TGoodhew/GPIBUtils) | application | `GpibUtils.Instruments.Scopes (RigolDS1054Z)` |
 
 
 ### Calibrators & metrology
@@ -203,12 +233,11 @@ Labels: `migration` (all), plus `driver` / `application` / `utility` / `mcp-serv
 
 | # | Instrument / component | Source repo | Type | Target module |
 |---|---|---|---|---|
-| [#38](https://github.com/TGoodhew/GPIBUtils-NG/issues/38) | HP 7090A Measurement Plotting System | [7090ATest](https://github.com/TGoodhew/7090ATest) | application | `GpibUtils.Instruments.Plotters (HP7090A) + GpibUtils.Hpgl` |
-| [#39](https://github.com/TGoodhew/GPIBUtils-NG/issues/39) | HP 7550A Graphics Plotter | [7550ATest](https://github.com/TGoodhew/7550ATest) | application | `GpibUtils.Instruments.Plotters (HP7550A) + GpibUtils.Hpgl` |
-| [#40](https://github.com/TGoodhew/GPIBUtils-NG/issues/40) | HP 7090A / 7475A / 7550A plotter (HPGL streamer prototype) | [HPGLTest](https://github.com/TGoodhew/HPGLTest) | application | `GpibUtils.Instruments.Plotters (shared HPGL send) + GpibUtils.Hpgl` |
 | [#41](https://github.com/TGoodhew/GPIBUtils-NG/issues/41) | GPIB-MCP server (generic multi-instrument MCP surface) | [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP) | mcp-server | `GpibUtils.Mcp (server) + shared instrument model DB` |
-| [#42](https://github.com/TGoodhew/GPIBUtils-NG/issues/42) | HP-GL / PCL screen-capture rendering (Hpgl.Rendering) | [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP) | mcp-server | `GpibUtils.Hpgl (parser/renderer/PCL) — shared with Plotters` |
-| [#43](https://github.com/TGoodhew/GPIBUtils-NG/issues/43) | SRQ / serial-poll completion engine (Srq.Completion) | [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP) | mcp-server | `GpibUtils.Visa (SRQ completion — shared by all drivers)` |
+| [#42](https://github.com/TGoodhew/GPIBUtils-NG/issues/42) | HP-GL / PCL screen-capture rendering (Hpgl.Rendering) | [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP) | mcp-server | `GpibUtils.Hpgl` + `GpibUtils.Pcl` — shared with Plotters |
+| [#43](https://github.com/TGoodhew/GPIBUtils-NG/issues/43) | SRQ / serial-poll completion engine (Srq.Completion) | [GPIB-MCP](https://github.com/TGoodhew/GPIB-MCP) | mcp-server | `GpibUtils.Visa/Srq` (shared by all drivers) |
+
+<sub>The plotter items #38/#39/#40 are listed once, under **Plotters (HP-GL)** above.</sub>
 
 
 ### Other
