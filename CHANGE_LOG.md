@@ -13,6 +13,24 @@ All notable changes to **GPIBUtils-NG** are recorded here. The format is based o
 
 ## [Unreleased]
 
+### Documentation
+
+- **README brought back in line with the code.** It had drifted badly while the migration completed. Fixed:
+  the status block still said "foundation in progress (#1) … instrument drivers are next" (all **68** drivers
+  are done and the suite passes **781** tests); the MCP instrument DB was described as "~200-model" when it
+  holds **55**; the oscilloscope project was named `GpibUtils.Instruments.Oscilloscopes` (it is
+  **`.Scopes`**); `GpibUtils.Pcl`, `GpibUtils.Hardcopy` and `GpibUtils.Measurement` were missing from the
+  architecture table entirely, as were eight instrument categories; `GpibUtils.Hpgl` was described as
+  handling PCL, which moved to its own project; the **TUI** was absent despite UI parity being a locked rule;
+  the development-workflow section still described the pre-2026-07-17 policy ("the issue is **not** closed"
+  on merge, closed only after the bench) and named the label `verification-needed` rather than
+  **`Needs Verification`**; the "42 instrument/driver items" figure predated the #70 manuals triage; and the
+  "Integration & shared infrastructure" table repeated #38/#39/#40 verbatim from the Plotters table.
+
+  Also: every `gpibutils …` example was unrunnable as written, because the executable is **not on `PATH`** —
+  the Quick start now invokes it by path and names the assembly (`gpibutils.exe`, not `GpibUtils.Console`),
+  and carries the extender/`discover` warning that a bench behind HP-IB extenders makes bus scans phantom.
+
 ### Added
 
 - **Simulated bench — the verification harness now runs with no hardware** (issue
